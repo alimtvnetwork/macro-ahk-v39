@@ -170,6 +170,62 @@ export function logBgWarnError(
     }
 }
 
+/**
+ * Per-key budget for `logBgWarnSampled`. Resets only on service-worker
+ * cold start so noisy "expected fallback" warnings (cache miss, missing
+ * chrome.runtime in test contexts, schema-not-ready) surface a handful
+ * of times per SW lifetime instead of flooding DevTools / Playwright
+ * stdout during long test runs.
+ */
+const sampledWarnCounters = new Map<string, number>();
+
+/** Default budget for sampled warnings — small enough to keep logs clean. */
+const SAMPLED_WARN_BUDGET_DEFAULT = 3;
+
+/**
+ * Throttled `console.warn` for expected/recoverable fallbacks.
+ *
+ * Use instead of `logBgWarnError` whenever a warning sits on a hot path
+ * (cache misses, per-tab probes, init-time schema races) where repeating
+ * the same warning thousands of times during a test run buries actual
+ * signal. The first `budget` (default 3) calls per `key` emit; the final
+ * allowed call is suffixed with "(further occurrences suppressed)" so a
+ * reader knows the throttle is engaged.
+ *
+ * Counters live for the SW lifetime, so forensics still get the first
+ * few occurrences with full error context.
+ *
+ * @param tag      BgLogTag identifying the module
+ * @param key      Stable per-call-site key (e.g. "cache-miss:<filePath>")
+ * @param message  Human-readable description
+ * @param error    Optional caught error
+ * @param budget   Override the default per-key emission budget
+ */
+export function logBgWarnSampled(
+    tag: string,
+    key: string,
+    message: string,
+    error?: CaughtError,
+    budget: number = SAMPLED_WARN_BUDGET_DEFAULT,
+): void {
+    const fullKey = `${tag}::${key}`;
+    const seen = sampledWarnCounters.get(fullKey) ?? 0;
+    if (seen >= budget) return;
+    sampledWarnCounters.set(fullKey, seen + 1);
+
+    const suffix = seen === budget - 1 ? " (further occurrences suppressed)" : "";
+    if (error !== undefined) {
+        console.warn(`${tag} ${message}${suffix}`, error);
+    } else {
+        console.warn(`${tag} ${message}${suffix}`);
+    }
+}
+
+/** Test-only: clears the sampled-warn counters between unit tests. */
+export function _resetSampledWarnCountersForTest(): void {
+    sampledWarnCounters.clear();
+}
+
 /* ------------------------------------------------------------------ */
 /*  Sampled debug emitter (Wave 4 P1 breadcrumbs)                      */
 /* ------------------------------------------------------------------ */
