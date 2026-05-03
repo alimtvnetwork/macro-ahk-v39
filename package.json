@@ -93,6 +93,7 @@
     "report:spec-consistency:strict": "node scripts/generate-spec-consistency-report.mjs --strict",
     "check:spec-folders:repair": "node scripts/spec-folder-guard.mjs",
     "check:spec-folders:verbose": "node scripts/spec-folder-guard.mjs --verbose",
+    "check:readme:txt": "node scripts/check-readme-txt.mjs",
     "check:readme": "node scripts/check-readme-compliance.mjs",
     "check:readme:json": "node scripts/check-readme-compliance.mjs --json",
     "check:readme:hero-layout": "node scripts/check-readme-hero-layout.mjs",
