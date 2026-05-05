@@ -39,6 +39,8 @@ const LibraryView = lazy(() => import("@/components/options/LibraryView"));
 const StepGroupLibraryPanel = lazy(() => import("@/components/options/StepGroupLibraryPanel"));
 const StepGroupListPanel = lazy(() => import("@/components/options/StepGroupListPanel"));
 const ErrorSwallowAuditView = lazy(() => import("@/components/options/ErrorSwallowAuditView"));
+const SECTION_STEP_GROUPS: SidebarSection = "step-groups";
+const HASH_STEP_GROUPS_LIST = "step-groups-list";
 
 function LazyFallback() {
   return (
@@ -169,10 +171,10 @@ const OptionsPage = () => {
     const validSections: SidebarSection[] = [
       "projects", "scripts", "prompts", "activity", "logging",
       "automation", "updaters", "timing", "data", "network",
-      "storage", "api", "library", "step-groups", "settings", "about", "audit",
+      "storage", "api", "library", SECTION_STEP_GROUPS, "settings", "about", "audit",
     ];
-    if (hash === "step-groups-list") {
-      return { section: "step-groups", stepGroupView: "list" };
+    if (hash === HASH_STEP_GROUPS_LIST) {
+      return { section: SECTION_STEP_GROUPS, stepGroupView: "list" };
     }
     if (hash !== "" && validSections.includes(hash as SidebarSection)) {
       return { section: hash as SidebarSection, stepGroupView: "tree" };
