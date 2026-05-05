@@ -7,7 +7,7 @@
 # Defaults — env vars override; set only when not already set so that
 # install.sh's parameter expansion ${VAR:-fallback} keeps working.
 
-MARCO_DEFAULT_REPO="alimtvnetwork/macro-ahk-v23"
+MARCO_DEFAULT_REPO="alimtvnetwork/macro-ahk-v29"
 MARCO_VERSION_REGEX='^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$'
 MARCO_MAIN_BRANCH_SENTINEL="__MAIN_BRANCH__"
 
