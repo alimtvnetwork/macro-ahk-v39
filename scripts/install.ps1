@@ -584,6 +584,52 @@ function Invoke-DelayedDelete([string]$path, [string]$reason) {
     }
 }
 
+function Invoke-DelayedRename([string]$source, [string]$destination, [string]$reason) {
+    # Schedule a rename of $source → $destination at next reboot using
+    # MoveFileEx with MOVEFILE_DELAY_UNTIL_REBOOT. This is the Windows-
+    # documented mechanism for displacing a locked file when even
+    # in-process Rename-Item fails (e.g. the file is held with
+    # FileShare.None). The destination uses the canonical
+    # `.<leaf>.delete-pending-marco-<runid>` pattern so a future sweep
+    # (or our own marker-driven cleanup) can attribute and remove it.
+    #
+    # Returns $true if scheduling succeeded, $false otherwise. Failure
+    # falls back to scheduling the original path for delete and writing
+    # a marker — never raises.
+    if (-not (Test-IsWindowsPlatform)) {
+        try { Rename-Item -LiteralPath $source -NewName (Split-Path -Leaf $destination) -Force -ErrorAction Stop } catch { }
+        return $true
+    }
+
+    try {
+        Add-MoveFileExType
+        $flags = [Marco.Win32.NativeMethods]::MOVEFILE_DELAY_UNTIL_REBOOT -bor `
+                 [Marco.Win32.NativeMethods]::MOVEFILE_REPLACE_EXISTING
+        $ok = [Marco.Win32.NativeMethods]::MoveFileEx($source, $destination, $flags)
+        if ($ok) {
+            $script:DeferredDeleteCount++
+            $script:DeferredDeleteRebootRequired = $true
+            Write-Note "Cleanup deferred to next reboot (locked file will be rotated on boot):"
+            Write-Host "    $source" -ForegroundColor DarkGray
+            Write-Host "    -> $destination" -ForegroundColor DarkGray
+            Write-Host "    Reason: $reason" -ForegroundColor DarkGray
+            # Drop a marker so the next install run knows to sweep the
+            # rotated path (it'll exist after reboot under the canonical
+            # pattern, ready for normal Remove-Item).
+            Register-PendingDeleteMarker -path $destination -reason "$reason (scheduled via MoveFileEx rename-on-reboot)"
+            return $true
+        }
+        $errCode = [System.Runtime.InteropServices.Marshal]::GetLastWin32Error()
+        Write-Note "Could not schedule rename-on-reboot (Win32 $errCode); falling back to delete-on-reboot:"
+        Write-Host "    $source" -ForegroundColor DarkGray
+        return (Invoke-DelayedDelete -path $source -reason "$reason (rename-on-reboot err=$errCode)")
+    } catch {
+        Write-Note "Could not schedule rename-on-reboot (exception); falling back to delete-on-reboot:"
+        Write-Host "    $source" -ForegroundColor DarkGray
+        return (Invoke-DelayedDelete -path $source -reason "$reason (rename-on-reboot exception: $($_.Exception.Message))")
+    }
+}
+
 function Test-IsSharingViolation($exception) {
     # Classify whether a Remove-Item failure was a Windows sharing/lock
     # error (file in use by another process) vs. a real problem (perms,
@@ -653,11 +699,15 @@ function Remove-PathSafely {
     try {
         Rename-Item -LiteralPath $Path -NewName (Split-Path -Leaf $rotated) -Force -ErrorAction Stop
     } catch {
-        # If even rename fails, schedule the original path itself.
-        # Still informational — the new install can land alongside.
-        Write-Note "Could not rotate locked path; scheduling original for reboot delete:"
+        # If even in-process rename fails (e.g. file held with
+        # FileShare.None), ask the kernel to perform the rename at next
+        # reboot via MoveFileEx + MOVEFILE_DELAY_UNTIL_REBOOT. This still
+        # produces the canonical `.<leaf>.delete-pending-marco-<runid>`
+        # destination so post-reboot sweeps can attribute & clean it up.
+        Write-Note "Could not rotate locked path in-process; scheduling rename-on-reboot:"
         Write-Host "    $Path" -ForegroundColor DarkGray
-        Invoke-DelayedDelete -path $Path -reason $Reason | Out-Null
+        Write-Host "    -> $rotated" -ForegroundColor DarkGray
+        Invoke-DelayedRename -source $Path -destination $rotated -reason $Reason | Out-Null
         return
     }
 

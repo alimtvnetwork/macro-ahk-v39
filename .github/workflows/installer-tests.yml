@@ -184,7 +184,12 @@ jobs:
           $victim = Join-Path $tmp 'locked.txt'
           'lock me' | Set-Content -LiteralPath $victim
 
-          # Open an exclusive handle so Remove-Item fails with sharing violation.
+          # Open an exclusive handle (FileShare.None) so both Remove-Item AND
+          # Rename-Item fail with a sharing violation — the worst-case lock
+          # scenario. The production code must still arrange for a registry
+          # entry that, on reboot, renames the locked file to the canonical
+          # `.<leaf>.delete-pending-marco-<runid>` pattern. We verify that
+          # entry below.
           $fs = [System.IO.File]::Open($victim, 'Open', 'Read', 'None')
           try {
               Remove-PathSafely -Path $victim -Reason "windows e2e sharing-violation"
