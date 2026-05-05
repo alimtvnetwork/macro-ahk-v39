@@ -45,10 +45,15 @@ export function useOnboarding() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("[useOnboarding] mount → checking state", {
+      hasChromeStorage: Boolean(getChromeStorage()),
+      timeoutMs: STORAGE_TIMEOUT_MS,
+    });
     checkOnboardingState();
   }, []);
 
   const checkOnboardingState = async () => {
+    const t0 = performance.now();
     try {
       const storage = getChromeStorage();
 
@@ -60,18 +65,33 @@ export function useOnboarding() {
           }),
         ]);
         const isDone = result[ONBOARDING_KEY] === true;
+        console.log("[useOnboarding] chrome.storage resolved", {
+          rawValue: result[ONBOARDING_KEY],
+          isDone,
+          elapsedMs: Math.round(performance.now() - t0),
+        });
         setIsComplete(isDone);
       } else {
         // Dev fallback — skip onboarding by default for browser preview
         const isDone = localStorage.getItem(ONBOARDING_KEY) !== "false";
+        console.log("[useOnboarding] no chrome.storage → localStorage fallback", {
+          rawValue: localStorage.getItem(ONBOARDING_KEY),
+          isDone,
+        });
         setIsComplete(isDone);
       }
     } catch {
       // In preview/sandbox, chrome storage can exist as a shim but never resolve.
       // Fall back to localStorage and always unblock UI.
       const isDone = localStorage.getItem(ONBOARDING_KEY) !== "false";
+      console.warn("[useOnboarding] chrome.storage threw/timed out → localStorage fallback", {
+        rawValue: localStorage.getItem(ONBOARDING_KEY),
+        isDone,
+        elapsedMs: Math.round(performance.now() - t0),
+      });
       setIsComplete(isDone);
     } finally {
+      console.log("[useOnboarding] loading=false");
       setLoading(false);
     }
   };

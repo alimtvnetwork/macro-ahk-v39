@@ -222,10 +222,53 @@ const OptionsPage = () => {
     setSelection(s);
   }, []);
 
+  // E2E diagnostic marker — expose live state to tests via DOM + console.
+  // The marker is always present (visually hidden) so Playwright can read it
+  // without waiting for a specific render branch.
+  useEffect(() => {
+    const branch =
+      onboardingLoading ? "loading"
+      : isComplete !== true ? "onboarding-flow"
+      : "ready";
+    console.log("[Options] render branch", {
+      branch,
+      onboardingLoading,
+      isComplete,
+      pLoading,
+      sLoading,
+      cLoading,
+    });
+    // Mirror onto window for tests that prefer a JS handle over DOM scraping.
+    (globalThis as unknown as { __MARCO_OPTIONS_STATE__?: unknown }).__MARCO_OPTIONS_STATE__ = {
+      branch,
+      onboardingLoading,
+      isComplete,
+      pLoading,
+      sLoading,
+      cLoading,
+      ts: Date.now(),
+    };
+  }, [onboardingLoading, isComplete, pLoading, sLoading, cLoading]);
+
+  const stateMarker = (
+    <div
+      data-testid="options-state-marker"
+      data-branch={onboardingLoading ? "loading" : isComplete !== true ? "onboarding-flow" : "ready"}
+      data-onboarding-loading={String(onboardingLoading)}
+      data-onboarding-complete={String(isComplete)}
+      data-projects-loading={String(pLoading)}
+      data-scripts-loading={String(sLoading)}
+      data-configs-loading={String(cLoading)}
+      style={{ position: "fixed", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: -9999, top: -9999 }}
+      aria-hidden="true"
+    />
+  );
+
   if (onboardingLoading) {
     return (
       <OnboardingLoadingGate>
         <div className="min-h-screen bg-background flex items-center justify-center">
+          {stateMarker}
           <div className="h-8 w-8 rounded-lg bg-primary animate-pulse" />
         </div>
       </OnboardingLoadingGate>
@@ -235,6 +278,7 @@ const OptionsPage = () => {
   if (isComplete !== true) {
     return (
       <>
+        {stateMarker}
         <Toaster />
         <OnboardingFlow onComplete={completeOnboarding} />
       </>
@@ -342,6 +386,7 @@ const OptionsPage = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
+        {stateMarker}
         <Toaster />
         <FloatingControllerHost />
         <OptionsSidebar selection={selection} onSelect={handleSidebarSelect} onErrorDrawerOpen={() => setErrorDrawerOpen(true)} />
