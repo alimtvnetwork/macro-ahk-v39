@@ -184,8 +184,15 @@ jobs:
           $victim = Join-Path $tmp 'locked.txt'
           'lock me' | Set-Content -LiteralPath $victim
 
-          # Open an exclusive handle so Remove-Item fails with sharing violation.
-          $fs = [System.IO.File]::Open($victim, 'Open', 'Read', 'None')
+          # Open the file the way Chrome / loaded modules hold their files:
+          # FILE_SHARE_READ | FILE_SHARE_DELETE, but WITHOUT FILE_SHARE_WRITE.
+          # This blocks Remove-Item (delete needs exclusive-ish semantics here
+          # because the unlink path opens with DELETE-only share) but permits
+          # the rotate-then-schedule flow (Rename-Item + MoveFileEx with
+          # MOVEFILE_DELAY_UNTIL_REBOOT) — exactly the production scenario
+          # this E2E exists to verify.
+          $share = [System.IO.FileShare]::Read -bor [System.IO.FileShare]::Delete
+          $fs = [System.IO.File]::Open($victim, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, $share)
           try {
               Remove-PathSafely -Path $victim -Reason "windows e2e sharing-violation"
           } finally {
