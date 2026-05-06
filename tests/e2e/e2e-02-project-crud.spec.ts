@@ -63,19 +63,38 @@ const OPTIONS_PROJECTS_E2E_QUERY = '?e2eHideFloatingController=1#projects';
  * a 3-minute UI timeout.
  */
 async function seedOnboardingFromServiceWorker(context: BrowserContext): Promise<void> {
-  let [sw] = context.serviceWorkers();
-  if (!sw) sw = await context.waitForEvent('serviceworker');
-  const verified = await sw.evaluate(async (key: string) => {
-    await chrome.storage.local.set({ [key]: true });
-    const result = await chrome.storage.local.get(key);
-    return result[key] === true;
-  }, ONBOARDING_KEY);
-  if (!verified) {
-    throw new Error(
-      `[e2e-02] SW seed failed: chrome.storage.local["${ONBOARDING_KEY}"] did not read back as true. ` +
-      `This is a hard determinism failure — the page would render OnboardingFlow.`,
-    );
+  const deadline = Date.now() + SETUP_TIMEOUT_MS;
+  let lastError: unknown = null;
+  while (Date.now() < deadline) {
+    let [sw] = context.serviceWorkers();
+    if (!sw) {
+      try {
+        sw = await context.waitForEvent('serviceworker', { timeout: 5_000 });
+      } catch (err) {
+        lastError = err;
+        continue;
+      }
+    }
+    try {
+      const verified = await sw.evaluate(async (key: string) => {
+        // Guard: in rare MV3 restart windows `chrome.storage` may not yet be
+        // bound on the worker global. Surface that as a retryable signal.
+        const c = (globalThis as unknown as { chrome?: { storage?: { local?: { set: (i: Record<string, unknown>) => Promise<void>; get: (k: string) => Promise<Record<string, unknown>> } } } }).chrome;
+        if (!c?.storage?.local) return 'chrome.storage.local unavailable';
+        await c.storage.local.set({ [key]: true });
+        const result = await c.storage.local.get(key);
+        return result[key] === true ? true : `read-back=${JSON.stringify(result[key])}`;
+      }, ONBOARDING_KEY);
+      if (verified === true) return;
+      lastError = new Error(`[e2e-02] SW seed verify failed: ${String(verified)}`);
+    } catch (err) {
+      lastError = err;
+    }
+    await new Promise((r) => setTimeout(r, 250));
   }
+  throw new Error(
+    `[e2e-02] SW seed failed after ${SETUP_TIMEOUT_MS}ms: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+  );
 }
 
 /**
