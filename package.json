@@ -109,7 +109,7 @@
     "version:minor": "node scripts/bump-version.mjs minor",
     "version:major": "node scripts/bump-version.mjs major",
     "version:check": "node scripts/check-version-sync.mjs",
-    "clone:ahk": "git clone https://github.com/alimtvnetwork/macro-ahk-v29 \"macro-ahk\"",
+    "clone:ahk": "git clone https://github.com/alimtvnetwork/macro-ahk-v31 \"macro-ahk\"",
     "check:readme:report": "node scripts/check-readme-compliance.mjs --report=.lovable/reports/readme-compliance.md",
     "repair:readme": "node scripts/repair-readme.mjs",
     "repair:readme:apply": "node scripts/repair-readme.mjs --apply",

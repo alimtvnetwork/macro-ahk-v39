@@ -18,7 +18,7 @@
  *   node scripts/print-quality-badges.mjs --codeclimate <TOKEN>     # only Code Climate
  *
  * Optional:
- *   --repo <owner/repo>   Override (default: alimtvnetwork/macro-ahk-v29)
+ *   --repo <owner/repo>   Override (default: alimtvnetwork/macro-ahk-v31)
  *   --branch <name>       Branch for Codacy grade (default: main)
  *   --check               HEAD-fetch each emitted badge URL and report status
  *   --write-readme [path] Replace the placeholder Codacy / Code Climate badge
@@ -36,7 +36,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-const DEFAULT_REPO = "alimtvnetwork/macro-ahk-v29";
+const DEFAULT_REPO = "alimtvnetwork/macro-ahk-v31";
 const DEFAULT_BRANCH = "main";
 
 function parseArgs(argv) {

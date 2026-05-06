@@ -259,11 +259,11 @@ Before changing **any** of the following, re-read this doc and update it:
 
 Marco ships alongside an AutoHotkey v2 sidecar that drives keyboard/mouse automation on Windows. The extension communicates with AHK scripts via `window.postMessage` bridges for native OS automation that Chrome extensions cannot perform directly.
 
-**Repository:** `https://github.com/alimtvnetwork/macro-ahk-v29`  
+**Repository:** `https://github.com/alimtvnetwork/macro-ahk-v31`  
 **Clone command:**
 
 ```bash
-git clone https://github.com/alimtvnetwork/macro-ahk-v29 "macro-ahk"
+git clone https://github.com/alimtvnetwork/macro-ahk-v31 "macro-ahk"
 ```
 
 Or via package.json script:
@@ -305,7 +305,7 @@ The `macro-looping.js` controller (via `standalone-scripts/macro-controller`) de
 
 **Version coupling:**
 
-- Extension v2.170.0+ requires AHK sidecar v23.x (macro-ahk-v29 branch)
+- Extension v2.170.0+ requires AHK sidecar v23.x (macro-ahk-v31 branch)
 - Mismatched versions log a warning but do not block core browser automation
 
 See also: `readme.md` §"Companion Repositories" for contributor setup instructions.

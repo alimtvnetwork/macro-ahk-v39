@@ -6,7 +6,7 @@
 ## Description
 The drift detector `scripts/check-installer-contract.mjs` was added in v2.228.0 to enforce that `scripts/install.sh`, `scripts/install.ps1`, and the generated `installer-constants.{sh,ps1}` stay in sync with `scripts/installer-contract.json` (single source of truth for repo, semver regex, exit codes, flags, endpoints, sibling-discovery defaults, checksum settings, AC-IDs).
 
-It runs locally and is correctly wired into `package.json` as `check:installer-contract`, but it was **not** invoked by the CI workflow. A future drift between the two installers (like the long-standing default-repo bug — `install.ps1` hardcoded to `macro-ahk-v29` while `install.sh` used `macro-ahk-v29`) could land on `main` without being caught.
+It runs locally and is correctly wired into `package.json` as `check:installer-contract`, but it was **not** invoked by the CI workflow. A future drift between the two installers (like the long-standing default-repo bug — `install.ps1` hardcoded to `macro-ahk-v31` while `install.sh` used `macro-ahk-v31`) could land on `main` without being caught.
 
 ## First Seen
 2026-04-24 (introduced with the shared installer contract)

@@ -6,8 +6,8 @@
 
 > **Browser automation for workspace management, credit monitoring, and AI-driven macro execution** — built as a Manifest V3 Chrome extension with a modular standalone script architecture.
 
-&#x200B;<!-- Build & Release --> [![CI](https://img.shields.io/github/actions/workflow/status/alimtvnetwork/macro-ahk-v29/ci.yml?branch=main&label=CI&logo=github&style=flat-square)](https://github.com/alimtvnetwork/macro-ahk-v29/actions/workflows/ci.yml) <!-- Repo activity --> [![Issues](https://img.shields.io/github/issues/alimtvnetwork/macro-ahk-v29?style=flat-square&logo=github)](https://github.com/alimtvnetwork/macro-ahk-v29/issues) [![Pull Requests](https://img.shields.io/github/issues-pr/alimtvnetwork/macro-ahk-v29?style=flat-square&logo=github)](https://github.com/alimtvnetwork/macro-ahk-v29/pulls) [![Repo Size](https://img.shields.io/github/repo-size/alimtvnetwork/macro-ahk-v29?style=flat-square)](https://github.com/alimtvnetwork/macro-ahk-v29)
-&#x200B;<!-- Community --> <!-- (intentionally empty — see mem://constraints/no-static-mockup-badges) --> <!-- Code-quality --> [![Security Issues](https://img.shields.io/github/issues-search/alimtvnetwork/macro-ahk-v29?query=is%3Aissue%20label%3Asecurity&label=security&style=flat-square&logo=github)](https://github.com/alimtvnetwork/macro-ahk-v29/issues?q=is%3Aissue+label%3Asecurity) [![Dependency PRs](https://img.shields.io/github/issues-pr-raw/alimtvnetwork/macro-ahk-v29?label=dependency%20PRs&style=flat-square&logo=dependabot)](https://github.com/alimtvnetwork/macro-ahk-v29/pulls?q=is%3Apr+label%3Adependencies) <!-- Stack & standards --> [![License](https://img.shields.io/github/license/alimtvnetwork/macro-ahk-v29?style=flat-square)](#license)
+&#x200B;<!-- Build & Release --> [![CI](https://img.shields.io/github/actions/workflow/status/alimtvnetwork/macro-ahk-v31/ci.yml?branch=main&label=CI&logo=github&style=flat-square)](https://github.com/alimtvnetwork/macro-ahk-v31/actions/workflows/ci.yml) <!-- Repo activity --> [![Issues](https://img.shields.io/github/issues/alimtvnetwork/macro-ahk-v31?style=flat-square&logo=github)](https://github.com/alimtvnetwork/macro-ahk-v31/issues) [![Pull Requests](https://img.shields.io/github/issues-pr/alimtvnetwork/macro-ahk-v31?style=flat-square&logo=github)](https://github.com/alimtvnetwork/macro-ahk-v31/pulls) [![Repo Size](https://img.shields.io/github/repo-size/alimtvnetwork/macro-ahk-v31?style=flat-square)](https://github.com/alimtvnetwork/macro-ahk-v31)
+&#x200B;<!-- Community --> <!-- (intentionally empty — see mem://constraints/no-static-mockup-badges) --> <!-- Code-quality --> [![Security Issues](https://img.shields.io/github/issues-search/alimtvnetwork/macro-ahk-v31?query=is%3Aissue%20label%3Asecurity&label=security&style=flat-square&logo=github)](https://github.com/alimtvnetwork/macro-ahk-v31/issues?q=is%3Aissue+label%3Asecurity) [![Dependency PRs](https://img.shields.io/github/issues-pr-raw/alimtvnetwork/macro-ahk-v31?label=dependency%20PRs&style=flat-square&logo=dependabot)](https://github.com/alimtvnetwork/macro-ahk-v31/pulls?q=is%3Apr+label%3Adependencies) <!-- Stack & standards --> [![License](https://img.shields.io/github/license/alimtvnetwork/macro-ahk-v31?style=flat-square)](#license)
 
 <img src="docs/assets/marco-extension-hero.png" alt="Marco Chrome Extension — Projects view inside the options page" width="820" />
 
@@ -22,25 +22,25 @@ Marco is a **Windows-first** project. The commands below auto-update to the **la
 ### 🪟 Windows · PowerShell (latest)
 
 ```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v29/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v31/main/scripts/install.ps1 | iex
 ```
 
 ### 🐧 macOS · Linux · Bash (latest)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v29/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v31/main/scripts/install.sh | bash
 ```
 
 ### 📌 Pinned version (`v2.230.0`)
 
 ```powershell
 # Windows · PowerShell
-irm https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v2.230.0/install.ps1 | iex
+irm https://github.com/alimtvnetwork/macro-ahk-v31/releases/download/v2.230.0/install.ps1 | iex
 ```
 
 ```bash
 # macOS · Linux · Bash
-curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v2.230.0/install.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v31/releases/download/v2.230.0/install.sh | bash
 ```
 
 **Pinned version:** `v2.230.0` &nbsp;•&nbsp; **Macro Controller:** `v7.41`
@@ -66,7 +66,7 @@ Pick your platform — each section is a self-contained install path with the re
 **Recommended path.** Open **PowerShell** (Win + X → "Windows PowerShell" or "Terminal") and run:
 
 ```powershell
-irm https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v2.230.0/install.ps1 | iex
+irm https://github.com/alimtvnetwork/macro-ahk-v31/releases/download/v2.230.0/install.ps1 | iex
 ```
 
 - 🔒 Pinned to `v2.230.0` — see [Pinned to a specific release](#-pinned-to-a-specific-release) to change versions
@@ -79,7 +79,7 @@ irm https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v2.230.0/in
 Open your terminal and run:
 
 ```bash
-curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v2.230.0/install.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v31/releases/download/v2.230.0/install.sh | bash
 ```
 
 - 🔒 Pinned to `v2.230.0` — see [Pinned to a specific release](#-pinned-to-a-specific-release) for other tags
@@ -97,32 +97,32 @@ The unified installer auto-derives the pinned version from its download URL. Use
 
 ```powershell
 # PowerShell (Windows) — replace v2.230.0 with any released tag
-irm https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v2.230.0/install.ps1 | iex
+irm https://github.com/alimtvnetwork/macro-ahk-v31/releases/download/v2.230.0/install.ps1 | iex
 ```
 
 ```bash
 # Bash (Linux / macOS)
-curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v2.230.0/install.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v31/releases/download/v2.230.0/install.sh | bash
 ```
 
 #### 🌊 Latest channel (auto-update)
 
 ```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v29/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v31/main/scripts/install.ps1 | iex
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v29/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v31/main/scripts/install.sh | bash
 ```
 
 #### Override the resolved version
 
 ```powershell
-& { $Version = "v2.220.0"; irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v29/main/scripts/install.ps1 | iex }
+& { $Version = "v2.220.0"; irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v31/main/scripts/install.ps1 | iex }
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v29/main/scripts/install.sh | bash -s -- --version v2.220.0
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v31/main/scripts/install.sh | bash -s -- --version v2.220.0
 ```
 
 ### Custom Directory Install
@@ -162,7 +162,7 @@ The installers (`install.ps1`, `install.sh`) conform to the [Generic Installer B
 |------|-------------|---------|
 | `-Version` | Pin a specific release (`vX.Y.Z[-pre]`) or `latest` | `-Version v2.230.0` |
 | `-InstallDir` | Custom install directory | `-InstallDir D:\marco-extension\v2.230.0` |
-| `-Repo` | Override GitHub `owner/repo` | `-Repo alimtvnetwork/macro-ahk-v29` |
+| `-Repo` | Override GitHub `owner/repo` | `-Repo alimtvnetwork/macro-ahk-v31` |
 | `-Help` | Print usage and exit 0 | `-Help` |
 
 **Linux / macOS (Bash — `install.sh`):**
@@ -171,7 +171,7 @@ The installers (`install.ps1`, `install.sh`) conform to the [Generic Installer B
 |------|-------|-------------|---------|
 | `--version <ver>` | `-v` | Force a specific version (`vX.Y.Z[-pre]`) or `latest`. Anything else exits 3. | `--version v2.230.0` |
 | `--dir <path>` | `-d` | Target directory (default: `~/marco-extension`) | `--dir ~/marco-extension/v2.230.0` |
-| `--repo <o/r>` | `-r` | Override GitHub `owner/repo` | `--repo alimtvnetwork/macro-ahk-v29` |
+| `--repo <o/r>` | `-r` | Override GitHub `owner/repo` | `--repo alimtvnetwork/macro-ahk-v31` |
 | `--dry-run` | — | Resolve the install plan, print it, exit 0 — **nothing is downloaded or extracted**. Useful for CI smoke tests and debugging. | `--dry-run --version v2.230.0` |
 | `--no-sibling-discovery` | — | Disable §4 sibling-repo probing for this run (overrides `install.config.sh`). Strict mode would skip it anyway. | `--no-sibling-discovery` |
 | `--enable-sibling-discovery` | — | Force-enable sibling probing for this run. **Still blocked by strict mode** (spec §4 rule 6). | `--enable-sibling-discovery` |
@@ -211,7 +211,7 @@ In **discovery mode**, if the GitHub API responds `200 OK` with zero releases (o
 
 #### Sibling-repo discovery (advanced)
 
-When the project ships successive major rewrites in sibling repos (e.g. `macro-ahk-v29` → `macro-ahk-v29` → `macro-ahk-v29`), discovery mode can optionally probe ahead and pick the newest. Defaults live in [`scripts/install.config.sh`](scripts/install.config.sh) and are **off by default**:
+When the project ships successive major rewrites in sibling repos (e.g. `macro-ahk-v31` → `macro-ahk-v31` → `macro-ahk-v31`), discovery mode can optionally probe ahead and pick the newest. Defaults live in [`scripts/install.config.sh`](scripts/install.config.sh) and are **off by default**:
 
 ```bash
 SIBLING_DISCOVERY_ENABLED=0          # opt-in
@@ -236,7 +236,7 @@ Use `--dry-run` to inspect the resolved decision without installing — the plan
 
 ```bash
 # Preview what would happen with the latest release — no network writes:
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v29/main/scripts/install.sh \
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v31/main/scripts/install.sh \
   | bash -s -- --dry-run
 
 # Pin a specific version into a custom directory:
@@ -251,7 +251,7 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v29/main/sc
 
 ### Manual Install
 
-1. Download `marco-extension-v{VERSION}.zip` from [Releases](https://github.com/alimtvnetwork/macro-ahk-v29/releases)
+1. Download `marco-extension-v{VERSION}.zip` from [Releases](https://github.com/alimtvnetwork/macro-ahk-v31/releases)
 2. Extract to a folder (e.g., `D:\marco-extension\v2.230.0`)
 3. Open `chrome://extensions` (or `edge://extensions`)
 4. Enable **Developer mode** (toggle in top-right)
@@ -266,7 +266,7 @@ Works in **Chrome**, **Edge**, **Brave**, **Arc**, and other Chromium browsers.
 Marco ships alongside an AutoHotkey sidecar that drives keyboard/mouse automation on Windows. Clone it next to this repo:
 
 ```bash
-git clone https://github.com/alimtvnetwork/macro-ahk-v29 "macro-ahk"
+git clone https://github.com/alimtvnetwork/macro-ahk-v31 "macro-ahk"
 ```
 
 Or use the package.json script:
@@ -620,7 +620,7 @@ Pushing to a `release/*` branch (e.g., `release/v2.117.0`) automatically:
 8. Generates categorized release notes from commit history with Bash + PowerShell install commands
 9. Creates a GitHub Release with all assets attached
 
-**No email or notification is sent** — check the [Releases page](https://github.com/alimtvnetwork/macro-ahk-v29/releases) for status.
+**No email or notification is sent** — check the [Releases page](https://github.com/alimtvnetwork/macro-ahk-v31/releases) for status.
 
 ### Re-running CI lint
 
@@ -649,13 +649,13 @@ the GitHub Actions cache (UI + `gh` CLI) when warnings persist.
 **Windows (PowerShell)**
 
 ```powershell
-irm https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v{VER}/install.ps1 | iex
+irm https://github.com/alimtvnetwork/macro-ahk-v31/releases/download/v{VER}/install.ps1 | iex
 ```
 
 **Linux / macOS**
 
 ```bash
-curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v29/releases/download/v{VER}/install.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v31/releases/download/v{VER}/install.sh | bash
 ```
 
 ---
