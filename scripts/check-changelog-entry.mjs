@@ -80,10 +80,68 @@ const looseRe = new RegExp(
 
 const expected = `## [v${version}] — YYYY-MM-DD <Short title>`;
 
+/**
+ * Scan the changelog for all H2 entries that look like version headings
+ * (`## [vX.Y.Z] ...` or `## [Unreleased] ...`) and return the lines
+ * closest to the missing version, sorted by semver distance.
+ * Falls back to the first few headings if no semver headings exist.
+ */
+function findNearbyEntries(text, missingVersion, limit = 5) {
+    const lines = text.split(/\r?\n/);
+    const semverRe = /^##\s+\[v?(\d+)\.(\d+)\.(\d+)\].*$/;
+    const looseHeadingRe = /^##\s+\[.+\].*$/;
+
+    const semverEntries = [];
+    const otherEntries = [];
+    lines.forEach((line, idx) => {
+        const sm = line.match(semverRe);
+        if (sm) {
+            semverEntries.push({
+                line,
+                lineNo: idx + 1,
+                major: Number(sm[1]),
+                minor: Number(sm[2]),
+                patch: Number(sm[3]),
+            });
+        } else if (looseHeadingRe.test(line)) {
+            otherEntries.push({ line, lineNo: idx + 1 });
+        }
+    });
+
+    if (semverEntries.length === 0) {
+        return otherEntries.slice(0, limit);
+    }
+
+    const [tMaj, tMin, tPat] = missingVersion.split(".").map(Number);
+    const distance = (e) =>
+        Math.abs(e.major - tMaj) * 1_000_000 +
+        Math.abs(e.minor - tMin) * 1_000 +
+        Math.abs(e.patch - tPat);
+
+    return [...semverEntries]
+        .sort((a, b) => distance(a) - distance(b))
+        .slice(0, limit)
+        .sort((a, b) => a.lineNo - b.lineNo);
+}
+
+function printNearby(nearby) {
+    if (nearby.length === 0) {
+        console.error("   No existing version headings found in changelog.md.");
+        return;
+    }
+    console.error("   Nearest existing changelog entries (changelog.md):");
+    const pad = String(Math.max(...nearby.map((e) => e.lineNo))).length;
+    for (const e of nearby) {
+        console.error(`     L${String(e.lineNo).padStart(pad)}: ${e.line}`);
+    }
+}
+
 const canonicalMatch = changelogTxt.match(canonicalRe);
 if (!canonicalMatch) {
+    const nearby = findNearbyEntries(changelogTxt, version);
     if (looseRe.test(changelogTxt)) {
         console.error("❌ Changelog entry for current version does not match the required template.");
+        console.error(`   Missing version: v${version} (from manifest.json)`);
         console.error(`   Found a heading mentioning v${version}, but it must be exactly:`);
         console.error(`     ${expected}`);
         console.error("");
@@ -93,11 +151,15 @@ if (!canonicalMatch) {
         console.error("     • Em dash `—` (U+2014) surrounded by single spaces");
         console.error("     • ISO date `YYYY-MM-DD`");
         console.error("     • Non-empty title after the date");
+        console.error("");
+        printNearby(nearby);
     } else {
         console.error("❌ Changelog entry missing for current version.");
-        console.error(`   manifest.json version = "${version}"`);
+        console.error(`   Missing version: v${version} (from manifest.json)`);
         console.error(`   Expected heading in changelog.md:`);
         console.error(`     ${expected}`);
+        console.error("");
+        printNearby(nearby);
     }
     process.exit(1);
 }

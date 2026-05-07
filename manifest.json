@@ -43,8 +43,12 @@
     "options_page": "src/options/options.html",
     "content_scripts": [
         {
-            "matches": ["<all_urls>"],
-            "js": ["content-scripts/message-relay.js"],
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content-scripts/message-relay.js"
+            ],
             "run_at": "document_start",
             "all_frames": false
         }
@@ -85,7 +89,9 @@
                 "content-scripts/network-reporter.js",
                 "content-scripts/prompt-injector.js"
             ],
-            "matches": ["<all_urls>"]
+            "matches": [
+                "<all_urls>"
+            ]
         }
     ]
 }
