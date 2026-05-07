@@ -1,0 +1,17 @@
+{
+  "version": "2.232.0",
+  "branch": "release/v2.232.0",
+  "sourceBranch": "main",
+  "commit": "6af7cdbc0342694e1cf6622309b80ecbbd96db24",
+  "tag": "v2.232.0",
+  "assets": [],
+  "changelog": [
+    "**Manifest seeder crash** (`src/background/manifest-seeder.ts`): resolved `TypeError: Cannot read properties of undefined (reading 'length')` in `seedFromManifest` by updating lingering camelCase accesses (`p.name`, `p.scripts`, `p.configs`, `c.key`, `c.seedId`, `dependencyProject.scripts`, `dependencyScript.seedId`) to PascalCase, matching the migrated manifest shape.",
+    "**Version bump**: 2.231.0 → 2.232.0 across all version-carrying files.",
+    "**Root `readme.md`**: pinned install instructions and tags to `v2.232.0`."
+  ],
+  "isDraft": false,
+  "isPreRelease": false,
+  "createdAt": "2026-05-07T13:24:27Z",
+  "isLatest": false
+}
