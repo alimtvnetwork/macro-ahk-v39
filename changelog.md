@@ -10,6 +10,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v2.233.0] — 2026-05-07 Macro controller panel layout fixes
+
+### Fixed
+- **Title bar `[ - ]` / `[ x ]` buttons** (`standalone-scripts/macro-controller/src/ui/panel-header.ts`): added `white-space:nowrap;flex-shrink:0` so the minimize and close glyphs render on a single line and never wrap mid-bracket inside narrow panels.
+- **Action button row clipping** (`standalone-scripts/macro-controller/src/ui/panel-controls.ts`): removed the legacy `min-width:460px` that forced the row wider than the panel's `overflow:hidden` content area, which clipped the rightmost action buttons (error toggle / hamburger menu) at the panel's default 494px width inside narrow Lovable sidebars. The flex-wrap layout already keeps buttons readable at any width.
+
+### Changed
+- **Version bump**: 2.232.0 → 2.233.0 across all version-carrying files.
+- **Root `readme.md`**: pinned install instructions and tags to `v2.233.0`.
+
+---
+
 ## [v2.232.0] — 2026-05-07 Manifest seeder PascalCase fix and version pin
 
 ### Fixed
