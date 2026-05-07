@@ -10,6 +10,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v2.232.0] — 2026-05-07 Manifest seeder PascalCase fix and version pin
+
+### Fixed
+- **Manifest seeder crash** (`src/background/manifest-seeder.ts`): resolved `TypeError: Cannot read properties of undefined (reading 'length')` in `seedFromManifest` by updating lingering camelCase accesses (`p.name`, `p.scripts`, `p.configs`, `c.key`, `c.seedId`, `dependencyProject.scripts`, `dependencyScript.seedId`) to PascalCase, matching the migrated manifest shape.
+
+### Changed
+- **Version bump**: 2.231.0 → 2.232.0 across all version-carrying files.
+- **Root `readme.md`**: pinned install instructions and tags to `v2.232.0`.
+
+---
+
 ## [v2.231.0] — 2026-05-06
 
 ### Changed
