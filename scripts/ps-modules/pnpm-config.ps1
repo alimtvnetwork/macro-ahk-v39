@@ -71,19 +71,25 @@ function Configure-PnpMode {
             "node-linker=$($script:EffectiveNodeLinker)",
             "symlink=true",
             "package-import-method=copy",
-            "virtual-store-dir=node_modules/.pnpm"
+            "virtual-store-dir=node_modules/.pnpm",
+            "verify-deps-before-run=false",
+            "confirm-modules-purge=false"
         ) -join "`n"
     } elseif ($script:EffectiveNodeLinker -eq "pnp") {
         $npmrcContent = @(
             "node-linker=pnp",
             "symlink=false",
-            "package-import-method=auto"
+            "package-import-method=auto",
+            "verify-deps-before-run=false",
+            "confirm-modules-purge=false"
         ) -join "`n"
     } else {
         $npmrcContent = @(
             "node-linker=isolated",
             "symlink=true",
-            "package-import-method=auto"
+            "package-import-method=auto",
+            "verify-deps-before-run=false",
+            "confirm-modules-purge=false"
         ) -join "`n"
     }
 
