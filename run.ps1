@@ -322,6 +322,7 @@ Write-Host ""
 # ============================================================================
 $stepWatch = [System.Diagnostics.Stopwatch]::StartNew()
 Remove-PnpNodeOptions
+Set-PnpmNonInteractiveEnvironment
 Write-Host "[2/4] Checking prerequisites..." -ForegroundColor Yellow
 
 if ($CheckNode) {
