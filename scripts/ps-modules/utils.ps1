@@ -233,6 +233,67 @@ function Get-EffectivePnpmInstallCommand([string]$BaseCommand, [int]$Major) {
 
 <#
 .SYNOPSIS
+    Executes a package.json script without invoking pnpm run.
+.DESCRIPTION
+    Bypasses pnpm's runDepsStatusCheck path, which can spawn `pnpm install`
+    before scripts and fail on Windows with ERR_PNPM_IGNORED_BUILDS.
+#>
+function Invoke-PackageScriptDirect([string]$PackageDir, [string]$ScriptName) {
+    $packageJsonPath = Join-Path $PackageDir "package.json"
+    if (-not (Test-Path $packageJsonPath -PathType Leaf)) {
+        Write-Host "  [FAIL] package.json missing for direct script execution" -ForegroundColor Red
+        Write-Host "    Path: $packageJsonPath" -ForegroundColor Red
+        Write-Host "    Missing item: package.json" -ForegroundColor Red
+        Write-Host "    Reason: Cannot bypass pnpm run without package script metadata." -ForegroundColor Yellow
+        return 2
+    }
+
+    try {
+        $packageJson = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
+    } catch {
+        Write-Host "  [FAIL] package.json parse failed" -ForegroundColor Red
+        Write-Host "    Path: $packageJsonPath" -ForegroundColor Red
+        Write-Host "    Missing item: valid JSON" -ForegroundColor Red
+        Write-Host "    Reason: $($_.Exception.Message)" -ForegroundColor Yellow
+        return 2
+    }
+
+    $scriptProperty = $packageJson.scripts.PSObject.Properties[$ScriptName]
+    if ($null -eq $scriptProperty -or [string]::IsNullOrWhiteSpace($scriptProperty.Value)) {
+        Write-Host "  [FAIL] package script missing" -ForegroundColor Red
+        Write-Host "    Path: $packageJsonPath" -ForegroundColor Red
+        Write-Host "    Missing item: scripts.$ScriptName" -ForegroundColor Red
+        Write-Host "    Reason: Configured build command targets a script that package.json does not define." -ForegroundColor Yellow
+        return 2
+    }
+
+    $scriptCommand = [string]$scriptProperty.Value
+    $binPath = Join-Path $PackageDir "node_modules/.bin"
+    $oldPath = $env:Path
+    $oldLifecycleEvent = $env:npm_lifecycle_event
+    $oldPackageName = $env:npm_package_name
+
+    Push-Location $PackageDir
+    try {
+        $env:Path = "$binPath$([IO.Path]::PathSeparator)$oldPath"
+        $env:npm_lifecycle_event = $ScriptName
+        $env:npm_package_name = if ($packageJson.name) { [string]$packageJson.name } else { "package" }
+        if ($IsWindows -or $env:OS -eq "Windows_NT") {
+            & cmd.exe /d /s /c $scriptCommand
+        } else {
+            & /bin/sh -c $scriptCommand
+        }
+        return $LASTEXITCODE
+    } finally {
+        $env:Path = $oldPath
+        $env:npm_lifecycle_event = $oldLifecycleEvent
+        $env:npm_package_name = $oldPackageName
+        Pop-Location
+    }
+}
+
+<#
+.SYNOPSIS
     Resolves a path relative to the script directory.
 .PARAMETER Path
     A relative or absolute path. If "." or empty, returns $ScriptDir.
