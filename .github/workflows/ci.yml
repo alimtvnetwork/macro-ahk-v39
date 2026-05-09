@@ -870,7 +870,7 @@ jobs:
         run: node scripts/check-no-pnpm-dlx-less.mjs
 
       - name: Preflight · standalone build portability
-        run: pnpm run check:standalone-build-portability
+        run: node scripts/check-standalone-build-portability.mjs
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
