@@ -108,13 +108,15 @@ function Build-StandaloneScript([string]$ScriptDirPath, [string]$ScriptName, [st
         }
     }
 
-    # ── TypeScript -> JS (npm run build:<name>) ──
+    # ── TypeScript -> JS (direct Node runner; no nested npm/pnpm run) ──
     Push-Location $RootDir
     $previousBuildMode = $env:BUILD_MODE
     try {
         $env:BUILD_MODE = $BuildMode
         $output += "  Building TypeScript bundle (mode: $BuildMode)..."
-        $buildResult = Invoke-Expression "npm run `"build:$ScriptName`"" 2>&1
+        $cachedBuildScript = Join-Path $RootDir "scripts\cached-build.mjs"
+        $standaloneBuildStepScript = "scripts/run-standalone-build-step.mjs"
+        $buildResult = & node $cachedBuildScript "--name=$ScriptName" "--mode=$BuildMode" "--" "node" $standaloneBuildStepScript "--project=$ScriptName" "--mode=$BuildMode" 2>&1
         $buildExitCode = $LASTEXITCODE
         if ($buildExitCode -ne 0) {
             $output += "  [FAIL] build:$ScriptName failed (exit $buildExitCode)"
