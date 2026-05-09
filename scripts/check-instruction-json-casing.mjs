@@ -667,7 +667,7 @@ function main() {
                     projects: [],
                 }) + "\n");
             } else {
-                process.stderr.write(`✗ standalone-scripts/ not found at ${rel(STANDALONE_DIR)} — repo layout broken?\n`);
+                process.stderr.write(`[FAIL] standalone-scripts/ not found at ${rel(STANDALONE_DIR)} - repo layout broken?\n`);
             }
             process.exit(2);
         }
@@ -765,14 +765,14 @@ function main() {
     }
 
     if (worst === 0) {
-        console.log(`\n✅ check-instruction-json-casing — ${scanned} project(s) passed both shape checks`);
+        console.log(`\n[OK] check-instruction-json-casing - ${scanned} project(s) passed both shape checks`);
     } else {
         // Final summary: collapse every failing file into a one-line
         // table so a CI viewer scrolling to the bottom of the log
         // gets a copy-pasteable list of every artifact that needs
         // fixing — both relative (for grep) and absolute (for
         // editor open) paths.
-        process.stderr.write(`\n❌ check-instruction-json-casing — failed (exit ${worst})\n`);
+        process.stderr.write(`\n[FAIL] check-instruction-json-casing - failed (exit ${worst})\n`);
         if (allFailures.length > 0) {
             process.stderr.write(`\nFailing artifacts (${allFailures.length}):\n`);
             for (const f of allFailures) {
@@ -782,7 +782,7 @@ function main() {
                         ? `walker aborted (partial: ${f.count} violation(s))`
                         : `JSON parse error`;
                 process.stderr.write(
-                    `  • ${f.project} ${f.label} — ${tag}\n` +
+                    `  - ${f.project} ${f.label} - ${tag}\n` +
                     `      relative: ${f.fileRel}\n` +
                     `      absolute: ${f.fileAbs}\n`,
                 );
