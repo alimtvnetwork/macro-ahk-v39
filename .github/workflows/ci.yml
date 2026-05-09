@@ -875,6 +875,9 @@ jobs:
       - name: Preflight · standalone build ASCII output
         run: node scripts/check-script-ascii-output.mjs
 
+      - name: Preflight · pnpm non-interactive .npmrc keys
+        run: node scripts/check-npmrc-pnpm-noninteractive.mjs
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
