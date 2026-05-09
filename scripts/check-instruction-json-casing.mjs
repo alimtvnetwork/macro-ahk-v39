@@ -10,17 +10,17 @@
  * For every `standalone-scripts/<name>/dist/instruction.json` and its
  * sibling `dist/instruction.compat.json` this script enforces:
  *
- *   ── instruction.json (canonical)
- *   • Every object key in the recursive tree starts with [A-Z] (PascalCase),
+ *   -- instruction.json (canonical)
+ *   - Every object key in the recursive tree starts with [A-Z] (PascalCase),
  *     OR is one of the documented lowercase binding identifiers
- *     ({config, theme} — these are user-chosen NAMES inside
+ *     ({config, theme} - these are user-chosen NAMES inside
  *     ConfigSeedIds, not schema keys; see CHECK A in
  *     scripts/check-pascalcase-instruction-migration.mjs).
- *   • Zero camelCase keys allowed (a key starting with [a-z] that is NOT
+ *   - Zero camelCase keys allowed (a key starting with [a-z] that is NOT
  *     in the lowercase allowlist is a hard fail).
  *
- *   ── instruction.compat.json (transitional camelCase snapshot)
- *   • Every object key starts with [a-z_] (camelCase or snake-ish) — i.e.
+ *   -- instruction.compat.json (transitional camelCase snapshot)
+ *   - Every object key starts with [a-z_] (camelCase or snake-ish) - i.e.
  *     no key may begin with [A-Z]. The lowercase binding identifiers
  *     ({config, theme}) are also valid here (they pass through unchanged
  *     during the camelCase conversion in compile-instruction.mjs).
@@ -29,7 +29,7 @@
  * check-pascalcase-instruction-migration.mjs):
  *   That checker validates SOURCE FILES (`src/instruction.ts` literals
  *   and `.ts/.mjs` consumers). This checker validates the BUILD ARTIFACTS
- *   (`dist/instruction.json` + `dist/instruction.compat.json`) — the actual
+ *   (`dist/instruction.json` + `dist/instruction.compat.json`) - the actual
  *   bytes that will be copied into the extension and shipped. Source can
  *   be clean while artifacts drift if `compile-instruction.mjs` has a bug
  *   (wrong conversion, partial walk, alias leak, etc.). This script is
@@ -43,14 +43,14 @@
  *
  * Usage:
  *   node scripts/check-instruction-json-casing.mjs
- *     → scans every standalone-scripts/<name>/dist/{instruction,instruction.compat}.json
+ *     -> scans every standalone-scripts/<name>/dist/{instruction,instruction.compat}.json
  *
  *   node scripts/check-instruction-json-casing.mjs <project-folder>
- *     → scans only that one project (matches compile-instruction.mjs CLI)
- *     → e.g. node scripts/check-instruction-json-casing.mjs standalone-scripts/macro-controller
+ *     -> scans only that one project (matches compile-instruction.mjs CLI)
+ *     -> e.g. node scripts/check-instruction-json-casing.mjs standalone-scripts/macro-controller
  *
  *   node scripts/check-instruction-json-casing.mjs --json [<project-folder>]
- *     → emits a single JSON document to stdout describing every scanned
+ *     -> emits a single JSON document to stdout describing every scanned
  *       project, the two artifacts, and every casing violation with its
  *       JSON-Pointer-like path. Suppresses human-readable logs and GitHub
  *       Actions ::error annotations so the stdout stream is pure JSON
@@ -64,7 +64,7 @@
  *               canonical: { shape:"PascalCase", artifact:"instruction.json",
  *                            scanned, violationCount, parseErrors,
  *                            walkAborted, failingProjects: [...], ok },
- *               compat:    { shape:"camelCase",  artifact:"instruction.compat.json", … }
+ *               compat:    { shape:"camelCase",  artifact:"instruction.compat.json", ... }
  *             }
  *           },
  *           // summary.ok mirrors `exitCode === 0` (so it is false when
@@ -74,11 +74,11 @@
  *           projects: [{ name, skipped, missingArtifact,
  *             artifacts: { canonical: { path, shape, ok, parseError,
  *               walkAborted, violationCount, violations: [{ path, key, expected }] },
- *                          compat:    { … } } }] }
+ *                          compat:    { ... } } }] }
  *
  * Exit codes:
- *   0 — every scanned project's two artifacts pass both shape checks
- *   1 — at least one violation. When run inside GitHub Actions
+ *   0 - every scanned project's two artifacts pass both shape checks
+ *   1 - at least one violation. When run inside GitHub Actions
  *       (GITHUB_ACTIONS=true), one `::error file=<dist/.../instruction[.compat].json>`
  *       annotation is emitted per offending JSON-pointer key (capped at
  *       INSTRUCTION_CASING_MAX_ANNOTATIONS, default 50, per artifact),
@@ -88,8 +88,8 @@
  *       so at least one inline marker exists even when the per-key cap
  *       truncates output. Outside Actions the framed text block is the
  *       sole output (no pseudo-annotation lines).
- *   2 — repo layout broken (no standalone-scripts/) or a referenced
- *       project lacks a dist/ — surfaces a missing-step problem
+ *   2 - repo layout broken (no standalone-scripts/) or a referenced
+ *       project lacks a dist/ - surfaces a missing-step problem
  *       instead of a false pass.
  *
  * Resolves: build-artifact JSON shape gate for the Phase 2b dual-emit
@@ -110,7 +110,7 @@ const STANDALONE_DIR = resolve(REPO_ROOT, "standalone-scripts");
 /*                                                                    */
 /*  These are user-chosen binding names that appear as object keys    */
 /*  inside ConfigSeedIds (e.g. `{ config: "...", theme: "..." }`).   */
-/*  They survive the PascalCase→camelCase conversion unchanged        */
+/*  They survive the PascalCase->camelCase conversion unchanged        */
 /*  because their first char is already lowercase, so the same        */
 /*  allowlist applies to both files. Mirrors                          */
 /*  LOWERCASE_KEY_ALLOWLIST in check-pascalcase-instruction-migration.mjs. */
@@ -127,11 +127,11 @@ const rel = (p) => relative(REPO_ROOT, p) || p;
 /*  cycle-broken-but-deeply-nested config tree) must NOT hang the    */
 /*  build or balloon CI memory. The walker enforces two hard caps:   */
 /*                                                                    */
-/*    MAX_NODES  — total objects + array elements visited per file.  */
+/*    MAX_NODES  - total objects + array elements visited per file.  */
 /*                 Exceeding it aborts that file's scan and surfaces */
 /*                 a clear "tree too large" diagnostic instead of    */
 /*                 silently truncating violations.                   */
-/*    MAX_DEPTH  — maximum nesting depth (object-or-array level) the */
+/*    MAX_DEPTH  - maximum nesting depth (object-or-array level) the */
 /*                 walker will descend into. Protects against        */
 /*                 pathological JSON that could blow Node's call     */
 /*                 stack via the recursive generator.                */
@@ -161,10 +161,10 @@ class WalkAbortError extends Error {
 /*  GitHub Actions annotations.                                       */
 /*                                                                    */
 /*  Two flavours:                                                     */
-/*    • annotateFile(file, msg)   — one summary `::error` on the      */
+/*    - annotateFile(file, msg)   - one summary `::error` on the      */
 /*      file (used for parse errors, walker aborts, and the trailing  */
 /*      "+N more" message when violations are truncated).             */
-/*    • annotateKey(file, v, shape) — one `::error` per offending     */
+/*    - annotateKey(file, v, shape) - one `::error` per offending     */
 /*      JSON-pointer key, so the developer sees the exact key in the  */
 /*      Actions UI without having to scroll the log.                  */
 /*                                                                    */
@@ -174,7 +174,7 @@ class WalkAbortError extends Error {
 /*                                                                    */
 /*  Per-file cap (MAX_ANNOTATIONS, default 50) prevents a totally-    */
 /*  broken artifact (thousands of bad keys) from drowning the Actions */
-/*  annotation pane — the cap matches the human-readable MAX_PRINT    */
+/*  annotation pane - the cap matches the human-readable MAX_PRINT    */
 /*  framed-block cap so the two reports stay in sync. Override via    */
 /*  INSTRUCTION_CASING_MAX_ANNOTATIONS env var.                       */
 /* ----------------------------------------------------------------- */
@@ -205,7 +205,7 @@ function annotateKeys(file, violations, shape) {
         const v = violations[i];
         process.stdout.write(
             `::error file=${file},title=${expected} casing violation::` +
-            ghEscapeMessage(`${v.path}  →  "${v.key}"  (expected ${expected})`) +
+            ghEscapeMessage(`${v.path}  ->  "${v.key}"  (expected ${expected})`) +
             `\n`,
         );
     }
@@ -216,8 +216,8 @@ function annotateKeys(file, violations, shape) {
 /*  Recursive key walker.                                             */
 /*                                                                    */
 /*  Yields every {path, key} pair encountered as the tree is walked. */
-/*  Arrays are descended (path becomes `…[i]`) but their indices are */
-/*  not yielded as keys. Non-object leaves are skipped — only object */
+/*  Arrays are descended (path becomes `...[i]`) but their indices are */
+/*  not yielded as keys. Non-object leaves are skipped - only object */
 /*  KEYS are subject to casing rules. JSON null is ignored.           */
 /*                                                                    */
 /*  Path uses dotted JSON-Pointer-like notation rooted at `$` for     */
@@ -272,7 +272,7 @@ function isLegalCamelKey(key) {
     const c = key.charCodeAt(0);
     // Reject only PascalCase (uppercase-leading). Lowercase binding
     // identifiers, snake_case, leading-underscore, and digits are all
-    // accepted — the only thing camelCase artifacts must never do is
+    // accepted - the only thing camelCase artifacts must never do is
     // re-introduce a PascalCase key.
     return !(c >= 65 && c <= 90);
 }
@@ -326,7 +326,7 @@ function checkProject(projectName) {
 
     // A project without a src/instruction.ts is intentionally skipped
     // (matches compile-instruction.mjs behaviour). A project WITH a
-    // source but missing dist artifacts is a hard error — it means
+    // source but missing dist artifacts is a hard error - it means
     // compile-instruction.mjs was not run before this checker, which
     // is a build-pipeline ordering bug.
     const tsPath = resolve(STANDALONE_DIR, projectName, "src", "instruction.ts");
@@ -371,7 +371,7 @@ function resolveProjectArg(arg) {
     const abs = resolve(REPO_ROOT, arg);
     const r = relative(STANDALONE_DIR, abs);
     if (!r || r.startsWith("..") || r.includes("/") || r.includes("\\")) {
-        // Not directly inside standalone-scripts/ — fall back to basename.
+        // Not directly inside standalone-scripts/ - fall back to basename.
         return arg.replace(/[\\/]+$/, "").split(/[\\/]/).pop();
     }
     return r;
@@ -383,19 +383,18 @@ function resolveProjectArg(arg) {
 
 function reportProject(name, result) {
     if (result.skipped) {
-        console.log(`ℹ  ${name} — skipped (${result.reason})`);
+        console.log(`[INFO] ${name} - skipped (${result.reason})`);
         return { exit: 0, failures: [] };
     }
     if (result.missingArtifact) {
         const distAbs = resolve(REPO_ROOT, result.distDir);
         process.stderr.write(
-            `\n┌─ ✗ ${name} — dist artifacts missing ─────────────────────────\n` +
-            `│  dist dir (relative): ${rel(result.distDir)}\n` +
-            `│  dist dir (absolute): ${distAbs}\n` +
-            `│    instruction.json:        ${result.canonicalExists ? "present" : "MISSING"}\n` +
-            `│    instruction.compat.json: ${result.compatExists ? "present" : "MISSING"}\n` +
-            `│  Fix: run \`node scripts/compile-instruction.mjs standalone-scripts/${name}\` before this check.\n` +
-            `└──────────────────────────────────────────────────────────────\n\n`,
+            `\n[FAIL] ${name} - dist artifacts missing\n` +
+            `  dist dir (relative): ${rel(result.distDir)}\n` +
+            `  dist dir (absolute): ${distAbs}\n` +
+            `    instruction.json:        ${result.canonicalExists ? "present" : "MISSING"}\n` +
+            `    instruction.compat.json: ${result.compatExists ? "present" : "MISSING"}\n` +
+            `  Fix: run \`node scripts/compile-instruction.mjs standalone-scripts/${name}\` before this check.\n\n`,
         );
         return { exit: 2, failures: [] };
     }
@@ -412,11 +411,10 @@ function reportProject(name, result) {
 
         if (res.parseError) {
             process.stderr.write(
-                `\n┌─ ✗ ${name} ${label.trim()} — JSON parse error ───────────────\n` +
-                `│  file (relative): ${fileRel}\n` +
-                `│  file (absolute): ${fileAbs}\n` +
-                `│  error:           ${res.parseError}\n` +
-                `└──────────────────────────────────────────────────────────────\n`,
+                `\n[FAIL] ${name} ${label.trim()} - JSON parse error\n` +
+                `  file (relative): ${fileRel}\n` +
+                `  file (absolute): ${fileAbs}\n` +
+                `  error:           ${res.parseError}\n`,
             );
             annotateFile(fileRel, `Invalid JSON in ${fileRel}: ${res.parseError}`);
             failures.push({ project: name, label: label.trim(), shape, fileRel, fileAbs, kind: "parse-error", count: 1 });
@@ -429,22 +427,21 @@ function reportProject(name, result) {
                 ? `tree exceeded MAX_NODES=${a.limit} (visited ${a.nodes} nodes before aborting at ${a.path})`
                 : `tree exceeded MAX_DEPTH=${a.limit} (depth ${a.depth} at ${a.path})`;
             process.stderr.write(
-                `\n┌─ ✗ ${name} ${label.trim()} — walker aborted ─────────────────\n` +
-                `│  file (relative): ${fileRel}\n` +
-                `│  file (absolute): ${fileAbs}\n` +
-                `│  reason:          ${explain}\n` +
-                `│  partial scan:    ${res.violations.length} violation(s) before abort\n` +
-                `│  override:        INSTRUCTION_CASING_MAX_NODES / INSTRUCTION_CASING_MAX_DEPTH env vars\n` +
-                `└──────────────────────────────────────────────────────────────\n`,
+                `\n[FAIL] ${name} ${label.trim()} - walker aborted\n` +
+                `  file (relative): ${fileRel}\n` +
+                `  file (absolute): ${fileAbs}\n` +
+                `  reason:          ${explain}\n` +
+                `  partial scan:    ${res.violations.length} violation(s) before abort\n` +
+                `  override:        INSTRUCTION_CASING_MAX_NODES / INSTRUCTION_CASING_MAX_DEPTH env vars\n`,
             );
             // Walker-aborted: emit the file-level summary AND per-key
             // annotations for whatever partial violations were collected
             // before the abort, so devs still see exact offending keys.
-            annotateFile(fileRel, `Walker aborted on ${fileRel}: ${explain}. Likely a runaway/oversized artifact — investigate compile-instruction.mjs output.`);
+            annotateFile(fileRel, `Walker aborted on ${fileRel}: ${explain}. Likely a runaway/oversized artifact - investigate compile-instruction.mjs output.`);
             if (res.violations.length > 0) {
                 const emitted = annotateKeys(fileRel, res.violations, shape);
                 if (res.violations.length > emitted) {
-                    annotateFile(fileRel, `… and ${res.violations.length - emitted} more ${shape}-shape violation(s) before walker abort (run with --json or set INSTRUCTION_CASING_MAX_ANNOTATIONS for the full list).`);
+                    annotateFile(fileRel, `... and ${res.violations.length - emitted} more ${shape}-shape violation(s) before walker abort (run with --json or set INSTRUCTION_CASING_MAX_ANNOTATIONS for the full list).`);
                 }
             }
             failures.push({ project: name, label: label.trim(), shape, fileRel, fileAbs, kind: "walker-aborted", count: res.violations.length });
@@ -452,14 +449,14 @@ function reportProject(name, result) {
             continue;
         }
         if (res.violations.length === 0) {
-            console.log(`✓ ${name} ${label} — ${fileRel} is pure ${shape}`);
+            console.log(`[OK] ${name} ${label} - ${fileRel} is pure ${shape}`);
             continue;
         }
 
-        // ── Casing violations: print a framed block with both paths
+        // -- Casing violations: print a framed block with both paths
         // and the full list of offending keys (capped at MAX_PRINT
         // so a totally-broken file can't spam thousands of lines).
-        // Each violation is shown as `<json-path>  →  "<offending-key>"`
+        // Each violation is shown as `<json-path>  ->  "<offending-key>"`
         // so the developer can grep the JSON file directly for the key.
         const expectation = shape === "PascalCase"
             ? `expected PascalCase (or one of {${[...LOWERCASE_KEY_ALLOWLIST].join(", ")}})`
@@ -467,19 +464,19 @@ function reportProject(name, result) {
         const MAX_PRINT = 50;
 
         process.stderr.write(
-            `\n┌─ ✗ ${name} ${label.trim()} — ${res.violations.length} ${shape}-shape violation(s) ─\n` +
-            `│  file (relative): ${fileRel}\n` +
-            `│  file (absolute): ${fileAbs}\n` +
-            `│  rule:            ${expectation}\n` +
-            `│  offending keys:  (showing ${Math.min(res.violations.length, MAX_PRINT)} of ${res.violations.length})\n`,
+            `\n[FAIL] ${name} ${label.trim()} - ${res.violations.length} ${shape}-shape violation(s)\n` +
+            `  file (relative): ${fileRel}\n` +
+            `  file (absolute): ${fileAbs}\n` +
+            `  rule:            ${expectation}\n` +
+            `  offending keys:  (showing ${Math.min(res.violations.length, MAX_PRINT)} of ${res.violations.length})\n`,
         );
         for (const v of res.violations.slice(0, MAX_PRINT)) {
-            process.stderr.write(`│    ${v.path}  →  "${v.key}"\n`);
+            process.stderr.write(`    ${v.path}  ->  "${v.key}"\n`);
         }
         if (res.violations.length > MAX_PRINT) {
-            process.stderr.write(`│    … and ${res.violations.length - MAX_PRINT} more (use --json for the full list)\n`);
+            process.stderr.write(`    ... and ${res.violations.length - MAX_PRINT} more (use --json for the full list)\n`);
         }
-        process.stderr.write(`└──────────────────────────────────────────────────────────────\n`);
+        process.stderr.write("\n");
 
         // Per-key GitHub Actions annotations: one ::error per
         // offending JSON-pointer key, capped at MAX_ANNOTATIONS so a
@@ -494,12 +491,12 @@ function reportProject(name, result) {
         if (res.violations.length > emittedKeys) {
             annotateFile(
                 fileRel,
-                `… and ${res.violations.length - emittedKeys} more ${shape}-shape violation(s) in ${fileRel} (showing first ${emittedKeys}; run --json or raise INSTRUCTION_CASING_MAX_ANNOTATIONS for the full list).`,
+                `... and ${res.violations.length - emittedKeys} more ${shape}-shape violation(s) in ${fileRel} (showing first ${emittedKeys}; run --json or raise INSTRUCTION_CASING_MAX_ANNOTATIONS for the full list).`,
             );
         }
         annotateFile(
             fileRel,
-            `${res.violations.length} ${shape}-shape violation(s) in ${fileRel}. First offender: ${res.violations[0].path} → "${res.violations[0].key}". ` +
+            `${res.violations.length} ${shape}-shape violation(s) in ${fileRel}. First offender: ${res.violations[0].path} -> "${res.violations[0].key}". ` +
             `Fix compile-instruction.mjs or the source instruction.ts so this artifact stays pure ${shape}.`,
         );
         failures.push({ project: name, label: label.trim(), shape, fileRel, fileAbs, kind: "casing", count: res.violations.length });
@@ -509,7 +506,7 @@ function reportProject(name, result) {
 }
 
 /* ----------------------------------------------------------------- */
-/*  JSON reporter — `--json` flag.                                    */
+/*  JSON reporter - `--json` flag.                                    */
 /*                                                                    */
 /*  Builds a single structured document covering every scanned        */
 /*  project and writes it to stdout. Suppresses the human-readable    */
@@ -637,7 +634,7 @@ function main() {
                     projects: [],
                 }) + "\n");
             } else {
-                process.stderr.write(`✗ Could not resolve project name from "${projectArg}"\n`);
+                process.stderr.write(`x Could not resolve project name from "${projectArg}"\n`);
             }
             process.exit(2);
         }
@@ -652,7 +649,7 @@ function main() {
                     projects: [],
                 }) + "\n");
             } else {
-                process.stderr.write(`✗ Project not found: standalone-scripts/${name}\n`);
+                process.stderr.write(`x Project not found: standalone-scripts/${name}\n`);
             }
             process.exit(2);
         }
@@ -670,13 +667,13 @@ function main() {
                     projects: [],
                 }) + "\n");
             } else {
-                process.stderr.write(`✗ standalone-scripts/ not found at ${rel(STANDALONE_DIR)} — repo layout broken?\n`);
+                process.stderr.write(`[FAIL] standalone-scripts/ not found at ${rel(STANDALONE_DIR)} - repo layout broken?\n`);
             }
             process.exit(2);
         }
     }
 
-    // ── JSON mode: build the report silently, then emit once. ──────
+    // -- JSON mode: build the report silently, then emit once. ------
     if (jsonMode) {
         const entries = [];
         let worst = 0;
@@ -689,12 +686,12 @@ function main() {
             entries.push(entry);
         }
 
-        // ── Top-level aggregate summary ─────────────────────────────
+        // -- Top-level aggregate summary -----------------------------
         // Roll every project's per-artifact result into two buckets
         // (canonical = instruction.json / PascalCase, compat =
         // instruction.compat.json / camelCase) so a CI dashboard or
         // jq one-liner can read total drift without walking the full
-        // projects[] array. Counts cover violations only — parse
+        // projects[] array. Counts cover violations only - parse
         // errors and walker aborts are tracked as separate booleans
         // per project (see `failingProjects` below) so a single bad
         // file can't inflate violation totals.
@@ -755,7 +752,7 @@ function main() {
         process.exit(worst);
     }
 
-    // ── Default text mode: per-project logs + ::error annotations. ─
+    // -- Default text mode: per-project logs + ::error annotations. -
     let worst = 0;
     let scanned = 0;
     const allFailures = [];
@@ -768,14 +765,14 @@ function main() {
     }
 
     if (worst === 0) {
-        console.log(`\n✅ check-instruction-json-casing — ${scanned} project(s) passed both shape checks`);
+        console.log(`\n[OK] check-instruction-json-casing - ${scanned} project(s) passed both shape checks`);
     } else {
         // Final summary: collapse every failing file into a one-line
         // table so a CI viewer scrolling to the bottom of the log
         // gets a copy-pasteable list of every artifact that needs
-        // fixing — both relative (for grep) and absolute (for
+        // fixing - both relative (for grep) and absolute (for
         // editor open) paths.
-        process.stderr.write(`\n❌ check-instruction-json-casing — failed (exit ${worst})\n`);
+        process.stderr.write(`\n[FAIL] check-instruction-json-casing - failed (exit ${worst})\n`);
         if (allFailures.length > 0) {
             process.stderr.write(`\nFailing artifacts (${allFailures.length}):\n`);
             for (const f of allFailures) {
@@ -785,7 +782,7 @@ function main() {
                         ? `walker aborted (partial: ${f.count} violation(s))`
                         : `JSON parse error`;
                 process.stderr.write(
-                    `  • ${f.project} ${f.label} — ${tag}\n` +
+                    `  - ${f.project} ${f.label} - ${tag}\n` +
                     `      relative: ${f.fileRel}\n` +
                     `      absolute: ${f.fileAbs}\n`,
                 );

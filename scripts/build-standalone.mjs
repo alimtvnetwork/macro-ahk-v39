@@ -18,7 +18,7 @@
  * Ordering contract (preserved from package.json scripts):
  *   1. SHARED PREREQS (sequential, run once):
  *        - check-axios-version.mjs
- *        - aggregate-prompts.mjs           (was: build:prompts — needed by macro-controller)
+ *        - aggregate-prompts.mjs           (was: build:prompts - needed by macro-controller)
  *        - lessc index.less                (was: build:macro-less)
  *        - compile-templates.mjs           (was: build:macro-templates)
  *        - compile-instruction.mjs x3      (marco-sdk, xpath, macro-controller)
@@ -47,12 +47,12 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 /**
- * PROJECTS array — canonical registry of every standalone-scripts project
+ * PROJECTS array - canonical registry of every standalone-scripts project
  * recognised by the orchestrator and the standalone registry checker
  * (`scripts/report-standalone-registry.mjs`). Keep in sync with the per-folder
  * directories under `standalone-scripts/`.
  *
- * Note: not every entry below has its own PARALLEL_JOBS step yet — some
+ * Note: not every entry below has its own PARALLEL_JOBS step yet - some
  * (lovable-common, lovable-owner-switch, lovable-user-add, payment-banner-hider)
  * are built by their dedicated `pnpm run build:<name>` scripts called from CI
  * jobs and from the `build:extension` chain. Listing them here keeps the
@@ -163,7 +163,7 @@ function runParallelJob(job) {
             child.stderr.on("data", writeChunk(process.stderr));
 
             child.on("error", (err) => {
-                console.error(`${prefix} FAIL — '${step.label}' could not start: ${err.message}`);
+                console.error(`${prefix} FAIL - '${step.label}' could not start: ${err.message}`);
                 resolvePromise({
                     name: job.name,
                     success: false,
@@ -177,7 +177,7 @@ function runParallelJob(job) {
                 if (code === 0) {
                     runStep(index + 1);
                 } else {
-                    console.error(`${prefix} FAIL — '${step.label}' exited with code ${code}`);
+                    console.error(`${prefix} FAIL - '${step.label}' exited with code ${code}`);
                     resolvePromise({
                         name: job.name,
                         success: false,
@@ -197,14 +197,14 @@ function runParallelJob(job) {
 /*  Pipeline definition                                                */
 /* ------------------------------------------------------------------ */
 
-/** Shared prerequisites — run exactly once, in this order. */
+/** Shared prerequisites - run exactly once, in this order. */
 const SHARED_PREREQS = [
     { label: "check-axios-version",          cmd: "node", args: ["scripts/check-axios-version.mjs"] },
     { label: "aggregate-prompts",            cmd: "node", args: ["scripts/aggregate-prompts.mjs"] },
     {
         // Compile LESS via the in-repo compile-less.mjs helper which imports
         // the `less` package directly. Do NOT shell out to npx/dlx with the
-        // npx-style `--package` flag — pnpm-managed CI rejects it with
+        // npx-style `--package` flag - pnpm-managed CI rejects it with
         // ERR_PNPM_SPEC_NOT_SUPPORTED_BY_ANY_RESOLVER. See
         // scripts/check-no-pnpm-dlx-less.mjs for the preflight guard.
         label: "compile-less macro-controller",
@@ -231,17 +231,16 @@ const SHARED_PREREQS = [
     { label: "check-version-sync",           cmd: "node", args: ["scripts/check-version-sync.mjs"] },
 ];
 
-/** Three bundle builds — fan out in parallel after prereqs succeed.
+/** Three bundle builds - fan out in parallel after prereqs succeed.
  *  Each job is wrapped by `scripts/cached-build.mjs` which:
- *    • computes a content hash of src/ + tsconfig + vite-config + lockfile
- *    • on HIT: restores standalone-scripts/<name>/dist/ from .cache/ in <100ms
- *    • on MISS: runs the inner tsc + vite + post-snapshot chain, then snapshots dist/
+ *    - computes a content hash of src/ + tsconfig + vite-config + lockfile
+ *    - on HIT: restores standalone-scripts/<name>/dist/ from .cache/ in <100ms
+ *    - on MISS: runs the inner tsc + vite + post-snapshot chain, then snapshots dist/
  *  The inner shell command is what would have run before (npx tsc + npx vite + node post)
  *  so cache misses behave exactly like the pre-cache pipeline.
  *  Bypass with STANDALONE_BUILD_NO_CACHE=1; force-rebuild with STANDALONE_BUILD_FORCE=1.
  */
-const viteModeFlagStr = BUILD_MODE === "development" ? " --mode development" : "";
-function cachedJob(name, innerShell) {
+function cachedJob(name) {
     return {
         name,
         steps: [
@@ -253,27 +252,19 @@ function cachedJob(name, innerShell) {
                     `--name=${name}`,
                     `--mode=${BUILD_MODE}`,
                     "--",
-                    "sh",
-                    "-c",
-                    innerShell,
+                    "node",
+                    "scripts/run-standalone-build-step.mjs",
+                    `--project=${name}`,
+                    `--mode=${BUILD_MODE}`,
                 ],
             },
         ],
     };
 }
 const PARALLEL_JOBS = [
-    cachedJob(
-        "marco-sdk",
-        `npx --no-install tsc --noEmit -p tsconfig.sdk.json && npx --no-install vite build --config vite.config.sdk.ts${viteModeFlagStr} && node scripts/generate-dts.mjs`,
-    ),
-    cachedJob(
-        "xpath",
-        `npx --no-install tsc --noEmit -p tsconfig.xpath.json && npx --no-install vite build --config vite.config.xpath.ts${viteModeFlagStr}`,
-    ),
-    cachedJob(
-        "macro-controller",
-        `npx --no-install tsc --noEmit -p tsconfig.macro.build.json && npx --no-install vite build --config vite.config.macro.ts${viteModeFlagStr} && node scripts/sync-macro-controller-legacy.mjs`,
-    ),
+    cachedJob("marco-sdk"),
+    cachedJob("xpath"),
+    cachedJob("macro-controller"),
 ];
 
 /* ------------------------------------------------------------------ */
@@ -329,7 +320,7 @@ try {
     }
 } catch (err) {
     console.error("");
-    console.error("[FAIL] Shared prereq failed — aborting before parallel bundles.");
+    console.error("[FAIL] Shared prereq failed - aborting before parallel bundles.");
     console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
 }
@@ -346,7 +337,7 @@ console.log("  Results");
 console.log("========================================");
 for (const r of results) {
     const status = r.success ? "OK  " : "FAIL";
-    const detail = r.success ? "" : `  (failed at: ${r.failedStep} — ${r.reason})`;
+    const detail = r.success ? "" : `  (failed at: ${r.failedStep} - ${r.reason})`;
     console.log(`  [${status}] ${r.name}  ${r.durationMs}ms${detail}`);
 }
 

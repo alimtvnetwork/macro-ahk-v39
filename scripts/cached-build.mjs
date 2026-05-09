@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * cached-build.mjs — Content-hash cache wrapper for standalone-scripts builds
+ * cached-build.mjs - Content-hash cache wrapper for standalone-scripts builds
  *
  * Wraps any standalone build pipeline so that repeated runs with identical
- * inputs return in ~50ms instead of 5–30s of tsc + vite work. Used both
+ * inputs return in ~50ms instead of 5-30s of tsc + vite work. Used both
  * locally (via `pnpm run build:<name>`) and in CI (the `.cache/` directory
  * is restored by `actions/cache@v4` keyed on the same hash inputs).
  *
- * Sequential, fail-fast (no retry/backoff). One miss → one full build → one
+ * Sequential, fail-fast (no retry/backoff). One miss -> one full build -> one
  * cache write. No partial caches. No probabilistic recovery.
  *
  * USAGE
@@ -37,20 +37,20 @@
  *   5. standalone-scripts/<name>/instruction.ts (if present)
  *   6. Root pnpm-lock.yaml
  *   7. The build command itself (so changing the command busts cache)
- *   8. --mode value (production vs development → different bundles)
+ *   8. --mode value (production vs development -> different bundles)
  *   9. Any --extra-input=<path> the caller passes (shared deps)
  *
  * CACHE LAYOUT
  * ------------
  *   .cache/standalone-builds/
  *     <name>/
- *       <hash>.json         ← manifest: { hash, builtAt, commandHash, files[] }
- *       <hash>/dist/...     ← snapshot of standalone-scripts/<name>/dist/
+ *       <hash>.json         <- manifest: { hash, builtAt, commandHash, files[] }
+ *       <hash>/dist/...     <- snapshot of standalone-scripts/<name>/dist/
  *
  * BYPASS
  * ------
- *   STANDALONE_BUILD_NO_CACHE=1   → always miss, always rebuild, no write
- *   STANDALONE_BUILD_FORCE=1      → ignore HIT, rebuild, overwrite cache
+ *   STANDALONE_BUILD_NO_CACHE=1   -> always miss, always rebuild, no write
+ *   STANDALONE_BUILD_FORCE=1      -> ignore HIT, rebuild, overwrite cache
  *
  * Author: Riseup Asia LLC
  */
@@ -94,7 +94,7 @@ function flagAll(prefix) {
 
 const scriptName = flagValue("--name=");
 if (!scriptName) fail("Missing required --name=<scriptName>.");
-const buildMode = flagValue("--mode=") ?? "production";
+const buildMode = flagValue("--mode=") ?? process.env.BUILD_MODE ?? "production";
 const extraInputs = flagAll("--extra-input=");
 
 const projectDir = path.join(REPO_ROOT, "standalone-scripts", scriptName);
@@ -110,7 +110,7 @@ if (!fs.existsSync(projectDir)) {
 
 /**
  * Some legacy projects use non-canonical config filenames (e.g. marco-sdk uses
- * tsconfig.sdk.json). Accept either canonical OR legacy names — first match wins.
+ * tsconfig.sdk.json). Accept either canonical OR legacy names - first match wins.
  * Order matters: canonical first so the registry-required name is preferred.
  */
 const TSCONFIG_CANDIDATES = {
@@ -251,23 +251,23 @@ if (cacheHit()) {
     clearDir(distDir);
     copyDirSync(cacheDistPath, distDir);
     logHeader("HIT");
-    console.log(`           restored dist/ from cache in ${Date.now() - restoreStart}ms — skipped tsc + vite`);
+    console.log(`           restored dist/ from cache in ${Date.now() - restoreStart}ms - skipped tsc + vite`);
     process.exit(0);
 }
 
 /* ------------------------------------------------------------------ */
-/*  Cache miss — run the build                                          */
+/*  Cache miss - run the build                                          */
 /* ------------------------------------------------------------------ */
 
 if (NO_CACHE) {
     logHeader("BYPASS");
-    console.log(`           STANDALONE_BUILD_NO_CACHE=1 — running build, not writing cache`);
+    console.log(`           STANDALONE_BUILD_NO_CACHE=1 - running build, not writing cache`);
 } else if (FORCE_REBUILD) {
     logHeader("FORCE");
-    console.log(`           STANDALONE_BUILD_FORCE=1 — running build, will overwrite cache`);
+    console.log(`           STANDALONE_BUILD_FORCE=1 - running build, will overwrite cache`);
 } else {
     logHeader("MISS");
-    console.log(`           running build → will write cache on success`);
+    console.log(`           running build -> will write cache on success`);
 }
 
 const buildStart = Date.now();
@@ -283,7 +283,7 @@ if (child.error) {
     process.exit(2);
 }
 if (child.status !== 0) {
-    console.error(`[cache] build command exited with status ${child.status} — NOT writing cache`);
+    console.error(`[cache] build command exited with status ${child.status} - NOT writing cache`);
     process.exit(child.status ?? 1);
 }
 const buildMs = Date.now() - buildStart;
@@ -298,7 +298,7 @@ if (NO_CACHE) {
 }
 
 if (!fs.existsSync(distDir)) {
-    console.error(`[cache] build succeeded but dist/ is missing at ${distDir} — refusing to write empty cache`);
+    console.error(`[cache] build succeeded but dist/ is missing at ${distDir} - refusing to write empty cache`);
     process.exit(0); // build itself succeeded, downstream gate will catch missing dist
 }
 

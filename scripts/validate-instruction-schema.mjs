@@ -11,31 +11,31 @@
  * SEMANTIC schema documented in
  * `standalone-scripts/types/instruction/project-instruction.ts`:
  *
- *   • Required top-level keys present and correctly typed
- *   • Optional keys, when present, correctly typed
- *   • String enums (World, RunAt, MatchType, Inject, Role) within the
+ *   - Required top-level keys present and correctly typed
+ *   - Optional keys, when present, correctly typed
+ *   - String enums (World, RunAt, MatchType, Inject, Role) within the
  *     allowed literal set
- *   • Arrays of objects (Dependencies, Cookies, TargetUrls, Css, …)
+ *   - Arrays of objects (Dependencies, Cookies, TargetUrls, Css, ...)
  *     each element validated against its own sub-schema
- *   • UNKNOWN keys at any node are rejected (closed schema) — the
+ *   - UNKNOWN keys at any node are rejected (closed schema) - the
  *     compile step is supposed to be lossless, so any new key is
  *     either a typo or a missed schema bump.
- *   • Cross-field invariants: every Asset.Scripts[].ConfigBinding /
+ *   - Cross-field invariants: every Asset.Scripts[].ConfigBinding /
  *     ThemeBinding must reference an existing Seed.ConfigSeedIds key,
  *     and every Configs[].Key must also be referenced by ConfigSeedIds.
  *
  * Usage:
  *   node scripts/validate-instruction-schema.mjs <project-folder>
- *     → validate exactly one project (matches compile-instruction.mjs CLI)
+ *     -> validate exactly one project (matches compile-instruction.mjs CLI)
  *
  *   node scripts/validate-instruction-schema.mjs
- *     → scan every standalone-scripts/<name>/dist/{instruction,instruction.compat}.json
+ *     -> scan every standalone-scripts/<name>/dist/{instruction,instruction.compat}.json
  *
  * Exit codes:
- *   0 — every scanned artifact passes
- *   1 — at least one schema violation. GitHub Actions annotations are
+ *   0 - every scanned artifact passes
+ *   1 - at least one schema violation. GitHub Actions annotations are
  *       emitted (one per violation, capped) when GITHUB_ACTIONS=true.
- *   2 — repo layout broken (missing standalone-scripts/) or a referenced
+ *   2 - repo layout broken (missing standalone-scripts/) or a referenced
  *       project lacks dist/ artifacts (mirrors check-instruction-json-casing).
  *       In per-project mode (folder argument supplied) a missing dist/
  *       exits 2 immediately. In repo-wide mode a missing dist/ for one
@@ -43,19 +43,19 @@
  *       sibling does not mask other projects' schema violations.
  *       Also fires when repo-wide discovery returns zero projects (a
  *       sparse-checkout / misconfiguration safeguard).
- *   3 — validator itself crashed (uncaught throw inside main). Treated
+ *   3 - validator itself crashed (uncaught throw inside main). Treated
  *       as fail-closed so a future schema refactor cannot accidentally
  *       pass green via a swallowed rejection.
  *
  * Design notes:
- *   • Hand-rolled validator (no ajv) to keep zero external deps in the
- *     build hot-path — `compile-instruction.mjs` itself is dep-free, so
+ *   - Hand-rolled validator (no ajv) to keep zero external deps in the
+ *     build hot-path - `compile-instruction.mjs` itself is dep-free, so
  *     pulling in ajv + json-schema files just for this gate would be a
  *     regression.
- *   • Schema is defined twice: once for PascalCase (canonical), and a
+ *   - Schema is defined twice: once for PascalCase (canonical), and a
  *     mechanical camelCase mirror is derived for the compat artifact.
  *     This guarantees both files are validated from the SAME source of
- *     truth — drift between the two artifacts is impossible.
+ *     truth - drift between the two artifacts is impossible.
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
@@ -77,7 +77,7 @@ const rel = (p) => relative(REPO_ROOT, p) || p;
 /*  SchemaVersion contract.                                             */
 /*                                                                      */
 /*  Loaded from `standalone-scripts/types/instruction/primitives/       */
-/*  schema-version.json` — the single source of truth shared with the   */
+/*  schema-version.json` - the single source of truth shared with the   */
 /*  TypeScript runtime (`schema-version.ts` mirror). Loading here keeps */
 /*  this script dep-free (no TS parser) while still failing CI the      */
 /*  moment a project's `instruction.json` declares an unsupported       */
@@ -93,7 +93,7 @@ function loadSchemaVersionContract() {
     if (!existsSync(SCHEMA_VERSION_CONTRACT_PATH)) {
         throw new Error(
             `SchemaVersion contract missing at ${rel(SCHEMA_VERSION_CONTRACT_PATH)} ` +
-            `— restore from schema-version.ts or git history`,
+            `- restore from schema-version.ts or git history`,
         );
     }
     const raw = JSON.parse(readFileSync(SCHEMA_VERSION_CONTRACT_PATH, "utf-8"));
@@ -103,7 +103,7 @@ function loadSchemaVersionContract() {
         || typeof raw.current !== "string") {
         throw new Error(
             `SchemaVersion contract malformed at ${rel(SCHEMA_VERSION_CONTRACT_PATH)} ` +
-            `— expected { pattern: string, supported: string[≥1], current: string }`,
+            `- expected { pattern: string, supported: string[>=1], current: string }`,
         );
     }
     let pattern;
@@ -167,7 +167,7 @@ const ConfigSeedIdsSchema = {
     required: [],
     properties: {},
     // Keys here are user-chosen lowercase binding identifiers
-    // ({config, theme}, ...). Allow any string→string mapping.
+    // ({config, theme}, ...). Allow any string->string mapping.
     additionalKeysAllowed: true,
     additionalValueSchema: { kind: "string" },
 };
@@ -185,7 +185,7 @@ const SeedSchema = {
         CookieBinding: { kind: "string" },
         TargetUrls: { kind: "array", items: TargetUrlSchema },
         Cookies: { kind: "array", items: CookieSpecSchema },
-        // Settings is a project-specific shape — we accept any object.
+        // Settings is a project-specific shape - we accept any object.
         Settings: { kind: "object", required: [], properties: {}, additionalKeysAllowed: true },
         ConfigSeedIds: ConfigSeedIdsSchema,
     },
@@ -285,7 +285,7 @@ const ProjectInstructionSchema = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  PascalCase → camelCase mirror (mechanical, mirrors compile step). */
+/*  PascalCase -> camelCase mirror (mechanical, mirrors compile step). */
 /* ------------------------------------------------------------------ */
 
 function toCamelCase(key) {
@@ -331,7 +331,7 @@ function typeOf(value) {
 
 /**
  * Pretty-preview a received value for an error message. Keeps strings
- * short (≤40 chars), shows numbers/bools verbatim, and prints a one-line
+ * short (<=40 chars), shows numbers/bools verbatim, and prints a one-line
  * shape summary for objects/arrays so the operator can eyeball "what
  * did the validator actually see" without scrolling the JSON dump.
  */
@@ -340,7 +340,7 @@ function previewValue(value) {
     if (t === "null" || t === "undefined") return t;
     if (t === "string") {
         const max = 40;
-        const truncated = value.length > max ? `${value.slice(0, max)}…` : value;
+        const truncated = value.length > max ? `${value.slice(0, max)}...` : value;
         return JSON.stringify(truncated);
     }
     if (t === "number" || t === "boolean") return String(value);
@@ -348,7 +348,7 @@ function previewValue(value) {
     // object
     const keys = Object.keys(value);
     const head = keys.slice(0, 4).join(",");
-    const tail = keys.length > 4 ? `,…+${keys.length - 4}` : "";
+    const tail = keys.length > 4 ? `,...+${keys.length - 4}` : "";
     return `object{${head}${tail}}`;
 }
 
@@ -370,7 +370,7 @@ const IDENTITY_KEYS = [
 
 function identityHint(parents) {
     // Walk parents from nearest object up; return the first object that
-    // has a recognisable identity field. Skip arrays — the index is
+    // has a recognisable identity field. Skip arrays - the index is
     // already in `path`.
     for (let i = parents.length - 1; i >= 0; i--) {
         const p = parents[i];
@@ -379,7 +379,7 @@ function identityHint(parents) {
             const v = p.value[k];
             if (typeof v === "string" && v.length > 0) {
                 const max = 40;
-                const trimmed = v.length > max ? `${v.slice(0, max)}…` : v;
+                const trimmed = v.length > max ? `${v.slice(0, max)}...` : v;
                 return ` (near ${p.label} {${k}:${JSON.stringify(trimmed)}})`;
             }
         }
@@ -387,7 +387,7 @@ function identityHint(parents) {
     return "";
 }
 
-/** Levenshtein distance, capped — used for "did you mean?" suggestions. */
+/** Levenshtein distance, capped - used for "did you mean?" suggestions. */
 function editDistance(a, b) {
     if (a === b) return 0;
     const al = a.length, bl = b.length;
@@ -416,7 +416,7 @@ function suggestClosest(input, candidates) {
         const d = editDistance(lcInput, cand.toLowerCase());
         if (d < bestDist) { bestDist = d; best = cand; }
     }
-    // Suggest only if reasonably close: ≤ 2 edits OR ≤ 1/3 of input length.
+    // Suggest only if reasonably close: <= 2 edits OR <= 1/3 of input length.
     const threshold = Math.max(2, Math.floor(input.length / 3));
     return bestDist <= threshold ? best : null;
 }
@@ -434,7 +434,7 @@ function validate(value, schema, path, violations, parents = []) {
         }
         if (schema.enum && !schema.enum.includes(value)) {
             const closest = suggestClosest(value, schema.enum);
-            const didYouMean = closest ? ` — did you mean "${closest}"?` : "";
+            const didYouMean = closest ? ` - did you mean "${closest}"?` : "";
             violations.push({
                 path,
                 message: `value "${value}" not in enum [${schema.enum.join(", ")}]${didYouMean}${hint()}`,
@@ -469,13 +469,13 @@ function validate(value, schema, path, violations, parents = []) {
         }
         if (!supported.includes(value)) {
             const closest = suggestClosest(value, supported);
-            const didYouMean = closest ? ` — did you mean "${closest}"?` : "";
+            const didYouMean = closest ? ` - did you mean "${closest}"?` : "";
             violations.push({
                 path,
                 message:
                     `SchemaVersion "${value}" is not supported by this build ` +
                     `(supported: [${supported.join(", ")}], current: "${current}")${didYouMean}` +
-                    ` — bump standalone-scripts/types/instruction/primitives/schema-version.{ts,json} ` +
+                    ` - bump standalone-scripts/types/instruction/primitives/schema-version.{ts,json} ` +
                     `if this is an intentional rollout${hint()}`,
             });
         }
@@ -536,10 +536,10 @@ function validate(value, schema, path, violations, parents = []) {
                 const presentKeys = Object.keys(value);
                 const presentSummary = presentKeys.length === 0
                     ? "(empty object)"
-                    : `present keys: [${presentKeys.slice(0, 8).join(", ")}${presentKeys.length > 8 ? `, …+${presentKeys.length - 8}` : ""}]`;
+                    : `present keys: [${presentKeys.slice(0, 8).join(", ")}${presentKeys.length > 8 ? `, ...+${presentKeys.length - 8}` : ""}]`;
                 violations.push({
                     path,
-                    message: `missing required key "${required}" — ${presentSummary}${hint()}`,
+                    message: `missing required key "${required}" - ${presentSummary}${hint()}`,
                 });
             }
         }
@@ -558,9 +558,9 @@ function validate(value, schema, path, violations, parents = []) {
                 continue;
             }
             const closest = suggestClosest(k, [...knownKeys]);
-            const didYouMean = closest ? ` — did you mean "${closest}"?` : "";
+            const didYouMean = closest ? ` - did you mean "${closest}"?` : "";
             const allowed = knownKeys.size > 0
-                ? ` (allowed: [${[...knownKeys].slice(0, 8).join(", ")}${knownKeys.size > 8 ? `, …+${knownKeys.size - 8}` : ""}])`
+                ? ` (allowed: [${[...knownKeys].slice(0, 8).join(", ")}${knownKeys.size > 8 ? `, ...+${knownKeys.size - 8}` : ""}])`
                 : "";
             violations.push({
                 path,
@@ -691,18 +691,18 @@ function listProjects() {
 
 function printArtifactReport(label, result) {
     if (result.ok) {
-        console.log(`  ✅ ${label}: ${rel(result.path)} — schema OK`);
+        console.log(`  [OK] ${label}: ${rel(result.path)} - schema OK`);
         return;
     }
-    console.log(`  ❌ ${label}: ${rel(result.path)}`);
+    console.log(`  [FAIL] ${label}: ${rel(result.path)}`);
     if (result.parseError) {
-        console.log(`     • ${result.parseError}`);
+        console.log(`     - ${result.parseError}`);
         annotate(rel(result.path), result.parseError);
         return;
     }
     let printed = 0;
     for (const v of result.violations) {
-        console.log(`     • ${v.path}: ${v.message}`);
+        console.log(`     - ${v.path}: ${v.message}`);
         if (printed < MAX_ANNOTATIONS) {
             annotate(rel(result.path), `${v.path}: ${v.message}`);
             printed++;
@@ -710,7 +710,7 @@ function printArtifactReport(label, result) {
     }
     if (result.violations.length > MAX_ANNOTATIONS) {
         const more = result.violations.length - MAX_ANNOTATIONS;
-        console.log(`     • (+${more} more violations not annotated)`);
+        console.log(`     - (+${more} more violations not annotated)`);
     }
 }
 
@@ -721,17 +721,17 @@ function main() {
     if (folderArg) {
         const full = resolve(REPO_ROOT, folderArg);
         if (!existsSync(full)) {
-            console.error(`❌ Project folder not found: ${folderArg}`);
+            console.error(`[FAIL] Project folder not found: ${folderArg}`);
             process.exit(2);
         }
         // Per-project mode: the folder must be a real standalone project,
         // i.e. it must contain `src/instruction.ts`. Without this check
         // the script silently "validates" arbitrary directories and exits
-        // 0 with `Scanned: 1 project(s), 0 artifact(s)` — a false green.
+        // 0 with `Scanned: 1 project(s), 0 artifact(s)` - a false green.
         const instructionSource = join(full, "src", "instruction.ts");
         if (!existsSync(instructionSource)) {
             console.error(
-                `❌ Not a standalone project (missing ${rel(instructionSource)})`,
+                `[FAIL] Not a standalone project (missing ${rel(instructionSource)})`,
             );
             process.exit(2);
         }
@@ -739,16 +739,16 @@ function main() {
     } else {
         projects = listProjects();
         if (projects === null) {
-            console.error(`❌ Repo layout broken: ${rel(STANDALONE_DIR)} not found`);
+            console.error(`[FAIL] Repo layout broken: ${rel(STANDALONE_DIR)} not found`);
             process.exit(2);
         }
-        // Repo-wide mode: an empty discovery is suspicious — treat as a
+        // Repo-wide mode: an empty discovery is suspicious - treat as a
         // layout failure (exit 2), not a clean pass. Without this guard
         // a misconfigured CI checkout (e.g. sparse-checkout dropping
         // standalone-scripts/*/src/) would produce a false green.
         if (projects.length === 0) {
             console.error(
-                `❌ No standalone projects discovered under ${rel(STANDALONE_DIR)} ` +
+                `[FAIL] No standalone projects discovered under ${rel(STANDALONE_DIR)} ` +
                 `(no src/instruction.ts files found)`,
             );
             process.exit(2);
@@ -756,7 +756,7 @@ function main() {
     }
 
     console.log("Instruction Schema Validator");
-    console.log("════════════════════════════");
+    console.log("============================");
 
     let totalFailures = 0;
     let totalArtifacts = 0;
@@ -771,11 +771,11 @@ function main() {
         const canonicalPath = join(distDir, "instruction.json");
         const compatPath = join(distDir, "instruction.compat.json");
 
-        console.log(`\n• ${project.name}`);
+        console.log(`\n- ${project.name}`);
         if (!existsSync(distDir)) {
-            const msg = `  ❌ Missing dist/ — run compile-instruction.mjs first`;
+            const msg = `  [FAIL] Missing dist/ - run compile-instruction.mjs first`;
             console.error(msg);
-            annotate(rel(distDir), "Missing dist/ — run compile-instruction.mjs first");
+            annotate(rel(distDir), "Missing dist/ - run compile-instruction.mjs first");
             if (isPerProject) {
                 process.exit(2);
             }
@@ -793,13 +793,13 @@ function main() {
         printArtifactReport("compat   ", compat);
     }
 
-    console.log("\n────────────────────────────");
+    console.log("\n----------------------------");
     console.log(`Scanned: ${projects.length} project(s), ${totalArtifacts} artifact(s)`);
     if (totalFailures === 0) {
-        console.log("✅ All instruction artifacts pass schema validation");
+        console.log("[OK] All instruction artifacts pass schema validation");
         process.exit(0);
     }
-    const failMsg = `❌ ${totalFailures} artifact(s) failed schema validation`;
+    const failMsg = `[FAIL] ${totalFailures} artifact(s) failed schema validation`;
     console.log(failMsg);
     if (IS_GITHUB_ACTIONS) {
         process.stdout.write(
@@ -821,7 +821,7 @@ try {
     // refactor would crash with exit 0 in some Node versions on CI
     // runners that swallow the rejection.
     const msg = err && err.stack ? err.stack : String(err);
-    console.error(`❌ Validator crashed: ${msg}`);
+    console.error(`[FAIL] Validator crashed: ${msg}`);
     if (IS_GITHUB_ACTIONS) {
         process.stdout.write(
             `::error title=Instruction schema validator crashed::${ghEscape(msg)}\n`,

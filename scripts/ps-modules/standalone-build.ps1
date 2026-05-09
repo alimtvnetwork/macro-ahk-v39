@@ -110,10 +110,11 @@ function Build-StandaloneScript([string]$ScriptDirPath, [string]$ScriptName, [st
 
     # ── TypeScript -> JS (npm run build:<name>) ──
     Push-Location $RootDir
+    $previousBuildMode = $env:BUILD_MODE
     try {
-        $modeFlag = if ($BuildMode -eq "development") { " -- --mode development" } else { "" }
+        $env:BUILD_MODE = $BuildMode
         $output += "  Building TypeScript bundle (mode: $BuildMode)..."
-        $buildResult = Invoke-Expression "npm run `"build:$ScriptName`"$modeFlag" 2>&1
+        $buildResult = Invoke-Expression "npm run `"build:$ScriptName`"" 2>&1
         $buildExitCode = $LASTEXITCODE
         if ($buildExitCode -ne 0) {
             $output += "  [FAIL] build:$ScriptName failed (exit $buildExitCode)"
@@ -123,6 +124,7 @@ function Build-StandaloneScript([string]$ScriptDirPath, [string]$ScriptName, [st
             $output += "  [OK] build:$ScriptName complete ($BuildMode)"
         }
     } finally {
+        $env:BUILD_MODE = $previousBuildMode
         Pop-Location
     }
 

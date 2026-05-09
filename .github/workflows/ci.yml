@@ -869,6 +869,9 @@ jobs:
       - name: Preflight · forbid broken pnpm-dlx-less invocation
         run: node scripts/check-no-pnpm-dlx-less.mjs
 
+      - name: Preflight · standalone build portability
+        run: node scripts/check-standalone-build-portability.mjs
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:

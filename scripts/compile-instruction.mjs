@@ -2,11 +2,11 @@
 /**
  * compile-instruction.mjs
  *
- * Compiles a standalone script's `src/instruction.ts` → two sibling
+ * Compiles a standalone script's `src/instruction.ts` -> two sibling
  * artifacts in `dist/`:
  *
- *   1. dist/instruction.json         ← canonical, **pure PascalCase**
- *   2. dist/instruction.compat.json  ← transitional, **camelCase-only**
+ *   1. dist/instruction.json         <- canonical, **pure PascalCase**
+ *   2. dist/instruction.compat.json  <- transitional, **camelCase-only**
  *
  * --- Phase 2b dual-emit (PascalCase canonical + camelCase compat snapshot) ---
  *
@@ -21,12 +21,12 @@
  *   - `instruction.json` is pure PascalCase. This is what every
  *     Phase 2a-migrated reader consumes (background runtime,
  *     manifest-seeder, generate-seed-manifest.mjs, builtin-script-guard,
- *     script-info-handler, runtime-injection-handler, …).
+ *     script-info-handler, runtime-injection-handler, ...).
  *
  *   - `instruction.compat.json` is a recursively-converted camelCase
  *     snapshot of the same tree, with NO PascalCase keys. It exists
  *     only for readers that haven't been migrated yet (currently:
- *     vite.config.extension.ts → copyProjectScripts plugin, which
+ *     vite.config.extension.ts -> copyProjectScripts plugin, which
  *     reads `instruction.assets.configs/templates/prompts/css/scripts`
  *     and `instruction.displayName` / `instruction.version`).
  *
@@ -49,9 +49,9 @@ const ROOT = resolve(import.meta.dirname, "..");
 /* ------------------------------------------------------------------ */
 
 /**
- * PascalCase → camelCase: lowercase the first character only, leave the
+ * PascalCase -> camelCase: lowercase the first character only, leave the
  * rest untouched. Acronym-heavy keys (`URL`, `XPaths`, `IsIife`) get
- * their leading char lowercased only — matching the legacy spelling
+ * their leading char lowercased only - matching the legacy spelling
  * already in the codebase (`url`, `xPaths`, `isIife`).
  *
  * Returns the input unchanged when the first character is not an
@@ -117,7 +117,7 @@ function toCamelCaseTree(value, path = "$") {
  * Returns the evaluated plain JS object (the instruction tree).
  *
  * Throws if the instruction block cannot be located. We do not run
- * `tsc` here — the source files are intentionally limited to a single
+ * `tsc` here - the source files are intentionally limited to a single
  * top-level object literal so this lightweight regex extraction is
  * sufficient and avoids dragging the TypeScript compiler into the
  * build-time hot path.
@@ -162,7 +162,7 @@ async function main() {
     const compatOutPath = join(distDir, "instruction.compat.json");
 
     if (!existsSync(tsPath)) {
-        console.log(`ℹ No instruction.ts in ${folderArg}/src/ — skipping`);
+        console.log(`[INFO] No instruction.ts in ${folderArg}/src/ - skipping`);
         return;
     }
 
@@ -170,7 +170,7 @@ async function main() {
     const obj = evaluateInstructionSource(source, tsPath);
 
     // The source MUST already be PascalCase (Phase 1 rename). We pass it
-    // through unchanged — no alias injection — so `instruction.json` is
+    // through unchanged - no alias injection - so `instruction.json` is
     // the canonical, single-spelling artifact.
     const canonical = obj;
 
@@ -183,11 +183,11 @@ async function main() {
     writeFileSync(canonicalOutPath, JSON.stringify(canonical, null, 2) + "\n", "utf-8");
     writeFileSync(compatOutPath, JSON.stringify(compat, null, 2) + "\n", "utf-8");
 
-    console.log(`✅ Compiled instruction.json         → ${canonicalOutPath} (PascalCase, canonical)`);
-    console.log(`✅ Compiled instruction.compat.json  → ${compatOutPath} (camelCase, transitional)`);
+    console.log(`[OK] Compiled instruction.json         -> ${canonicalOutPath} (PascalCase, canonical)`);
+    console.log(`[OK] Compiled instruction.compat.json  -> ${compatOutPath} (camelCase, transitional)`);
 }
 
 main().catch((err) => {
-    console.error("❌ compile-instruction failed:", err);
+    console.error("[FAIL] compile-instruction failed:", err);
     process.exit(1);
 });
