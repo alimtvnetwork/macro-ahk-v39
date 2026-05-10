@@ -49,68 +49,12 @@ function Build-StandaloneScript([string]$ScriptDirPath, [string]$ScriptName, [st
         }
     }
 
-    # ── LESS -> CSS ──
-    $lessDir = Join-Path $ScriptDirPath "less"
-    if (Test-Path $lessDir) {
-        $lessIndex = Join-Path $lessDir "index.less"
-        if (Test-Path $lessIndex) {
-            $scriptDistDir = Join-Path $ScriptDirPath "dist"
-            if (-not (Test-Path $scriptDistDir)) { New-Item -ItemType Directory -Path $scriptDistDir -Force | Out-Null }
-            # Read CSS output name from compiled instruction.json
-            $cssOutName = "$ScriptName.css"
-            $instrJsonPath = Join-Path $scriptDistDir "instruction.json"
-            if (Test-Path $instrJsonPath) {
-                $instrJson = Get-Content $instrJsonPath -Raw | ConvertFrom-Json
-                if ($instrJson.assets -and $instrJson.assets.css -and $instrJson.assets.css.Count -gt 0) {
-                    $cssOutName = $instrJson.assets.css[0].file
-                }
-            }
-            $cssOut = Join-Path $scriptDistDir $cssOutName
-            $output += "  Compiling LESS -> $cssOutName"
-            # Use the in-repo compile-less.mjs helper (which imports `less`
-            # directly). Do NOT shell out to npx/dlx with the npx-style
-            # `--package` flag — pnpm-managed CI rejects it with
-            # ERR_PNPM_SPEC_NOT_SUPPORTED_BY_ANY_RESOLVER. See
-            # scripts/check-no-pnpm-dlx-less.mjs for the preflight guard.
-            $compileLessScript = Join-Path $RootDir "scripts\compile-less.mjs"
-            $lessResult = node $compileLessScript $lessIndex $cssOut 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                $output += "  [WARN] LESS compilation failed"
-                foreach ($line in $lessResult) { $output += "    $line" }
-            } else {
-                $output += "  [OK] LESS compiled"
-            }
-        }
-    }
-
-    # ── Templates -> JSON ──
-    $tplDir = Join-Path $ScriptDirPath "templates"
-    if (Test-Path $tplDir) {
-        $scriptDistDir = Join-Path $ScriptDirPath "dist"
-        if (-not (Test-Path $scriptDistDir)) { New-Item -ItemType Directory -Path $scriptDistDir -Force | Out-Null }
-        $compileScript = Join-Path $RootDir "scripts\compile-templates.mjs"
-        if (Test-Path $compileScript) {
-            $tplOut = Join-Path $scriptDistDir "templates.json"
-            # Read template output name from compiled instruction.json
-            $instrJsonPath = Join-Path $scriptDistDir "instruction.json"
-            if (Test-Path $instrJsonPath) {
-                $instrJson = Get-Content $instrJsonPath -Raw | ConvertFrom-Json
-                if ($instrJson.assets -and $instrJson.assets.templates -and $instrJson.assets.templates.Count -gt 0) {
-                    $tplOut = Join-Path $scriptDistDir $instrJson.assets.templates[0].file
-                }
-            }
-            $output += "  Compiling templates -> templates.json"
-            $tplResult = node $compileScript $tplDir $tplOut 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                $output += "  [WARN] Template compilation failed"
-                foreach ($line in $tplResult) { $output += "    $line" }
-            } else {
-                $output += "  [OK] Templates compiled"
-            }
-        }
-    }
-
     # ── TypeScript -> JS (direct Node runner; no nested npm/pnpm run) ──
+    # Run BEFORE LESS/templates: cached-build wipes dist/ on cache HIT and
+    # restores from snapshot, so any pre-build assets would be lost. By
+    # running asset compilation AFTER, the assets always overlay dist/
+    # regardless of cache HIT or MISS. (instruction.json is hashed via
+    # instruction.ts so it is correctly part of the cache key.)
     Push-Location $RootDir
     $previousBuildMode = $env:BUILD_MODE
     try {
@@ -130,6 +74,62 @@ function Build-StandaloneScript([string]$ScriptDirPath, [string]$ScriptName, [st
     } finally {
         $env:BUILD_MODE = $previousBuildMode
         Pop-Location
+    }
+
+    # ── LESS -> CSS (post-bundle: overlays dist/ after cache restore) ──
+    $lessDir = Join-Path $ScriptDirPath "less"
+    if (Test-Path $lessDir) {
+        $lessIndex = Join-Path $lessDir "index.less"
+        if (Test-Path $lessIndex) {
+            $scriptDistDir = Join-Path $ScriptDirPath "dist"
+            if (-not (Test-Path $scriptDistDir)) { New-Item -ItemType Directory -Path $scriptDistDir -Force | Out-Null }
+            $cssOutName = "$ScriptName.css"
+            $instrJsonPath = Join-Path $scriptDistDir "instruction.json"
+            if (Test-Path $instrJsonPath) {
+                $instrJson = Get-Content $instrJsonPath -Raw | ConvertFrom-Json
+                if ($instrJson.assets -and $instrJson.assets.css -and $instrJson.assets.css.Count -gt 0) {
+                    $cssOutName = $instrJson.assets.css[0].file
+                }
+            }
+            $cssOut = Join-Path $scriptDistDir $cssOutName
+            $output += "  Compiling LESS -> $cssOutName"
+            $compileLessScript = Join-Path $RootDir "scripts\compile-less.mjs"
+            $lessResult = node $compileLessScript $lessIndex $cssOut 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                $output += "  [FAIL] LESS compilation failed"
+                foreach ($line in $lessResult) { $output += "    $line" }
+                $success = $false
+            } else {
+                $output += "  [OK] LESS compiled"
+            }
+        }
+    }
+
+    # ── Templates -> JSON (post-bundle: overlays dist/ after cache restore) ──
+    $tplDir = Join-Path $ScriptDirPath "templates"
+    if (Test-Path $tplDir) {
+        $scriptDistDir = Join-Path $ScriptDirPath "dist"
+        if (-not (Test-Path $scriptDistDir)) { New-Item -ItemType Directory -Path $scriptDistDir -Force | Out-Null }
+        $compileScript = Join-Path $RootDir "scripts\compile-templates.mjs"
+        if (Test-Path $compileScript) {
+            $tplOut = Join-Path $scriptDistDir "templates.json"
+            $instrJsonPath = Join-Path $scriptDistDir "instruction.json"
+            if (Test-Path $instrJsonPath) {
+                $instrJson = Get-Content $instrJsonPath -Raw | ConvertFrom-Json
+                if ($instrJson.assets -and $instrJson.assets.templates -and $instrJson.assets.templates.Count -gt 0) {
+                    $tplOut = Join-Path $scriptDistDir $instrJson.assets.templates[0].file
+                }
+            }
+            $output += "  Compiling templates -> templates.json"
+            $tplResult = node $compileScript $tplDir $tplOut 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                $output += "  [FAIL] Template compilation failed"
+                foreach ($line in $tplResult) { $output += "    $line" }
+                $success = $false
+            } else {
+                $output += "  [OK] Templates compiled"
+            }
+        }
     }
 
     return @{
