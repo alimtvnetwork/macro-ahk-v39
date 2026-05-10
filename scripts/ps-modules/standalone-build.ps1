@@ -28,6 +28,27 @@ function Build-StandaloneScript([string]$ScriptDirPath, [string]$ScriptName, [st
     $output = @()
     $success = $true
 
+    # ── instruction.ts -> instruction.json ──
+    # Compile this before asset steps so LESS/templates can use the declared
+    # artifact filenames from instruction.json on a fresh checkout.
+    $srcDir = Join-Path $ScriptDirPath "src"
+    $instructionTs = Join-Path $srcDir "instruction.ts"
+    if (Test-Path $instructionTs) {
+        $scriptDistDir = Join-Path $ScriptDirPath "dist"
+        if (-not (Test-Path $scriptDistDir)) { New-Item -ItemType Directory -Path $scriptDistDir -Force | Out-Null }
+        $compileInstrScript = Join-Path $RootDir "scripts\compile-instruction.mjs"
+        if (Test-Path $compileInstrScript) {
+            $output += "  Compiling instruction.ts -> instruction.json"
+            $instrResult = node $compileInstrScript "standalone-scripts/$ScriptName" 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                $output += "  [WARN] instruction.ts compilation failed"
+                foreach ($line in $instrResult) { $output += "    $line" }
+            } else {
+                $output += "  [OK] instruction.json compiled"
+            }
+        }
+    }
+
     # ── LESS -> CSS ──
     $lessDir = Join-Path $ScriptDirPath "less"
     if (Test-Path $lessDir) {
@@ -85,25 +106,6 @@ function Build-StandaloneScript([string]$ScriptDirPath, [string]$ScriptName, [st
                 foreach ($line in $tplResult) { $output += "    $line" }
             } else {
                 $output += "  [OK] Templates compiled"
-            }
-        }
-    }
-
-    # ── instruction.ts -> instruction.json ──
-    $srcDir = Join-Path $ScriptDirPath "src"
-    $instructionTs = Join-Path $srcDir "instruction.ts"
-    if (Test-Path $instructionTs) {
-        $scriptDistDir = Join-Path $ScriptDirPath "dist"
-        if (-not (Test-Path $scriptDistDir)) { New-Item -ItemType Directory -Path $scriptDistDir -Force | Out-Null }
-        $compileInstrScript = Join-Path $RootDir "scripts\compile-instruction.mjs"
-        if (Test-Path $compileInstrScript) {
-            $output += "  Compiling instruction.ts -> instruction.json"
-            $instrResult = node $compileInstrScript "standalone-scripts/$ScriptName" 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                $output += "  [WARN] instruction.ts compilation failed"
-                foreach ($line in $instrResult) { $output += "    $line" }
-            } else {
-                $output += "  [OK] instruction.json compiled"
             }
         }
     }
@@ -251,7 +253,7 @@ function Test-StandaloneDistArtifacts([string]$RootDir) {
     $standaloneDir = Join-Path $RootDir "standalone-scripts"
     $requiredArtifacts = @{
         "marco-sdk"        = @("marco-sdk.js")
-        "macro-controller" = @("macro-looping.js")
+        "macro-controller" = @("macro-looping.js", "macro-looping.css")
         "xpath"            = @("xpath.js")
     }
     $guardFailed = $false
