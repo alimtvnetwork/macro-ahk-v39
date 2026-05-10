@@ -22,7 +22,7 @@ const STANDALONE_DIR = path.join(ROOT, "standalone-scripts");
  */
 const REQUIRED_ARTIFACTS = {
   "marco-sdk": ["marco-sdk.js", "instruction.json", "instruction.compat.json"],
-  "macro-controller": ["macro-looping.js", "instruction.json", "instruction.compat.json"],
+  "macro-controller": ["macro-looping.js", "macro-looping.css", "instruction.json", "instruction.compat.json"],
   "xpath": ["xpath.js", "instruction.json", "instruction.compat.json"],
   "payment-banner-hider": ["payment-banner-hider.js", "payment-banner-hider.css", "instruction.json", "instruction.compat.json"],
   "lovable-common": ["lovable-common.js", "instruction.json"],
