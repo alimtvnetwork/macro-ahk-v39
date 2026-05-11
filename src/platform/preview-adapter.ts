@@ -62,6 +62,68 @@ const previewTabs: PlatformTabs = {
 /*  Mock Message Responses                                             */
 /* ------------------------------------------------------------------ */
 
+/* In-memory recorder steps so Self-Test / Export work in web preview. */
+interface MockRecorderStep {
+    StepId: number;
+    StepKindId: number;
+    VariableName: string;
+    Label: string;
+    InlineJs: string | null;
+    ParamsJson: string | null;
+    IsBreakpoint: boolean;
+    OrderIndex: number;
+    CreatedAt: string;
+}
+const mockRecorderSteps = new Map<string, MockRecorderStep[]>();
+let mockRecorderStepIdSeq = 1000;
+
+interface MockRecorderMessage {
+    type: string;
+    projectSlug?: string;
+    stepId?: number;
+    draft?: {
+        StepKindId: number;
+        VariableName: string;
+        Label?: string;
+        InlineJs: string | null;
+        ParamsJson: string | null;
+        IsBreakpoint: boolean;
+    };
+}
+
+function handleRecorderMock(message: MockRecorderMessage): object | null {
+    const slug = typeof message.projectSlug === "string" ? message.projectSlug : "";
+    if (slug.length === 0) { return null; }
+
+    if (message.type === "RECORDER_STEP_LIST") {
+        const steps = mockRecorderSteps.get(slug) ?? [];
+        return { steps, dataSources: [], fieldBindings: [] };
+    }
+    if (message.type === "RECORDER_STEP_INSERT" && message.draft !== undefined) {
+        const list = mockRecorderSteps.get(slug) ?? [];
+        const draft = message.draft;
+        const step: MockRecorderStep = {
+            StepId: ++mockRecorderStepIdSeq,
+            StepKindId: draft.StepKindId,
+            VariableName: draft.VariableName,
+            Label: draft.Label ?? "",
+            InlineJs: draft.InlineJs,
+            ParamsJson: draft.ParamsJson,
+            IsBreakpoint: draft.IsBreakpoint,
+            OrderIndex: list.length,
+            CreatedAt: new Date().toISOString(),
+        };
+        mockRecorderSteps.set(slug, [...list, step]);
+        return { isOk: true, step };
+    }
+    if (message.type === "RECORDER_STEP_DELETE" && typeof message.stepId === "number") {
+        const list = mockRecorderSteps.get(slug) ?? [];
+        mockRecorderSteps.set(slug, list.filter((s) => s.StepId !== message.stepId));
+        return { isOk: true };
+    }
+    return null;
+}
+
 /** Returns mock data matching the background service worker protocol. */
 // eslint-disable-next-line max-lines-per-function
 function getMockResponse(message: MessagePayload): string | number | boolean | null | object {
@@ -70,6 +132,14 @@ function getMockResponse(message: MessagePayload): string | number | boolean | n
         mockErrorsCleared = true;
         mockLogsCleared = true;
         return { isOk: true };
+    }
+
+    /* Recorder messages — stateful, project-scoped in-memory store. */
+    if (message.type === "RECORDER_STEP_LIST"
+        || message.type === "RECORDER_STEP_INSERT"
+        || message.type === "RECORDER_STEP_DELETE") {
+        const result = handleRecorderMock(message as unknown as MockRecorderMessage);
+        if (result !== null) { return result; }
     }
 
     const mocks: Record<string, string | number | boolean | null | object> = {
