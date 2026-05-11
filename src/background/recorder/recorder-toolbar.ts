@@ -183,7 +183,7 @@ export function mountRecorderToolbar(
     const stopBtn  = makeButton("stop", "Stop");
 
     bar.append(phaseLabel, projectChip, healthChip, startBtn, pauseBtn, stopBtn);
-    root.appendChild(host === host ? bar : bar);
+    root.appendChild(bar);
     container.appendChild(host);
 
     function dispatch(action: RecorderAction): void {
