@@ -299,43 +299,51 @@ export default function RecorderVisualisationPanel({ projectSlug }: Props) {
                 </div>
             </div>
 
-            {/* Two-column layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(280px,1fr)_2fr] gap-4">
-                <div className="space-y-2">
-                    <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                        Steps ({data.steps.length})
-                    </h3>
-                    <RecorderStepGraph
-                        steps={data.steps}
-                        selectedStepId={selectedStepId}
-                        onSelect={setSelectedStepId}
-                        onDelete={handleDelete}
-                    />
-                </div>
-                <div className="border border-border rounded-md bg-card/50 p-4">
-                    {selectedStep === null ? (
-                        <p className="text-xs text-muted-foreground italic">
-                            Select a step from the list to inspect its selectors and binding.
-                        </p>
-                    ) : selectorsLoading ? (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading selectors…
-                        </div>
-                    ) : (
-                        <RecorderStepDetail
-                            step={selectedStep}
-                            selectors={selectors}
-                            dataSources={data.dataSources}
-                            bindings={data.bindings}
-                            tags={tagsByStep.get(selectedStep.StepId) ?? []}
-                            onRename={handleRename}
-                            onDescriptionSave={handleDescriptionSave}
-                            onTagsSave={handleTagsSave}
-                            onLinkChange={handleLinkChange}
+            {/* Two-column layout — or empty-state when no steps recorded */}
+            {data.steps.length === 0 ? (
+                <RecorderEmptyState
+                    projectSlug={projectSlug}
+                    hasDbError={false}
+                    onReload={() => { void reload(); }}
+                />
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-[minmax(280px,1fr)_2fr] gap-4">
+                    <div className="space-y-2">
+                        <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                            Steps ({data.steps.length})
+                        </h3>
+                        <RecorderStepGraph
+                            steps={data.steps}
+                            selectedStepId={selectedStepId}
+                            onSelect={setSelectedStepId}
+                            onDelete={handleDelete}
                         />
-                    )}
+                    </div>
+                    <div className="border border-border rounded-md bg-card/50 p-4">
+                        {selectedStep === null ? (
+                            <p className="text-xs text-muted-foreground italic">
+                                Select a step from the list to inspect its selectors and binding.
+                            </p>
+                        ) : selectorsLoading ? (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading selectors…
+                            </div>
+                        ) : (
+                            <RecorderStepDetail
+                                step={selectedStep}
+                                selectors={selectors}
+                                dataSources={data.dataSources}
+                                bindings={data.bindings}
+                                tags={tagsByStep.get(selectedStep.StepId) ?? []}
+                                onRename={handleRename}
+                                onDescriptionSave={handleDescriptionSave}
+                                onTagsSave={handleTagsSave}
+                                onLinkChange={handleLinkChange}
+                            />
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
