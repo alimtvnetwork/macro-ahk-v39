@@ -300,7 +300,22 @@ export default function RecorderVisualisationPanel({ projectSlug }: Props) {
                         </Badge>
                     ))
                 )}
-                <div className="ml-auto">
+                <div className="ml-auto flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5"
+                        onClick={() => { void handleSelfTest(); }}
+                        disabled={selfTestRunning}
+                        title="Insert a dummy step, verify it appears, and clean it up. Failures land in the Error Drawer."
+                    >
+                        {selfTestRunning ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                            <FlaskConical className="h-3.5 w-3.5" />
+                        )}
+                        Run self-test
+                    </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
