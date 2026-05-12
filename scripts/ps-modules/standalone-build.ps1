@@ -70,6 +70,25 @@ function Build-StandaloneScript([string]$ScriptDirPath, [string]$ScriptName, [st
             $success = $false
         } else {
             $output += "  [OK] build:$ScriptName complete ($BuildMode)"
+
+            # ── Post-build: sync legacy macro bundle ──
+            # cached-build may restore dist/ from snapshot on cache HIT, which
+            # skips the sync step inside run-standalone-build-step.mjs. Run it
+            # unconditionally here so 01-macro-looping.js stays in sync with
+            # dist/macro-looping.js (check-legacy-sync.mjs guard).
+            if ($ScriptName -eq "macro-controller") {
+                $syncScript = Join-Path $RootDir "scripts\sync-macro-controller-legacy.mjs"
+                if (Test-Path $syncScript) {
+                    $syncResult = node $syncScript 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        $output += "  [FAIL] sync-macro-controller-legacy failed"
+                        foreach ($line in $syncResult) { $output += "    $line" }
+                        $success = $false
+                    } else {
+                        foreach ($line in $syncResult) { $output += "  $line" }
+                    }
+                }
+            }
         }
     } finally {
         $env:BUILD_MODE = $previousBuildMode
