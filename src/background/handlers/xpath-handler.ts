@@ -32,12 +32,12 @@ export function resetXPathState(): void {
 /*  TOGGLE_XPATH_RECORDER                                              */
 /* ------------------------------------------------------------------ */
 
-/** Toggles the XPath recorder on the sender's tab. */
+/** Toggles the XPath recorder on the active web tab (not the Options tab). */
 export async function handleToggleXPathRecorder(
-    message: MessageRequest,
-    sender: chrome.runtime.MessageSender,
+    _message: MessageRequest,
+    _sender: chrome.runtime.MessageSender,
 ): Promise<{ isRecording: boolean }> {
-    const tabId = resolveTabId(sender);
+    const tabId = await resolveTargetTabId();
     const isMissingTab = tabId === null;
 
     if (isMissingTab) {
@@ -53,11 +53,44 @@ export async function handleToggleXPathRecorder(
     return { isRecording };
 }
 
-/** Resolves the tab ID from the sender. */
-function resolveTabId(sender: chrome.runtime.MessageSender): number | null {
-    const hasTabId = sender.tab?.id !== undefined;
+/**
+ * Resolves the tab to inject the recorder into.
+ *
+ * Strategy: pick the active tab in the last-focused normal window so the
+ * recorder lands on the user's real web page (e.g. github.com), not on the
+ * Options/Popup tab that initiated the toggle. Falls back to the active tab
+ * in the current window, then to any active tab, and finally null.
+ */
+async function resolveTargetTabId(): Promise<number | null> {
+    const optionsUrl = chrome.runtime.getURL("");
 
-    return hasTabId ? sender.tab!.id! : null;
+    const isWebTab = (url: string | undefined): boolean => {
+        if (url === undefined) return false;
+        if (url.startsWith(optionsUrl)) return false;
+        if (url.startsWith("chrome://")) return false;
+        if (url.startsWith("chrome-extension://")) return false;
+        if (url.startsWith("edge://")) return false;
+        if (url.startsWith("about:")) return false;
+        return true;
+    };
+
+    const queries: chrome.tabs.QueryInfo[] = [
+        { active: true, lastFocusedWindow: true, windowType: "normal" },
+        { active: true, currentWindow: true },
+        { active: true },
+    ];
+
+    for (const query of queries) {
+        try {
+            const tabs = await chrome.tabs.query(query);
+            const candidate = tabs.find((t) => t.id !== undefined && isWebTab(t.url));
+            if (candidate?.id !== undefined) return candidate.id;
+        } catch {
+            // try next query
+        }
+    }
+
+    return null;
 }
 
 /** Starts recording XPaths in the given tab. */
