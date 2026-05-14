@@ -44,6 +44,7 @@ const LOADER_DEFAULT_IDS = [
   'default-code-coverage-details',
   'default-next-tasks',
   'default-unit-test-issues-v2-enhanced',
+  'default-read-memory',
 ];
 
 describe('Prompt parity check — DEFAULT_PROMPTS ↔ DB seed', () => {

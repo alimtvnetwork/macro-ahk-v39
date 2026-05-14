@@ -1,6 +1,6 @@
 # All Prompt Samples — Index
 
-**Total prompts:** 13
+**Total prompts:** 14
 
 | Seq | Name | Category | Slug |
 |-----|------|----------|------|
@@ -17,3 +17,4 @@
 | 12 | Code Coverage Details | code-coverage | code-coverage-details |
 | 13 | Next Tasks | automation | next-tasks |
 | 14 | Unit Test Issues V2 Enhanced | code-coverage | unit-test-issues-v2-enhanced |
+| 15 | Read Memory | onboarding | read-memory |
