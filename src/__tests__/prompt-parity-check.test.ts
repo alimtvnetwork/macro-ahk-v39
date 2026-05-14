@@ -14,7 +14,6 @@ import { describe, it, expect } from 'vitest';
 // ── Canonical entries (source of truth: prompt-handler.ts getFallbackDefaultPrompts) ──
 const DB_SEEDED_IDS = [
   'default-start',
-  'default-start-v2',
   'default-rejog',
   'default-unified',
   'default-issues',
@@ -32,7 +31,6 @@ const DB_SEEDED_IDS = [
 // ── prompt-loader.ts DEFAULT_PROMPTS ids ──
 const LOADER_DEFAULT_IDS = [
   'default-start',
-  'default-start-v2',
   'default-rejog',
   'default-unified',
   'default-issues',

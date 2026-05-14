@@ -2,20 +2,11 @@
   "prompts": [
     {
       "name": "Start Prompt",
-      "text": "Begin session with repository context scan and produce a reliability risk report before implementation.",
+      "text": "Begin session with repository context scan and memory synthesis, then produce a reliability risk report before implementation.",
       "id": "default-start",
       "slug": "start-prompt",
       "version": "1.0.0",
       "order": 0,
-      "isDefault": true
-    },
-    {
-      "name": "Start Prompt v2",
-      "text": "Begin session with repository context scan, memory synthesis, and reliability report.",
-      "id": "default-start-v2",
-      "slug": "start-prompt-v2",
-      "version": "1.0.0",
-      "order": 1,
       "isDefault": true
     },
     {

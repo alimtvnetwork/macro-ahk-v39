@@ -639,8 +639,7 @@ function getMockResponse(message: MessagePayload): string | number | boolean | n
         })(),
         GET_PROMPTS: {
             prompts: [
-                { id: "1", name: "Start Prompt", text: "Begin session with repository context scan and produce a reliability risk report before implementation.", order: 0, isDefault: true, category: "General", isFavorite: true, createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },
-                { id: "2", name: "Start Prompt v2", text: "Begin session with repository context scan, memory synthesis, and reliability report.", order: 1, isDefault: true, category: "General", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },
+                { id: "1", name: "Start Prompt", text: "Begin session with repository context scan and memory synthesis, then produce a reliability risk report before implementation.", order: 0, isDefault: true, category: "General", isFavorite: true, createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },
                 { id: "3", name: "Rejog the Memory v1", text: "Read and synthesize existing repository context from the memory folder and the full specification set.", order: 2, isDefault: true, category: "Memory", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },
                 { id: "4", name: "Unified AI Prompt v4", text: "Read and synthesize existing repository context. Follow Required Execution Order.", order: 3, isDefault: true, category: "Memory", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },
                 { id: "5", name: "Issues Tracking", text: "Do not implement any code changes. Update specifications and documentation only.", order: 4, isDefault: true, category: "Debug", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },

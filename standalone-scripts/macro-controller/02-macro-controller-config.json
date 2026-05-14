@@ -118,11 +118,7 @@
         "entries": [
             {
                 "name": "Start Prompt",
-                "text": "Begin session with repository context scan and produce a reliability risk report before implementation."
-            },
-            {
-                "name": "Start Prompt v2",
-                "text": "Begin session with repository context scan, memory synthesis, and reliability report."
+                "text": "Begin session with repository context scan and memory synthesis, then produce a reliability risk report before implementation."
             },
             {
                 "name": "Rejog the Memory v1",
