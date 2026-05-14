@@ -13,7 +13,7 @@ import type { EmptySettings } from "../../types/instruction/seed/empty-settings"
 const LOVABLE_BASE_URL = "https://lovable.dev";
 
 const instruction: ProjectInstruction<{ OnlyRunAsDependency: boolean }> = {
-    SchemaVersion: "2.241",
+    SchemaVersion: "1.0",
     Name: "marco-sdk",
     DisplayName: "Rise Up Macro SDK",
     Version: "2.239.0",

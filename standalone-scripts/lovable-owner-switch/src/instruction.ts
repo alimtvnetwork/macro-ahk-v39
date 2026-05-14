@@ -13,7 +13,7 @@ import type { ProjectInstruction } from "../../types/instruction/project-instruc
 import type { EmptySettings } from "../../types/instruction/seed/empty-settings";
 
 const instruction: ProjectInstruction<EmptySettings> = {
-    SchemaVersion: "2.241",
+    SchemaVersion: "1.0",
     Name: "lovable-owner-switch",
     DisplayName: "Lovable Owner Switch",
     Version: "2.239.0",
