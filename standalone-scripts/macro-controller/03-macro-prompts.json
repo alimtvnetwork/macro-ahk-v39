@@ -57,7 +57,7 @@
     },
     {
       "name": "Minor Bump",
-      "text": "Bump all Minor versions for all",
+      "text": "Bump all Minor versions for all.\n\nAlso pin the new version to the root readme.",
       "id": "default-minor-bump",
       "slug": "minor-bump",
       "version": "1.0.0",
@@ -67,7 +67,7 @@
     },
     {
       "name": "Major Bump",
-      "text": "Bump all Major versions for all",
+      "text": "Bump all Major versions for all.\n\nAlso pin the new version to the root readme.",
       "id": "default-major-bump",
       "slug": "major-bump",
       "version": "1.0.0",

@@ -14,7 +14,7 @@ const instruction: ProjectInstruction<EmptySettings> = {
     SchemaVersion: "1.0",
     Name: "payment-banner-hider",
     DisplayName: "Payment Banner Hider",
-    Version: "2.234.0",
+    Version: "2.235.0",
     Description: "Auto-hides the Lovable 'Payment issue detected.' sticky banner with a smooth CSS3 fade.",
     World: "MAIN",
     IsGlobal: true,
