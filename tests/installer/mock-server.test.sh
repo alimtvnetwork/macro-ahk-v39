@@ -308,7 +308,7 @@ stop_all_mocks
 
 # ── AC-10: sibling discovery ON, newer sibling exists → pick highest ──
 #
-# Mock advertises macro-ahk-v32 (200) AND macro-ahk-v32 (200).
+# Mock advertises macro-ahk-v33 (200) AND macro-ahk-v33 (200).
 # Highest-numbered 200 (v25) MUST be selected. Probing happens in
 # discovery mode (no --version semver, no URL pin), with
 # SIBLING_DISCOVERY_ENABLED=1. Install of the *current* repo still
@@ -325,7 +325,7 @@ stop_all_mocks
 # (no false positive, strict-mode lockout).
 printf '\n\033[36m▸ AC-10 — sibling discovery ON, install completes\033[0m\n'
 
-start_mock "MOCK_LATEST_TAG=v2.500.0 MOCK_SIBLINGS=macro-ahk-v32:200,macro-ahk-v32:200"
+start_mock "MOCK_LATEST_TAG=v2.500.0 MOCK_SIBLINGS=macro-ahk-v33:200,macro-ahk-v33:200"
 INSTALL_DIR="$(mktemp_install_dir)"
 out="$(MARCO_API_BASE="${MOCK_BASE}" MARCO_DOWNLOAD_BASE="${MOCK_BASE}" \
     SIBLING_DISCOVERY_ENABLED=1 SIBLING_PROBE_DEPTH=10 SIBLING_PROBE_TIMEOUT_SECS=5 \
@@ -361,7 +361,7 @@ stop_all_mocks
 # reads `skipped-strict` and cites rule 6.
 printf '\n\033[36m▸ AC-13 — strict mode locks out sibling discovery\033[0m\n'
 
-start_mock "MOCK_LATEST_TAG=v2.500.0 MOCK_SIBLINGS=macro-ahk-v32:200"
+start_mock "MOCK_LATEST_TAG=v2.500.0 MOCK_SIBLINGS=macro-ahk-v33:200"
 INSTALL_DIR="$(mktemp_install_dir)"
 out="$(MARCO_API_BASE="${MOCK_BASE}" MARCO_DOWNLOAD_BASE="${MOCK_BASE}" \
     SIBLING_DISCOVERY_ENABLED=1 \
