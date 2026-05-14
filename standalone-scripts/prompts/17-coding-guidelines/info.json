@@ -1,0 +1,12 @@
+{
+  "Id": "default-coding-guidelines",
+  "Title": "Coding Guidelines",
+  "Slug": "coding-guidelines",
+  "Version": "1.0.0",
+  "Author": "marco",
+  "Categories": ["onboarding"],
+  "IsDefault": true,
+  "Order": 17,
+  "CreatedAt": "2026-05-14T00:00:00Z",
+  "UpdatedAt": "2026-05-14T00:00:00Z"
+}
