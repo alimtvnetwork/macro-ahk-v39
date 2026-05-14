@@ -132,6 +132,18 @@ export const apiRegistry: ApiRegistry = Object.freeze({
             description: "List up to 200 projects in a workspace (used for remix-name collision check)",
             timeoutMs: 10_000,
         }),
+        /**
+         * Fetch a single project's metadata (used to read GitHub repo / branch
+         * for the Projects-modal CSV export). Tolerates partial responses —
+         * caller treats missing `github_repo` / `github_branch` as blank.
+         */
+        get: Object.freeze({
+            url: "/projects/{projectId}",
+            method: "GET" as const,
+            auth: true,
+            description: "Get a project's metadata (id, name, github_repo, github_branch, last_message_at, …)",
+            timeoutMs: 10_000,
+        }),
     }),
 
     remix: Object.freeze({
