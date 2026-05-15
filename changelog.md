@@ -6,6 +6,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v2.242.0] — 2026-05-15 SchemaVersion pinning and release version separation
+
+### Fixed
+- **SchemaVersion validation failure**: `scripts/bump-version.mjs` regex hardened with `\b` word boundary so `Version` bumps no longer accidentally overwrite `SchemaVersion` in instruction sources.
+- **Compile-time guard**: `scripts/compile-instruction.mjs` now enforces `SchemaVersion: "1.0"` at emission — any source drift is auto-corrected before validation.
+
+### Changed
+- Version bump: 2.241.0 → 2.242.0 across all version-carrying files.
+- Root `readme.md`: pinned install instructions and tags to `v2.242.0`.
+
+---
+
 ## [v2.241.0] — 2026-05-14 Projects modal CSV export with git info
 
 ### Added
