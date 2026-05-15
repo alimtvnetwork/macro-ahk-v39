@@ -3,7 +3,10 @@
 ## Version Bumping
 - **Always bump minor version** on every meaningful change set (features, fixes, refactors).
 - Update version in ALL locations: `src/shared/constants.ts`, `src/options/sections/AboutSection.tsx`, `chrome-extension/manifest.json` (both `version` and `version_name`), `standalone-scripts/macro-controller/src/instruction.ts`, `standalone-scripts/marco-sdk/src/instruction.ts`.
-- Current version: **2.137.0**
+- Current version: **2.242.0**
+- Use `node scripts/bump-version.mjs <patch|minor|major>` — it word-boundary–matches `\bVersion\b` only and will not corrupt `SchemaVersion`.
+- `SchemaVersion` (instruction contract, currently `"1.0"`) is independent of release `Version` and must never be bumped by version scripts. Compiler enforces this in `scripts/compile-instruction.mjs`.
+- After bumping, also pin version refs in `readme.md` install commands. Never touch `readme.txt` (SP-1..SP-7).
 
 ## Memory Updates
 - Always update relevant memory files after changes to capture decisions and current state.
