@@ -10,6 +10,24 @@
 
 ---
 
+## 🛑 Stability — Loop & Leak Prevention (added 2026-05-15)
+
+Audit: `.lovable/audits/2026-05-15-infinite-loop-and-memory-leak-audit.md`.
+User reported intermittent browser crashes during long sessions. Static scan
+found 5 plausible cumulative contributors (no single hard infinite loop):
+
+| ID  | Severity | File | Fix |
+|-----|----------|------|-----|
+| L-1 | **P0** | `standalone-scripts/macro-controller/src/workspace-observer.ts` | `handleObserverMutation` re-installs the observer every 2 s with `retryCount` reset on each install — uncapped under SPA churn. Add bounded counter + exponential backoff (2 s → 10 s → 60 s → stop). |
+| L-2 | P1 | `src/background/recorder/recorder-toolbar.ts` | 1 Hz `renderHealth` tick runs in hidden tabs. Mirror PERF-5: pause on `document.hidden`, stop on `pagehide`, drop cadence to 5 s. |
+| L-3 | P1 | `standalone-scripts/macro-controller/src/startup-persistence.ts` | MutationObserver on `<body>` never disconnects. Prefer `#root`; expose teardown on `pagehide`. |
+| L-4 | P2 | `standalone-scripts/marco-sdk/src/utils.ts` | `pollUntil` uses native `setInterval` — invisible to IntervalRegistry. Use a tracked wrapper. |
+| L-5 | P2 | `src/content-scripts/message-relay.ts` | No cap on outstanding `chrome.runtime.sendMessage` callbacks; can balloon when SW is asleep. Track in-flight count, reject after threshold. |
+
+Execute on `next` — start with L-1 (the only path that can run forever).
+
+---
+
 ## ⏳ Pending — Next Up
 
 | # | Item | Priority | Reference |
