@@ -359,7 +359,19 @@ function handleObserverMutation(navEl: Node | Element): void {
     log('Workspace nav element removed from DOM — restarting observer', 'warn');
     wsObserverState.disconnect();
     state.workspaceObserverActive = false;
-    setTimeout(startWorkspaceObserver, 2000);
+    const backoff = wsObserverState.nextMutationBackoffMs();
+    if (backoff === null) {
+      logError(
+        'standalone-scripts/macro-controller/src/workspace-observer.ts',
+        'Reason=ReinstallCapHit ReasonDetail=workspace observer reinstall cap (' + MUTATION_REINSTALL_CAP + ' per ' + (MUTATION_REINSTALL_WINDOW_MS / 1000) + 's) hit; halting auto-reinstall to prevent leak loop'
+      );
+      return;
+    }
+    const handle = setTimeout(function () {
+      wsObserverState.untrackTimer(handle);
+      startWorkspaceObserver();
+    }, backoff);
+    wsObserverState.trackTimer(handle);
     return;
   }
 
