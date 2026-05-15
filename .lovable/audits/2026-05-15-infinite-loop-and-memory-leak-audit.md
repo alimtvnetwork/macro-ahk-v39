@@ -153,3 +153,10 @@ URL.revokeObjectURL after download, etc.). No findings.
 
 All five are added to `.lovable/plan.md` under **Stability — Loop & Leak
 Prevention (2026-05-15)**.
+
+---
+
+## Resolution — v2.243.0 (2026-05-15)
+
+All 5 findings (L-1 … L-5) are fixed. See `changelog.md` § v2.243.0 for the
+per-item summary and the files touched.
