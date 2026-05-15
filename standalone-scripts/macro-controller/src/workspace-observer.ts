@@ -194,9 +194,20 @@ export function fetchWorkspaceNameFromNav(): boolean {
 //   After:  `WorkspaceObserverState` singleton class with private fields.
 // ============================================
 
+// L-1 (audit 2026-05-15): bound the mutation-driven reinstall loop.
+// Cap reinstalls at 10 per 60s window with bounded backoff (2s→5s→15s→60s).
+// Track all setTimeout handles so disconnect() leaves zero pending timers.
+const MUTATION_REINSTALL_CAP = 10;
+const MUTATION_REINSTALL_WINDOW_MS = 60_000;
+const MUTATION_BACKOFF_LADDER_MS = [2_000, 5_000, 15_000, 60_000];
+
 class WorkspaceObserverState {
   private _instance: MutationObserver | null = null;
   private _retryCount = 0;
+  private _mutationReinstallCount = 0;
+  private _mutationReinstallWindowStartedAt = 0;
+  private _mutationCapReached = false;
+  private _pendingTimers = new Set<ReturnType<typeof setTimeout>>();
 
   get instance(): MutationObserver | null { return this._instance; }
   set instance(value: MutationObserver | null) { this._instance = value; }
@@ -206,11 +217,47 @@ class WorkspaceObserverState {
 
   incrementRetry(): number { return ++this._retryCount; }
 
+  /** Track a setTimeout handle so we can clear it on disconnect. */
+  trackTimer(handle: ReturnType<typeof setTimeout>): void {
+    this._pendingTimers.add(handle);
+  }
+
+  /** Untrack a timer that fired naturally. */
+  untrackTimer(handle: ReturnType<typeof setTimeout>): void {
+    this._pendingTimers.delete(handle);
+  }
+
+  /**
+   * Returns the next backoff delay (ms) when the nav element disappears,
+   * or `null` when the cap for the current 60s window has been reached.
+   */
+  nextMutationBackoffMs(): number | null {
+    const now = Date.now();
+    if (now - this._mutationReinstallWindowStartedAt > MUTATION_REINSTALL_WINDOW_MS) {
+      this._mutationReinstallWindowStartedAt = now;
+      this._mutationReinstallCount = 0;
+      this._mutationCapReached = false;
+    }
+    if (this._mutationReinstallCount >= MUTATION_REINSTALL_CAP) {
+      this._mutationCapReached = true;
+      return null;
+    }
+    const idx = Math.min(this._mutationReinstallCount, MUTATION_BACKOFF_LADDER_MS.length - 1);
+    this._mutationReinstallCount += 1;
+    return MUTATION_BACKOFF_LADDER_MS[idx];
+  }
+
+  get mutationCapReached(): boolean { return this._mutationCapReached; }
+
   disconnect(): void {
     if (this._instance) {
       this._instance.disconnect();
       this._instance = null;
     }
+    for (const handle of this._pendingTimers) {
+      clearTimeout(handle);
+    }
+    this._pendingTimers.clear();
   }
 }
 
@@ -274,7 +321,11 @@ function scheduleObserverRetry(): void {
   if (retryNum < WORKSPACE_OBSERVER_MAX_RETRIES) {
     const retryDelay = Math.min(retryNum * 3000, 15000);
     log('Workspace observer: element not found — retry ' + retryNum + '/' + WORKSPACE_OBSERVER_MAX_RETRIES + ' in ' + (retryDelay / 1000) + 's', 'warn');
-    setTimeout(startWorkspaceObserver, retryDelay);
+    const handle = setTimeout(function () {
+      wsObserverState.untrackTimer(handle);
+      startWorkspaceObserver();
+    }, retryDelay);
+    wsObserverState.trackTimer(handle);
   } else {
     logError('Workspace observer', 'gave up after \' + WORKSPACE_OBSERVER_MAX_RETRIES + \' retries. Set WorkspaceNavXPath in config.ini.');
   }
@@ -308,7 +359,19 @@ function handleObserverMutation(navEl: Node | Element): void {
     log('Workspace nav element removed from DOM — restarting observer', 'warn');
     wsObserverState.disconnect();
     state.workspaceObserverActive = false;
-    setTimeout(startWorkspaceObserver, 2000);
+    const backoff = wsObserverState.nextMutationBackoffMs();
+    if (backoff === null) {
+      logError(
+        'standalone-scripts/macro-controller/src/workspace-observer.ts',
+        'Reason=ReinstallCapHit ReasonDetail=workspace observer reinstall cap (' + MUTATION_REINSTALL_CAP + ' per ' + (MUTATION_REINSTALL_WINDOW_MS / 1000) + 's) hit; halting auto-reinstall to prevent leak loop'
+      );
+      return;
+    }
+    const handle = setTimeout(function () {
+      wsObserverState.untrackTimer(handle);
+      startWorkspaceObserver();
+    }, backoff);
+    wsObserverState.trackTimer(handle);
     return;
   }
 
