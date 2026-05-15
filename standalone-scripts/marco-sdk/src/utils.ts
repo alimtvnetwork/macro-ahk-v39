@@ -192,6 +192,25 @@ function delay(ms: number): Promise<void> {
 /*  pollUntil                                                          */
 /* ------------------------------------------------------------------ */
 
+// L-4 (audit 2026-05-15): Track every active poll so a forgotten interval
+// is observable via marco._diag.activePolls() and so we have a single
+// audit point if a leak ever recurs.
+interface ActivePollEntry {
+    handle: ReturnType<typeof setInterval>;
+    label: string;
+    startedAt: number;
+}
+const _activePolls = new Set<ActivePollEntry>();
+
+export function _diagActivePolls(): Array<{ label: string; ageMs: number }> {
+    const now = Date.now();
+    const out: Array<{ label: string; ageMs: number }> = [];
+    for (const entry of _activePolls) {
+        out.push({ label: entry.label, ageMs: now - entry.startedAt });
+    }
+    return out;
+}
+
 function pollUntil<T>(
     condition: () => T | null | undefined | false,
     options: PollUntilOptions = {},
@@ -209,23 +228,35 @@ function pollUntil<T>(
             return;
         }
 
-        const timer = setInterval(function () {
+        const entry: ActivePollEntry = {
+            handle: 0 as unknown as ReturnType<typeof setInterval>,
+            label: 'pollUntil(timeoutMs=' + timeoutMs + ',intervalMs=' + intervalMs + ')',
+            startedAt,
+        };
+
+        function stop(): void {
+            clearInterval(entry.handle);
+            _activePolls.delete(entry);
+        }
+
+        entry.handle = setInterval(function () {
             const elapsed = Date.now() - startedAt;
             const result = condition();
 
             if (result) {
-                clearInterval(timer);
+                stop();
                 if (options.onFound) { options.onFound(elapsed); }
                 resolve(result);
                 return;
             }
 
             if (elapsed >= timeoutMs) {
-                clearInterval(timer);
+                stop();
                 if (options.onTimeout) { options.onTimeout(); }
                 resolve(null);
             }
         }, intervalMs);
+        _activePolls.add(entry);
     });
 }
 
