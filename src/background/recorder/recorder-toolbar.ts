@@ -271,11 +271,52 @@ export function mountRecorderToolbar(
     }
 
     render();
-    const tickInterval = (typeof window !== "undefined")
-        ? window.setInterval(() => { renderHealth(); }, 1000)
+
+    // L-2 (audit 2026-05-15): visibility-aware tick + pagehide teardown.
+    // Cadence reduced from 1s to 5s. Skip work when document is hidden;
+    // re-render once on visibility return. Pagehide guarantees teardown
+    // even when no caller invokes Destroy() (bfcache, navigation away).
+    const TICK_INTERVAL_MS = 5000;
+    const hasWindow = typeof window !== "undefined";
+    const hasDocument = typeof document !== "undefined";
+
+    function tick(): void {
+        if (hasDocument && document.hidden) { return; }
+        renderHealth();
+    }
+
+    const tickInterval = hasWindow
+        ? window.setInterval(tick, TICK_INTERVAL_MS)
         : 0;
 
+    function onVisibilityChange(): void {
+        if (hasDocument && !document.hidden) { renderHealth(); }
+    }
+    if (hasDocument) {
+        document.addEventListener("visibilitychange", onVisibilityChange);
+    }
+
     let destroyed = false;
+    function destroy(): void {
+        if (destroyed) { return; }
+        destroyed = true;
+        if (tickInterval !== 0 && hasWindow) {
+            window.clearInterval(tickInterval);
+        }
+        if (hasDocument) {
+            document.removeEventListener("visibilitychange", onVisibilityChange);
+        }
+        if (hasWindow) {
+            window.removeEventListener("pagehide", onPageHide);
+        }
+        host.remove();
+    }
+
+    function onPageHide(): void { destroy(); }
+    if (hasWindow) {
+        window.addEventListener("pagehide", onPageHide, { once: true });
+    }
+
     return {
         Host: host,
         Root: root,
@@ -284,14 +325,7 @@ export function mountRecorderToolbar(
         Pause: pause,
         Resume: resume,
         Stop: stop,
-        Destroy: () => {
-            if (destroyed) { return; }
-            destroyed = true;
-            if (tickInterval !== 0 && typeof window !== "undefined") {
-                window.clearInterval(tickInterval);
-            }
-            host.remove();
-        },
+        Destroy: destroy,
     };
 }
 
