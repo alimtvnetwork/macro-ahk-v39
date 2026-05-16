@@ -434,6 +434,7 @@ function Get-Asset([string]$version) {
 
     Write-OK "Downloaded successfully."
     Test-Checksum -Version $version -AssetName $assetName -ZipPath $zipPath -TmpDir $tmpDir
+    Test-Signature -Version $version -TmpDir $tmpDir
     return @{ ZipPath = $zipPath; TmpDir = $tmpDir }
 }
 
