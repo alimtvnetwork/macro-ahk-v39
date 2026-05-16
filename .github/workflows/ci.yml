@@ -1858,11 +1858,73 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ════════════════════════════════════════════════════════════
+  # Job 3g: Import/Export E2E
+  #
+  # Runs the dedicated import-export round-trip test suite against
+  # the REAL exporter + importer (sql.js WASM, JSZip, mocked bridge).
+  # Validates archive structure, schema PascalCase, project/script/config
+  # round-trips, prompt byte-equality, bundle determinism, and negative
+  # cases (corrupt zip, missing DB, non-PascalCase schema, unknown tables).
+  #
+  # No build artifacts required — only node_modules + source tree.
+  # ════════════════════════════════════════════════════════════
+  import-export-e2e:
+    name: E2E · Import/Export Round-trip
+    needs: setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store path
+        id: pnpm-store
+        shell: bash
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml', '**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            standalone-scripts/*/node_modules
+          key: ${{ runner.os }}-nm-ie-${{ hashFiles('**/pnpm-lock.yaml', '**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nm-ie-
+
+      - name: Install root dependencies
+        run: pnpm install --prefer-offline --no-frozen-lockfile
+
+      - name: Run Import/Export E2E tests
+        run: npx vitest run src/test/import-export/ --reporter=github-actions
+
+  # ════════════════════════════════════════════════════════════
   # Job 4: Build Chrome Extension (depends on all standalone)
   # ════════════════════════════════════════════════════════════
   build-extension:
     name: Build · Chrome Extension
-    needs: [spec-links, no-nested-template-literals, eslint-run-summary-types, contract-checkers-wired, cicd-index-sync, changelog-entry, pascalcase-instruction-migration, report-standalone-registry, readme-conventions, typecheck-app, typecheck-standalone, lint-standalone, build-sdk, build-xpath, build-payment-banner-hider, build-macro-controller, build-prompts, casing-instruction-json]
+    needs: [spec-links, no-nested-template-literals, eslint-run-summary-types, contract-checkers-wired, cicd-index-sync, changelog-entry, pascalcase-instruction-migration, report-standalone-registry, readme-conventions, typecheck-app, typecheck-standalone, lint-standalone, build-sdk, build-xpath, build-payment-banner-hider, build-macro-controller, build-prompts, casing-instruction-json, import-export-e2e]
     runs-on: ubuntu-latest
     # `actions: read` is required for `gh api .../actions/runs/.../artifacts`
     # used by the "Resolve payment-banner-hider artifact URL + id" step.
