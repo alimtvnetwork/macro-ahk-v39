@@ -16,7 +16,7 @@ const instruction: ProjectInstruction<{ OnlyRunAsDependency: boolean }> = {
     SchemaVersion: "1.0",
     Name: "marco-sdk",
     DisplayName: "Rise Up Macro SDK",
-    Version: "2.249.0",
+    Version: "2.249.1",
     Description: "Core SDK — creates and freezes window.marco namespace",
     World: "MAIN",
     IsGlobal: true,
