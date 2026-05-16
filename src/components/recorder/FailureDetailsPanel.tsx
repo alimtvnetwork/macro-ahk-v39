@@ -67,6 +67,7 @@ const REASON_GROUP: Readonly<Record<FailureReasonCode, ReasonGroup>> = {
     UnresolvedAnchor:       "syntax",
     EmptyExpression:        "syntax",
     Timeout:                "timeout",
+    ConditionTimeout:       "timeout",
     JsThrew:                "other",
     Unknown:                "other",
 };
