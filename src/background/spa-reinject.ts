@@ -18,6 +18,7 @@ import {
 } from "./injection-diagnostics";
 import { readAllProjects } from "./handlers/project-helpers";
 import { logCaughtError, logBgWarnError, BgLogTag } from "./bg-logger";
+import { urlFingerprint } from "./url-fingerprint";
 import type { ResolvedScript } from "./script-resolver";
 
 /* ------------------------------------------------------------------ */
@@ -35,8 +36,17 @@ const MARKER_IDS = [
 /** Delay before probing markers (let SPA settle). */
 const PROBE_DELAY_MS = 500;
 
-/** Minimum age (ms) of a tab injection before re-inject is allowed. */
-const MIN_INJECTION_AGE_MS = 2000;
+/**
+ * Per-tab fingerprint of the last URL we already probed during an SPA
+ * route change. Prevents the U-2 storm where 5 pushState calls in a
+ * 200ms burst (common on React routers re-syncing query params)
+ * scheduled 5 redundant probe + executeScript fan-outs.
+ *
+ * Cleared on tabs.onRemoved via state-manager.removeTabInjection (not
+ * needed here — closed tabs simply leave a stale entry that is
+ * harmless and bounded by the small set of open tabs).
+ */
+const lastProbedFingerprint: Map<number, string> = new Map();
 
 /* ------------------------------------------------------------------ */
 /*  Public API                                                         */
