@@ -403,11 +403,11 @@ function toStepResultDraft(r: ReplayStepResult): ReplayStepResultDraft {
     // user can later copy the full diagnostic blob from the project DB.
     const errorMessage = r.FailureReport !== undefined
         ? JSON.stringify(r.FailureReport)
-        : (r.Error ?? null);
+        : (r.Skipped === true ? (r.Error ?? "Skipped: gate condition not met") : (r.Error ?? null));
     return {
         StepId: r.StepId,
         OrderIndex: r.Index,
-        IsOk: r.Ok,
+        IsOk: r.Ok || r.Skipped === true,
         ErrorMessage: errorMessage,
         ResolvedXPath: r.ResolvedXPath ?? null,
         StartedAt: r.StartedAt,
