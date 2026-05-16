@@ -126,6 +126,12 @@ export interface ReplayStepResult {
     readonly DurationMs: number;
     /** Structured failure report — populated only when `Ok === false`. */
     readonly FailureReport?: FailureReport;
+    /**
+     * When `true`, the step was intentionally skipped because its
+     * pre-condition gate timed out with `OnTimeout = "Skip"`. Not a
+     * failure — `Ok` is also `true`.
+     */
+    readonly Skipped?: true;
 }
 
 export interface ReplayRunOutcome {
