@@ -278,5 +278,3 @@ function emitProbeFailure(
     }
     return { payload: null, error: reasonDetail, reason, reasonDetail };
 }
-    }
-}
