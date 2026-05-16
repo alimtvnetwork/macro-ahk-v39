@@ -48,5 +48,6 @@ Appended once to `document.body` per (tab, fingerprint). Page-side scripts read 
 - `src/content-scripts/sentinel-reader.ts` — page-side O(1) reader
 - `src/background/spa-reinject.ts` — also uses `urlFingerprint` for its own pushState dedup (U-2)
 - `src/background/cookie-watcher.ts` — 200ms trailing debounce (U-8)
+- `standalone-scripts/macro-controller/src/spa-route-guard.ts` — page-side popstate/pushState guard; stops loop on project-id change or `pagehide` (U-5, v2.245.0). Idempotent via `window.__marcoRouteGuardInstalled`.
 
 Audit: `.lovable/audits/2026-05-16-url-trigger-and-energy-audit.md`.

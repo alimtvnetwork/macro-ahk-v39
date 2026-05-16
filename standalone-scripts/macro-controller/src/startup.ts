@@ -46,6 +46,7 @@ import type { MarkViewedResponse } from './types';
 import { ensureTokenReady } from './startup-token-gate';
 import { setupPersistenceObserver } from './startup-persistence';
 import { setupGlobalErrorHandlers, setupDiagnosticDump } from './startup-global-handlers';
+import { installSpaRouteGuard } from './spa-route-guard';
 import { MAX_SDK_ATTEMPTS, SDK_RETRY_DELAY_MS, MAX_UI_CREATE_RETRIES, STARTUP_WS_MAX_RETRIES } from './constants';
 import { Label } from './types';
 import { loadSettingsOverrides, onSettingsChange } from './settings-store';
@@ -96,6 +97,8 @@ export function bootstrap(deps: {
   });
   setupGlobalErrorHandlers();
   setupDiagnosticDump();
+  // U-5: tear down loop on SPA navigation away from /projects/{id}
+  installSpaRouteGuard();
 
   // Unified notifier: use SDK-backed toast system only (queued until SDK is ready)
   showToast('MacroLoop v' + VERSION + ' — loading workspace…', 'info', { noStop: true });
