@@ -242,8 +242,36 @@ All PRs must pass these automated gates before merge:
 | Build | Vite (extension + standalone) | Yes |
 | Version sync | `check-version-sync.mjs` | Yes |
 | Const reassign | `lint-const-reassign.mjs` | Yes |
+| Storage PascalCase rewrite | `check-no-storage-pascalcase-rewrite.mjs` | Yes |
 
 **No email or notification is sent for CI results** — check the Actions tab for status.
+
+---
+
+## Storage Migration Rules
+
+> ⛔ **Phase 2c-storage v2 (PascalCase rewrite of `StoredProject` keys in `chrome.storage.local`) is permanently banned.** Do not propose, draft, or ship it. See `mem://constraints/no-storage-pascalcase-migration`.
+
+### Banned
+
+- Renaming/rewriting persisted `StoredProject` keys from camelCase to PascalCase.
+- Registering any migration with `version > MAX_ALLOWED_STORAGE_SCHEMA_VERSION` (currently `1`).
+- Identifiers: `renameStorageKey`, `migrateStoredProjectKeys`, `pascalCaseStoredProject`.
+- `chrome.storage.local.set({ PascalKey: ... })` for project payloads.
+
+### Permitted
+
+- Additive, backward-compatible schema changes (new optional fields).
+- Bumping `CURRENT_STORAGE_SCHEMA_VERSION` **together with** `MAX_ALLOWED_STORAGE_SCHEMA_VERSION` for additive migrations.
+- In-memory PascalCase compat snapshots (e.g. `compile-instruction` dual-emit); persisted shape stays camelCase.
+- Read-side normalization: accept both shapes, always write camelCase.
+- Destructive key changes only with a written RFC and explicit user sign-off.
+
+### Enforcement
+
+1. **Runtime** — `assertNoPascalCaseStorageMigration()` in `src/background/storage-migration.ts`.
+2. **Test** — `src/background/__tests__/storage-migration-guard.test.ts`.
+3. **CI** — `pnpm run check:no-storage-pascalcase-rewrite` (wired into `build` and `build:dev`).
 
 ---
 

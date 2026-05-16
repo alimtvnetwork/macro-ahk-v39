@@ -409,6 +409,28 @@ Popup / Options UI
 | IndexedDB | Unlimited | Prompt cache (dual JSON/text) |
 | OPFS | Unlimited | Crash-resilient log writes |
 
+#### Storage Migration Policy
+
+> ⛔ **Phase 2c-storage v2 is permanently banned.** Rewriting `StoredProject` keys in `chrome.storage.local` from camelCase to PascalCase would break ~50+ downstream consumers and is blocked at three layers.
+
+**Banned behavior** (never ship):
+- Renaming/rewriting persisted `StoredProject` keys (e.g. `name` → `Name`, `urlPatterns` → `UrlPatterns`).
+- Any migration with `version > MAX_ALLOWED_STORAGE_SCHEMA_VERSION` (currently `1`).
+- Helpers named `renameStorageKey`, `migrateStoredProjectKeys`, `pascalCaseStoredProject`, or equivalents.
+- `chrome.storage.local.set({ PascalKey: ... })` writes against project payloads.
+
+**Enforcement layers:**
+1. **Runtime guard** — `assertNoPascalCaseStorageMigration()` in `src/background/storage-migration.ts` throws before any out-of-range migration executes.
+2. **CI check** — `pnpm run check:no-storage-pascalcase-rewrite` (wired into `build` + `build:dev`) scans `src/` and `standalone-scripts/` for violations.
+3. **Memory rule** — `mem://constraints/no-storage-pascalcase-migration` blocks the agent from re-proposing it.
+
+**Permitted migration behavior:**
+- Additive, backward-compatible changes only (new optional fields, new top-level keys).
+- Bump `CURRENT_STORAGE_SCHEMA_VERSION` **and** `MAX_ALLOWED_STORAGE_SCHEMA_VERSION` together when adding a new migration.
+- Identity-only PascalCase compat snapshots emitted *in-memory* (e.g. `compile-instruction` dual-emit) are fine — the persisted shape must remain camelCase.
+- Read-side normalization (accept both shapes, write camelCase) is fine.
+- Deletions/renames of persisted keys require a written RFC and explicit user sign-off.
+
 ### Performance Optimizations
 
 - **DomCache** with TTL for repeated DOM queries

@@ -309,3 +309,33 @@ The `macro-looping.js` controller (via `standalone-scripts/macro-controller`) de
 - Mismatched versions log a warning but do not block core browser automation
 
 See also: `readme.md` §"Companion Repositories" for contributor setup instructions.
+
+---
+
+## Storage Migration Policy
+
+> ⛔ **Phase 2c-storage v2 is permanently banned.** Rewriting `StoredProject` keys in `chrome.storage.local` from camelCase to PascalCase would break ~50+ downstream consumers. Three enforcement layers (runtime guard, unit test, CI check) block it.
+
+### Banned behavior
+
+- Renaming/rewriting persisted `StoredProject` keys (e.g. `name` → `Name`, `urlPatterns` → `UrlPatterns`).
+- Registering any migration whose `version > MAX_ALLOWED_STORAGE_SCHEMA_VERSION` (currently `1`).
+- Helpers like `renameStorageKey`, `migrateStoredProjectKeys`, `pascalCaseStoredProject`.
+- `chrome.storage.local.set({ PascalKey: ... })` writes against project payloads.
+
+### Permitted migration behavior
+
+| Allowed | Notes |
+|---------|-------|
+| Add new optional fields | Additive, backward-compatible only |
+| Bump schema version | Bump `CURRENT_STORAGE_SCHEMA_VERSION` **and** `MAX_ALLOWED_STORAGE_SCHEMA_VERSION` in lockstep |
+| In-memory PascalCase compat snapshot | e.g. `compile-instruction` dual-emit; persisted shape stays camelCase |
+| Read-side normalization | Accept both shapes on read; always write camelCase |
+| Destructive rename/delete | Only with a written RFC and explicit user sign-off |
+
+### Enforcement layers
+
+1. **Runtime guard** — `assertNoPascalCaseStorageMigration()` in `src/background/storage-migration.ts` throws before any out-of-range migration runs.
+2. **Unit test** — `src/background/__tests__/storage-migration-guard.test.ts`.
+3. **CI check** — `pnpm run check:no-storage-pascalcase-rewrite` (wired into `build` and `build:dev`); scans `src/` + `standalone-scripts/` for violating writes and helper identifiers.
+4. **Memory rule** — `mem://constraints/no-storage-pascalcase-migration` blocks the agent from re-proposing it.
