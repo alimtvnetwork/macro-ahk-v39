@@ -21,7 +21,7 @@ const instruction: ProjectInstruction<MacroControllerSettings> = {
     SchemaVersion: "1.0",
     Name: "macro-controller",
     DisplayName: "Macro Controller",
-    Version: "2.249.4",
+    Version: "2.249.5",
     Description: "Macro Controller for workspace and credit management",
     World: "MAIN",
     Dependencies: ["marco-sdk", "xpath"],
