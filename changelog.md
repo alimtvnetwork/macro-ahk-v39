@@ -6,6 +6,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v2.247.0] — 2026-05-16 Smoke-test + CI dist path fix
+
+### Fixed
+- **`scripts/smoke-test-background.mjs:54`** — pointed at `../chrome-extension/dist/background/index.js`, but `vite.config.extension.ts` writes `DIST_DIR = chrome-extension/` (no `/dist` subfolder). The dynamic `import()` was silently 404'ing, so the smoke test never actually validated the background bundle. Updated to `../chrome-extension/background/index.js`.
+- **`.github/workflows/ci.yml:2103`** — same stale `chrome-extension/dist` path in the "Verify no source maps in dist" step. The `find` returned empty regardless of whether maps were present, defeating the gate. Updated to `find chrome-extension -name '*.map'`.
+
+### Why
+- Both were collateral from an earlier folder layout. With these fixed, the smoke test now exercises the real bundle and the no-sourcemap check actually fails the build when a `.map` leaks into production output.
+
+---
+
 ## [v2.246.0] — 2026-05-16 Project-ID cache (audit U-4)
 
 ### Changed
