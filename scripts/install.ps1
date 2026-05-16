@@ -532,7 +532,68 @@ function Test-Checksum {
 }
 
 
-# --- Reboot-safe delete (Windows MoveFileEx + scheduled-task fallback) ---
+# --- Signature verification (spec §7.1.5, AC-24/25/26) ---
+#
+# Optional v0.3 hardening mirror of install.sh verify_signature. Verifies
+# checksums.txt against checksums.txt.minisig using the minisign CLI and
+# the public key in $env:MARCO_MINISIGN_PUBKEY. Soft-skips when any
+# precondition is missing (matches AC-23 / Test-Checksum policy);
+# hard-aborts (exit 6) only on an actual signature mismatch.
+function Test-Signature {
+    param(
+        [string]$Version,
+        [string]$TmpDir
+    )
+
+    $pubkey = $env:MARCO_MINISIGN_PUBKEY
+    if ([string]::IsNullOrEmpty($pubkey)) {
+        return
+    }
+
+    $sigFile = if ($script:MarcoSignatureFile) { $script:MarcoSignatureFile } else { 'checksums.txt.minisig' }
+    $checksumsPath = Join-Path $TmpDir 'checksums.txt'
+    if (-not (Test-Path -LiteralPath $checksumsPath)) {
+        Write-Warn "Signature verification skipped: checksums.txt was not downloaded."
+        return
+    }
+
+    $sigUrl = "$script:DownloadBase/$Repo/releases/download/$Version/$sigFile"
+    $sigPath = Join-Path $TmpDir $sigFile
+    try {
+        Invoke-WebRequest -Uri $sigUrl -OutFile $sigPath -UseBasicParsing -ErrorAction Stop
+    }
+    catch {
+        Write-Warn "Signature file not found at $sigUrl"
+        Write-Warn "Skipping signature verification (release predates v0.3 signing)."
+        return
+    }
+
+    $minisign = Get-Command minisign -ErrorAction SilentlyContinue
+    if (-not $minisign) {
+        Write-Warn "minisign CLI not found — skipping signature verification."
+        Write-Warn "Install minisign (https://jedisct1.github.io/minisign/) to enable v0.3 signature checks."
+        return
+    }
+
+    Write-Step "Verifying minisign signature of checksums.txt..."
+    & $minisign.Source -V -P $pubkey -m $checksumsPath -x $sigPath *> $null
+    if ($LASTEXITCODE -eq 0) {
+        Write-OK "Signature verified (checksums.txt)."
+        return
+    }
+
+    $pubkeyPrefix = if ($pubkey.Length -ge 16) { $pubkey.Substring(0, 16) } else { $pubkey }
+    Write-Err "Signature MISMATCH for checksums.txt"
+    Write-Err "  source: $sigUrl"
+    Write-Err "  pubkey: `$env:MARCO_MINISIGN_PUBKEY (first 16 chars: $pubkeyPrefix…)"
+    Write-Err ""
+    Write-Err "The release's checksums.txt does not validate against the configured public key."
+    Write-Err "Refusing to install — possible mirror tampering or wrong key."
+    Remove-PathSafely -Path $TmpDir -Reason "signature-mismatch cleanup" | Out-Null
+    exit 6
+}
+
+
 #
 # Windows file deletion fails with ERROR_SHARING_VIOLATION / ACCESS_DENIED
 # when another process (typically Chrome holding the loaded extension's
