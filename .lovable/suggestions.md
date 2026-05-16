@@ -7,16 +7,18 @@
 ## Active Suggestions
 
 ### Round-trip files (file:save → file:list → file:delete) and grouped-kv in the SDK self-test
-- **Status:** Pending
+- **Status:** ✅ Implemented — 2026-05-16 (verified against existing code)
 - **Priority:** Medium
 - **Description:** Extend `standalone-scripts/marco-sdk/src/self-test.ts` to exercise the file-storage and grouped-kv handlers with the same set/get/delete pattern as the new KV round-trip, so every project-scoped storage surface is health-checked on every page load.
 - **Added:** 2026-04-20 (session v2.166.0)
+- **Resolution:** `runFilesRoundTrip` (line 243) drives `files.save → files.list (must include) → files.read → files.delete → files.list (must NOT include)` and `runGkvRoundTrip` (line 326) drives `gkv:set → gkv:get → gkv:delete → gkv:get (cleared)` directly through the bridge. Each surface logs its own PASS/FAIL via `NamespaceLogger` under `sdkSelfTest:files-roundtrip` / `sdkSelfTest:gkv-roundtrip`.
 
 ### Surface latest sdkSelfTest + kv-roundtrip results in the popup
-- **Status:** Pending
+- **Status:** ✅ Implemented — 2026-05-16 (verified against existing code)
 - **Priority:** Medium
 - **Description:** Show ✅/❌ + last-run timestamp in the popup so users see SDK health without opening DevTools.
 - **Added:** 2026-04-20
+- **Resolution:** `src/components/popup/SdkSelfTestPanel.tsx` renders a 4-row grid (sync / KV / Files / GKV) with per-surface ✅/❌ + last-run timestamp, backed by `chrome.storage.local["marco_sdk_selftest"]` written by `src/background/handlers/sdk-selftest-handler.ts`. Wired into `src/pages/Popup.tsx` (lazy import, line 19; rendered line 209).
 
 ### Vitest tests for `assertBindable` + `BindError`
 - **Status:** ✅ Implemented — 2026-04-22
