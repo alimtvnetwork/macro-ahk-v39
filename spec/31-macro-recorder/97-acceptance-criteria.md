@@ -62,7 +62,7 @@
 |------|-------------|--------|-------------|
 | 19.1 | `UrlTabClick` capture + replay | ✅ 2026-04-27 | AC-19.1.1 .. AC-19.1.10 (replay-side suite green; capture suite green) |
 | 19.2 | Unify appearance waits behind `waitForCondition` | 📋 Spec'd | AC-19.2.1 .. AC-19.2.7 |
-| 19.3 | `validateCondition` + `ConditionFailureRecord` | 📋 Spec'd | AC-19.3.1 .. AC-19.3.10 |
+| 19.3 | `validateCondition` + `ConditionFailureRecord` | ✅ 2026-05-16 | AC-19.3.1 .. AC-19.3.10 (suite `condition-ac-19-3.test.ts` 10/10 green) |
 | 19.4 | Migration `005` — seed `StepKind (9, 'UrlTabClick')` | ✅ 2026-04-27 | (schema-level — no AC-19.* row, covered by migration test) |
 | 19.5 | Step inspector UI for `UrlTabClick` editor | 📋 Spec'd | (UI — covered indirectly by AC-19.1.*) |
 | 19.6 | Append AC-19.* into `97-acceptance-criteria.md` + LlmGuide cookbook | ✅ 2026-05-16 (this file) | (meta) |
