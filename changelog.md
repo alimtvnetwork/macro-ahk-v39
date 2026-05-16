@@ -6,6 +6,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v2.249.3] — 2026-05-16 install.ps1 — AC-2 resolver unit test
+
+### Added
+- **`tests/installer/resolver.ps1.test.ps1`** — 6 sub-tests, 13 assertions covering `Get-LatestVersion`: 200+empty body, 200+missing `tag_name`, 404 (all three resolve to `__MAIN_BRANCH__` sentinel), 500 and bare network failure (both `exit 5` with spec §2.3 banner), and the happy 200+tag path. Runs via `pwsh -NoProfile -File`, dot-sources installer under `MARCO_INSTALLER_TEST_MODE=1`, mocks `Invoke-WebRequest` in a child pwsh process so `exit 5` is captured via `$LASTEXITCODE` without killing the harness.
+
+---
+
 ## [v2.249.2] — 2026-05-16 install.ps1 — AC-2 main-branch fallback parity
 
 ### Changed

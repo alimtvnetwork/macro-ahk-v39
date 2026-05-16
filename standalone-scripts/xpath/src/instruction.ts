@@ -14,7 +14,7 @@ const instruction: ProjectInstruction<EmptySettings> = {
     SchemaVersion: "1.0",
     Name: "xpath",
     DisplayName: "XPath Utilities",
-    Version: "2.249.2",
+    Version: "2.249.3",
     Description: "Global XPath utility library (getByXPath, findElement, reactClick)",
     World: "MAIN",
     IsGlobal: true,
