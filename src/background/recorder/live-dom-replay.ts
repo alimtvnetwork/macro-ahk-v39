@@ -345,6 +345,7 @@ function finalize(
             StepId: step.StepId,
             Index: step.Index,
             Ok: true,
+            Skipped: outcome.Skipped === true ? true : undefined,
             ResolvedXPath: outcome.ResolvedXPath,
             StartedAt: toIso(started),
             FinishedAt: toIso(finished),
