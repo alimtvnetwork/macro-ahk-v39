@@ -65,6 +65,22 @@ export interface ReplayStepInput {
      * {@link WaitForSpec} for the selector grammar.
      */
     readonly WaitFor?: WaitForSpec;
+    /**
+     * Spec-19 canonical pre-condition gate. When present, the executor
+     * polls `Condition` against the live DOM **before** actuating the
+     * step. On timeout:
+     *   - `OnTimeout = "Fail"` → step fails with `ConditionTimeout`.
+     *   - `OnTimeout = "Skip"` → step is skipped (no actuation, not a
+     *     failure).
+     */
+    readonly Gate?: StepGate;
+}
+
+export interface StepGate {
+    readonly Condition: Condition;
+    readonly TimeoutMs: number;
+    readonly PollMs?: number;
+    readonly OnTimeout: "Fail" | "Skip";
 }
 
 export interface ReplayPersistOptions {
