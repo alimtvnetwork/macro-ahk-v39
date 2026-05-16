@@ -51,6 +51,7 @@ export const enum BgLogTag {
     MARCO = "[Marco]",
     MESSAGE_ROUTER = "[message-router]",
     NS_CACHE = "[ns-cache]",
+    OPEN_TABS = "[open-tabs]",
     PROJECT_SAVE_CONFIG_SEED = "[project-save:config-seed]",
     PROMPTS = "[prompts]",
     REMOTE_CONFIG = "[remote-config]",
