@@ -170,3 +170,6 @@ Implementation is gated on the user's "next" — at that point we tackle U-1, U-
 
 **Memory**: `mem://architecture/url-trigger-sentinel-cache`
 **Changelog**: `changelog.md` → v2.244.0
+
+### Update v2.245.0 — U-5 resolved
+`standalone-scripts/macro-controller/src/spa-route-guard.ts` installs a single popstate listener + pushState/replaceState monkey-patch. On project id change (or leaving `/projects/{id}` entirely) it calls `stopLoop()` and surfaces one toast. `pagehide` stops the loop to avoid BFCache zombies. Teardown restores originals and removes listeners. No interval, no retry, idempotent.

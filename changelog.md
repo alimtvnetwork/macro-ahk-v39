@@ -6,6 +6,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v2.245.0] — 2026-05-16 SPA route guard (audit U-5)
+
+### Added
+- **`standalone-scripts/macro-controller/src/spa-route-guard.ts`** — page-side complement to the v2.244.0 background URL trigger gate. Monkey-patches `history.pushState`/`history.replaceState` and listens for `popstate` so the macro controller detects SPA navigation away from `/projects/{id}` (or switching to a different project id) and **stops the running loop** before it can act on a stale `state.projectId`. Also stops the loop on `pagehide` (BFCache + unload) so a restored page does not resume with a zombie heartbeat.
+- Returns a `teardown()` that restores the original history methods and removes both listeners. Idempotent via `window.__marcoRouteGuardInstalled`. No `setInterval`, no retry, never throws from inside the patched method (would break the page's own router).
+
+### Wired
+- `startup.ts` calls `installSpaRouteGuard()` immediately after `setupDiagnosticDump()` so it is the first thing protecting against route changes.
+
+### Audit
+- Closes U-5 (P2) in `.lovable/audits/2026-05-16-url-trigger-and-energy-audit.md`. U-4 (P2 — centralize `extractProjectIdFromUrl()` callers) remains deferred but is now lower priority because the route guard prevents the worst symptom (stale work on stale URL).
+
+---
+
 ## [v2.244.0] — 2026-05-16 URL trigger gate + DOM sentinel cache (audit U-1…U-3, U-8)
 
 ### Added
