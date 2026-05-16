@@ -173,6 +173,11 @@ export default function StepEditorDialog(props: StepEditorDialogProps): JSX.Elem
      *  hydrate from the stored PayloadJson on open. */
     const [hotkeyChords, setHotkeyChords] = useState<readonly string[]>([]);
     const [hotkeyWaitMs, setHotkeyWaitMs] = useState<string>("");
+    /** UrlTabClick-specific structured form. Serialised into PayloadJson
+     *  on submit and hydrated from PayloadJson when editing. */
+    const [urlTabClick, setUrlTabClick] = useState<UrlTabClickFormState>(URL_TAB_CLICK_DEFAULTS);
+    const patchUrlTabClick = (patch: Partial<UrlTabClickFormState>): void =>
+        setUrlTabClick((prev) => ({ ...prev, ...patch }));
 
     // Reset form whenever the dialog (re-)opens with a new mode.
     useEffect(() => {
