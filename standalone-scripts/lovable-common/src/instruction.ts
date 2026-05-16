@@ -18,7 +18,7 @@ const instruction: ProjectInstruction<EmptySettings> = {
     SchemaVersion: "1.0",
     Name: "lovable-common",
     DisplayName: "Lovable Common (XPath + API)",
-    Version: "2.247.0",
+    Version: "2.248.0",
     Description: "Shared XPaths, default delays, and (future) LovableApiClient consumed by Lovable Owner Switch and Lovable User Add.",
     World: "MAIN",
     IsGlobal: false,

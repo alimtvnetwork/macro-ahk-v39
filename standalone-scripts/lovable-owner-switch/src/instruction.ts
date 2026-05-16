@@ -16,7 +16,7 @@ const instruction: ProjectInstruction<EmptySettings> = {
     SchemaVersion: "1.0",
     Name: "lovable-owner-switch",
     DisplayName: "Lovable Owner Switch",
-    Version: "2.247.0",
+    Version: "2.248.0",
     Description: "Bulk-switch Lovable workspace ownership from a CSV of LoginEmail → OwnerEmail rows.",
     World: "MAIN",
     IsGlobal: false,
