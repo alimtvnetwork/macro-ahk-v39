@@ -6,6 +6,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v2.249.5] — 2026-05-16 New-tab / empty-URL guard
+
+### Added
+- **`src/shared/url-utils.ts`** — new `isNewTabOrBlankUrl(url)` helper. Single source of truth for "no real page" detection: empty/undefined/null, `about:blank` (any casing + trailing `/?#`), `chrome://newtab/`, `chrome://new-tab-page/`, `chrome-search://local-ntp*`, `edge://newtab/`, `brave://newtab/`, `opera://startpage/`. Real `http(s)://` URLs (including `https://example.com/newtab`) always return false.
+- **`src/background/auto-injector.ts → handleNavigationCompleted`** — early-returns when `isNewTabOrBlankUrl(details.url)` is true, before any matcher / DB / seeder call. Logs one info line: `[new-tab-guard] skipped url="<url>" tabId=<n>`.
+- **`src/background/project-matcher.ts → evaluateUrlMatches`** — returns `[]` immediately on new-tab URLs (defense in depth for popup probes, devtools commands, tests).
+- **`src/shared/__tests__/url-utils.test.ts`** — 23 table-driven cases (17 positive + 6 negative).
+- **`src/background/__tests__/project-matcher-new-tab-guard.test.ts`** — 6 cases verifying `readAllProjects()` is **not** called for new-tab URLs.
+- **`mem://features/new-tab-no-url-guard`** + Core line in `mem://index.md`.
+- **`spec/21-app/02-features/chrome-extension/05-content-script-adaptation.md §4a`** — full contract + gate points.
+- **`.lovable/question-and-ambiguity/48-new-tab-no-url-guard-scope.md`** + counter row #17.
+
+### Changed
+- **Root `readme.md`** — pinned version block bumped `v2.243.0` → `v2.249.5` across all 5 references.
+
+### Why
+A `chrome://newtab/` navigation fires `webNavigation.onCompleted` with an internal scheme. Chrome already blocks content-script injection there, but the matcher still spun up DB reads, condition evaluation, and seeding work — wasted cycles and noisy diagnostics. The guard makes the no-op explicit and cheap.
+
+---
+
 ## [v2.249.4] — 2026-05-16 Wire AC-2 ps1 resolver test into CI
 
 ### Changed
