@@ -1057,8 +1057,11 @@ function Main {
     # Strict mode = URL-pinned OR explicit semver -Version (NOT 'latest').
     $isExplicitPin = ($Version -ne '' -and $Version -ine 'latest')
     $isStrict = $urlPinned -or $isExplicitPin
+    $isMainFallback = ($resolvedVersion -eq $script:MarcoMainBranchSentinel)
     if ($isStrict) {
         Write-Step "🔒 Strict mode — pinned to $resolvedVersion"
+    } elseif ($isMainFallback) {
+        Write-Step "🌿 Discovery mode — main branch (no releases found)"
     } else {
         Write-Step "🌊 Discovery mode — resolved $resolvedVersion"
     }
