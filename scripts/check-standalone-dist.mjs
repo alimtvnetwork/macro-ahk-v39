@@ -13,18 +13,15 @@ const STANDALONE_DIR = path.join(ROOT, "standalone-scripts");
 
 /** Map of project folder → required dist files.
  *
- * `instruction.json`        — canonical, PascalCase (Phase 2b+)
- * `instruction.compat.json` — transitional, camelCase-only snapshot
- *                             emitted alongside the canonical file by
- *                             scripts/compile-instruction.mjs. Required
- *                             until Phase 2c migrates the last
- *                             camelCase reader (vite copyProjectScripts).
+ * `instruction.json` — canonical, PascalCase. As of Phase 2c the
+ * transitional `instruction.compat.json` is no longer emitted and is
+ * therefore not required here.
  */
 const REQUIRED_ARTIFACTS = {
-  "marco-sdk": ["marco-sdk.js", "instruction.json", "instruction.compat.json"],
-  "macro-controller": ["macro-looping.js", "macro-looping.css", "instruction.json", "instruction.compat.json"],
-  "xpath": ["xpath.js", "instruction.json", "instruction.compat.json"],
-  "payment-banner-hider": ["payment-banner-hider.js", "payment-banner-hider.css", "instruction.json", "instruction.compat.json"],
+  "marco-sdk": ["marco-sdk.js", "instruction.json"],
+  "macro-controller": ["macro-looping.js", "macro-looping.css", "instruction.json"],
+  "xpath": ["xpath.js", "instruction.json"],
+  "payment-banner-hider": ["payment-banner-hider.js", "payment-banner-hider.css", "instruction.json"],
   "lovable-common": ["lovable-common.js", "instruction.json"],
   "lovable-owner-switch": ["lovable-owner-switch.js", "instruction.json"],
   "lovable-user-add": ["lovable-user-add.js", "instruction.json"],
