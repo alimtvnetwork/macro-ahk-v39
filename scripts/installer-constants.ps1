@@ -24,3 +24,7 @@ Set-Variable -Scope Script -Option ReadOnly -Force -Name 'MarcoExitInvalidArchiv
 $script:MarcoChecksumsFile = 'checksums.txt'
 $script:MarcoChecksumsAlgo = 'SHA-256'
 
+# Signing (v0.3, opt-in)
+$script:MarcoSignatureFile = 'checksums.txt.minisig'
+if (-not $env:MARCO_MINISIGN_PUBKEY) { $env:MARCO_MINISIGN_PUBKEY = '' }
+
