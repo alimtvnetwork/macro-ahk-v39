@@ -162,11 +162,11 @@ test("annotation lines snapshot — truncation summary case", (t) => {
     // file-level summary is always emitted last and names the first
     // offender + a remediation hint.
     const expected = [
-        '::error file=<FIXTURE>/dist/instruction.json,title=PascalCase casing violation::$  →  "badKey0"  (expected PascalCase)',
-        '::error file=<FIXTURE>/dist/instruction.json,title=PascalCase casing violation::$  →  "badKey1"  (expected PascalCase)',
-        '::error file=<FIXTURE>/dist/instruction.json,title=PascalCase casing violation::$  →  "badKey2"  (expected PascalCase)',
-        '::error file=<FIXTURE>/dist/instruction.json::… and 2 more PascalCase-shape violation(s) in <FIXTURE>/dist/instruction.json (showing first 3; run --json or raise INSTRUCTION_CASING_MAX_ANNOTATIONS for the full list).',
-        '::error file=<FIXTURE>/dist/instruction.json::5 PascalCase-shape violation(s) in <FIXTURE>/dist/instruction.json. First offender: $ → "badKey0". Fix compile-instruction.mjs or the source instruction.ts so this artifact stays pure PascalCase.',
+        '::error file=<FIXTURE>/dist/instruction.json,title=PascalCase casing violation::$  ->  "badKey0"  (expected PascalCase)',
+        '::error file=<FIXTURE>/dist/instruction.json,title=PascalCase casing violation::$  ->  "badKey1"  (expected PascalCase)',
+        '::error file=<FIXTURE>/dist/instruction.json,title=PascalCase casing violation::$  ->  "badKey2"  (expected PascalCase)',
+        '::error file=<FIXTURE>/dist/instruction.json::... and 2 more PascalCase-shape violation(s) in <FIXTURE>/dist/instruction.json (showing first 3; run --json or raise INSTRUCTION_CASING_MAX_ANNOTATIONS for the full list).',
+        '::error file=<FIXTURE>/dist/instruction.json::5 PascalCase-shape violation(s) in <FIXTURE>/dist/instruction.json. First offender: $ -> "badKey0". Fix compile-instruction.mjs or the source instruction.ts so this artifact stays pure PascalCase.',
     ];
 
     assert.deepEqual(
