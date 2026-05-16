@@ -84,13 +84,8 @@ export interface OpenLovableTabsResponse {
     capturedAt: string;
 }
 
-/** URL match patterns for chrome.tabs.query — must mirror auto-injector / cookie-watcher. */
-const LOVABLE_TAB_PATTERNS: string[] = [
-    "https://lovable.dev/*",
-    "https://*.lovable.dev/*",
-    "https://lovable.app/*",
-    "https://*.lovable.app/*",
-];
+/** URL match patterns for chrome.tabs.query — single source of truth. */
+import { LOVABLE_TAB_PATTERNS } from "../../shared/lovable-tab-patterns";
 
 interface ProbePayload {
     workspaceName?: string;
