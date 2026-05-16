@@ -5,7 +5,7 @@
  * via chrome.storage.session. See spec 19-opfs-persistence-strategy.md.
  */
 
-import type { ScriptBindingResolved } from "../shared/types";
+import type { MatchResult, ScriptBindingResolved } from "../shared/types";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -66,6 +66,62 @@ let currentSessionId = "";
 let persistenceMode: TransientState["persistenceMode"] = "memory";
 
 /* ------------------------------------------------------------------ */
+/*  Per-Tab URL Decision Cache (2026-05-16 audit U-1/U-2/U-3)         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Cached URL-match decision for a single tab. Populated ONLY by the
+ * three allowed triggers (initial load, refresh, tab change) so that
+ * `evaluateUrlMatches()` runs at most once per (tab, urlFingerprint).
+ * Lifetime is the tab's lifetime — cleared on `tabs.onRemoved`.
+ *
+ * Memory-only; this is a hot path read on every tab activation.
+ * Persisting to `chrome.storage.session` would cost an async hop and
+ * defeat the cache purpose. SW restart simply re-warms it from the
+ * next trigger — that's the same cost as today's cold path.
+ */
+export interface TabDecision {
+    /** URL fingerprint produced by `urlFingerprint(url)`. */
+    urlFp: string;
+    /** Full URL at decision time — kept for diagnostics only. */
+    url: string;
+    /** Resolved matches (may be empty array — empty IS a valid decision). */
+    matches: MatchResult[];
+    /** Trigger that produced this decision. */
+    trigger: "load" | "refresh" | "activate";
+    /** Decision wall-clock timestamp (ms since epoch). */
+    decidedAt: number;
+}
+
+const tabDecisionCache: Map<number, TabDecision> = new Map();
+
+/** Returns the cached decision for a tab, or undefined if none. */
+export function getTabDecision(tabId: number): TabDecision | undefined {
+    return tabDecisionCache.get(tabId);
+}
+
+/** Stores a fresh decision for a tab. */
+export function setTabDecision(tabId: number, decision: TabDecision): void {
+    tabDecisionCache.set(tabId, decision);
+}
+
+/** Removes the cached decision for a tab (call on close/invalidate). */
+export function clearTabDecision(tabId: number): void {
+    tabDecisionCache.delete(tabId);
+}
+
+/**
+ * Returns true iff the tab already has a decision for this exact
+ * fingerprint. Callers MUST use this gate before calling
+ * `evaluateUrlMatches()` from a navigation trigger — that's the whole
+ * point of the cache.
+ */
+export function isSameDecisionFingerprint(tabId: number, urlFp: string): boolean {
+    const cached = tabDecisionCache.get(tabId);
+    return cached !== undefined && cached.urlFp === urlFp;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Getters                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -106,6 +162,7 @@ export function setTabInjection(tabId: number, record: TabInjectionRecord): void
 /** Removes injection tracking for a closed tab. */
 export function removeTabInjection(tabId: number): void {
     delete tabInjections[tabId];
+    tabDecisionCache.delete(tabId);
 }
 
 /** Updates the health state. */
