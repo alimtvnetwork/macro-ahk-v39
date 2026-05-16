@@ -164,13 +164,13 @@ test("annotation cap + truncation summary at MAX_ANNOTATIONS", (t) => {
 
     // — c. Truncation summary: exactly one match, with correct "+N more" count —
     const truncationRe = new RegExp(
-        `^::error file=[^:]+::… and ${VIOLATIONS - CAP} more PascalCase-shape violation\\(s\\) in `,
+        `^::error file=[^:]+::\\.\\.\\. and ${VIOLATIONS - CAP} more PascalCase-shape violation\\(s\\) in `,
     );
     const truncationMatches = annotationLines.filter((l) => truncationRe.test(l));
     assert.equal(
         truncationMatches.length,
         1,
-        `Expected exactly 1 truncation-summary annotation matching "… and ${VIOLATIONS - CAP} more PascalCase-shape violation(s) in …"; got ${truncationMatches.length}.\nAnnotations:\n${annotationLines.join("\n")}`,
+        `Expected exactly 1 truncation-summary annotation matching "... and ${VIOLATIONS - CAP} more PascalCase-shape violation(s) in ..."; got ${truncationMatches.length}.\nAnnotations:\n${annotationLines.join("\n")}`,
     );
 
     // — d. File-level summary annotation present exactly once —
