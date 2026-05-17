@@ -2,38 +2,30 @@
 /**
  * compile-instruction.mjs
  *
- * Compiles a standalone script's `src/instruction.ts` -> two sibling
- * artifacts in `dist/`:
+ * Compiles a standalone script's `src/instruction.ts` -> canonical
+ * artifact in `dist/`:
  *
  *   1. dist/instruction.json         <- canonical, **pure PascalCase**
- *   2. dist/instruction.compat.json  <- transitional, **camelCase-only**
  *
- * --- Phase 2b dual-emit (PascalCase canonical + camelCase compat snapshot) ---
+ * --- Phase 2c canonical-only emit (PascalCase) ---
  *
  * Phase 1 emitted a single file with BOTH spellings merged on every
  * object node. That worked, but it (a) doubled the file size, (b) made
  * the JSON noisy and ambiguous to read, and (c) let consumers silently
  * keep using the wrong spelling because both keys "just worked".
  *
- * Phase 2b (this file) splits the two spellings into two physical
- * files:
+ * Phase 2b split the two spellings into two physical files. Phase 2c
+ * retired the camelCase compat snapshot; this file now emits only:
  *
  *   - `instruction.json` is pure PascalCase. This is what every
  *     Phase 2a-migrated reader consumes (background runtime,
  *     manifest-seeder, generate-seed-manifest.mjs, builtin-script-guard,
  *     script-info-handler, runtime-injection-handler, ...).
  *
- *   - `instruction.compat.json` is a recursively-converted camelCase
- *     snapshot of the same tree, with NO PascalCase keys. It exists
- *     only for readers that haven't been migrated yet (currently:
- *     vite.config.extension.ts -> copyProjectScripts plugin, which
- *     reads `instruction.assets.configs/templates/prompts/css/scripts`
- *     and `instruction.displayName` / `instruction.version`).
- *
- * Both files are emitted on every compile; neither is gated. The
- * compat file is removed in Phase 2c once `grep -rn` against the
- * source tree shows zero remaining camelCase reads of instruction
- * objects (see plan.md and `mem://standards/pascalcase-json-keys`).
+ *   - `instruction.json` is pure PascalCase. This is what every reader
+ *     consumes (background runtime, manifest-seeder,
+ *     generate-seed-manifest.mjs, builtin-script-guard,
+ *     script-info-handler, runtime-injection-handler, vite copy plugin, ...).
  *
  * Usage: node scripts/compile-instruction.mjs <script-folder-path>
  * Example: node scripts/compile-instruction.mjs standalone-scripts/macro-controller
