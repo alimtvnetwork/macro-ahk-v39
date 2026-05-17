@@ -1839,7 +1839,7 @@ jobs:
             echo ""
             echo "**Standards enforced:**"
             echo "- \`dist/instruction.json\` → PascalCase keys only (canonical)"
-            echo "- \`dist/instruction.compat.json\` → camelCase keys only (transitional snapshot)"
+            
             echo ""
             echo '```json'
             node scripts/check-instruction-json-casing.mjs --json standalone-scripts/${{ matrix.project }} || true
