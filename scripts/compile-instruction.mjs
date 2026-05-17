@@ -6,6 +6,7 @@
  * artifact in `dist/`:
  *
  *   1. dist/instruction.json         <- canonical, **pure PascalCase**
+ *   2. dist/instruction.compat.json  <- transitional camelCase snapshot
  *
  * --- Phase 2c canonical-only emit (PascalCase) ---
  *
@@ -15,17 +16,17 @@
  * keep using the wrong spelling because both keys "just worked".
  *
  * Phase 2b split the two spellings into two physical files. Phase 2c
- * retired the camelCase compat snapshot; this file now emits only:
+ * moved all runtime readers to the canonical PascalCase file, but the
+ * compat snapshot is still emitted so older CI artifact checks and
+ * queued workflow runs can validate the same dist payload safely:
  *
  *   - `instruction.json` is pure PascalCase. This is what every
  *     Phase 2a-migrated reader consumes (background runtime,
  *     manifest-seeder, generate-seed-manifest.mjs, builtin-script-guard,
  *     script-info-handler, runtime-injection-handler, ...).
  *
- *   - `instruction.json` is pure PascalCase. This is what every reader
- *     consumes (background runtime, manifest-seeder,
- *     generate-seed-manifest.mjs, builtin-script-guard,
- *     script-info-handler, runtime-injection-handler, vite copy plugin, ...).
+ *   - `instruction.compat.json` is pure camelCase and exists only as a
+ *     transitional artifact. Runtime consumers must not read it.
  *
  * Usage: node scripts/compile-instruction.mjs <script-folder-path>
  * Example: node scripts/compile-instruction.mjs standalone-scripts/macro-controller
@@ -199,6 +200,7 @@ async function main() {
     const tsPath = join(folder, "src", "instruction.ts");
     const distDir = join(folder, "dist");
     const canonicalOutPath = join(distDir, "instruction.json");
+    const compatOutPath = join(distDir, "instruction.compat.json");
 
     if (!existsSync(tsPath)) {
         console.log(`[INFO] No instruction.ts in ${folderArg}/src/ - skipping`);
@@ -208,18 +210,19 @@ async function main() {
     const source = readFileSync(tsPath, "utf-8");
     const obj = pinSchemaVersion(evaluateInstructionSource(source, tsPath), tsPath, folderArg);
 
-    // Phase 2c: dual-emit retired. We emit ONLY the canonical
-    // PascalCase artifact. The transitional `instruction.compat.json`
-    // (camelCase snapshot) is no longer written — every runtime
-    // consumer reads PascalCase. `toCamelCaseTree` is retained
-    // upstream as dead code for now in case a future migration needs
-    // it; tree-shake or remove on a follow-up pass.
+    // Runtime readers consume only the canonical PascalCase artifact.
+    // Keep emitting the transitional camelCase snapshot because older
+    // queued CI workflow revisions still assert its presence after
+    // downloading each standalone dist artifact.
     const canonical = obj;
+    const compat = toCamelCaseTree(obj);
 
     mkdirSync(distDir, { recursive: true });
     writeFileSync(canonicalOutPath, JSON.stringify(canonical, null, 2) + "\n", "utf-8");
+    writeFileSync(compatOutPath, JSON.stringify(compat, null, 2) + "\n", "utf-8");
 
     console.log(`[OK] Compiled instruction.json -> ${canonicalOutPath} (PascalCase, canonical)`);
+    console.log(`[OK] Compiled instruction.compat.json -> ${compatOutPath} (camelCase, transitional)`);
 }
 
 main().catch((err) => {

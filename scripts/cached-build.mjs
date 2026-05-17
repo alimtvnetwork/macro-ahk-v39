@@ -35,10 +35,11 @@
  *   3. vite.config.<name>.ts (or vite.config.sdk.ts / .xpath.ts / .macro.ts)
  *   4. standalone-scripts/<name>/package.json (if present)
  *   5. standalone-scripts/<name>/instruction.ts (if present)
- *   6. Root pnpm-lock.yaml
- *   7. The build command itself (so changing the command busts cache)
- *   8. --mode value (production vs development -> different bundles)
- *   9. Any --extra-input=<path> the caller passes (shared deps)
+ *   6. Instruction compiler + schema-version contract
+ *   7. Root pnpm-lock.yaml
+ *   8. The build command itself (so changing the command busts cache)
+ *   9. --mode value (production vs development -> different bundles)
+ *  10. Any --extra-input=<path> the caller passes (shared deps)
  *
  * CACHE LAYOUT
  * ------------
@@ -202,10 +203,19 @@ inputManifest.configs.viteHash = safeHashFile(viteConfigPath);
 inputManifest.configs.projectPackageJson = safeHashFile(path.join(projectDir, "package.json"));
 inputManifest.configs.instructionTs = safeHashFile(path.join(projectDir, "instruction.ts"));
 
-// 6. Root lockfile
+// 6. Instruction compiler + schema contract. These files can change the
+// dist/instruction*.json files before the cached vite step runs; without
+// hashing them, a cache HIT can restore an older dist snapshot and erase
+// freshly compiled instruction artifacts.
+inputManifest.configs.compileInstruction = safeHashFile(path.join(REPO_ROOT, "scripts/compile-instruction.mjs"));
+inputManifest.configs.instructionSchemaVersion = safeHashFile(
+    path.join(REPO_ROOT, "standalone-scripts/types/instruction/primitives/schema-version.json"),
+);
+
+// 7. Root lockfile
 inputManifest.configs.pnpmLock = safeHashFile(path.join(REPO_ROOT, "pnpm-lock.yaml"));
 
-// 9. Caller-supplied extras
+// 10. Caller-supplied extras
 for (const extra of extraInputs) {
     const abs = path.isAbsolute(extra) ? extra : path.join(REPO_ROOT, extra);
     inputManifest.extras[extra] = safeHashFile(abs);
