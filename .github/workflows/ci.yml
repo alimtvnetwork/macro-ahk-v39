@@ -24,6 +24,9 @@ on:
     branches:
       - main
 
+# CI revision marker: 2026-05-17 — force fresh run after Phase 2c
+# compat-snapshot removal; old runs reference stale SHA with the
+# retired "instruction.compat.json" requirement.
 concurrency:
   # Group by ref (branch or PR head) so a fresh push to the same
   # branch/PR cancels any in-progress run instead of letting two
