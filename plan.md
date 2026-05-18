@@ -188,7 +188,7 @@
 
 ### Follow-ups (queued, not in current task)
 1. ✅ **Done 2026-05-18** — Rewired `ProjectDetailView.tsx`, `ProjectsList.tsx`, `ProjectsListView.tsx` (the actual current components — `ProjectEditor`/`ProjectsSection` from the original note no longer exist) to `exportProjectAsSqliteZip()`; deleted `src/lib/project-exporter.ts` + its test. `ProjectsListView` "Export JSON" button collapsed into the single canonical "Export" (DB zip) action.
-2. Promote `dependencies` and `variables` from JSON-blob to first-class PascalCase tables (`Dependencies`, `Variables`) with a `SchemaVersion` bump — requires migration.
+2. ✅ **Done 2026-05-18** — Promoted `dependencies` + `variables` to first-class PascalCase tables (`Dependencies`, `Variables`). Bumped `CURRENT_FORMAT_VERSION` to `"6"` (kept `"4"`/`"5"` as `SUPPORTED_FORMAT_VERSIONS` for read-back). Per-project `SchemaVersion` bumped to 2 on every emit. Dual-write: legacy JSON blobs (`Projects.Dependencies`, `Projects.Settings.variables`) still emitted so v4/v5-only readers keep round-tripping; v6+ readers prefer the row tables when `SchemaVersion >= 2`. Updated `sqlite-bundle-contract.ts` + schema-drift CI, added `src/test/import-export/v6-row-tables.test.ts` (5 cases). All 70 E2E + 20 contract/roundtrip tests pass.
 3. Export `PromptsCategory` + `PromptsToCategory` to preserve multi-category prompt linkage (currently lossy — flattened to `Prompts.Category`).
 4. Add explicit `ImportStrictPascalCase` flag and gate the snake_case/camelCase fallback readers in `sqlite-bundle.ts:371-372` etc. behind `legacy=true`.
 5. Extend the existing `casing-instruction-json` CI job (or add a sibling) to validate `standalone-scripts/prompts/*/info.json` PascalCase compliance.
