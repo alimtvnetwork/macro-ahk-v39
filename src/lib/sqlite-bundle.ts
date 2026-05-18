@@ -1145,11 +1145,14 @@ function safeJsonParse<T>(raw: string | null, fallback: T): T {
 /** Exports all prompts as a SQLite ZIP. */
 export async function exportPromptsAsSqliteZip(): Promise<void> {
   const result = await sendMessage<{ prompts?: PromptEntry[] }>({ type: "GET_PROMPTS" });
+  const rawPromptsByUid = new Map<string, Record<string, unknown>>();
   const prompts: PromptEntry[] = Array.isArray(result.prompts)
     ? result.prompts.map((raw, i) => {
         const r = raw as unknown as Record<string, unknown>;
+        const uid = String(r.id ?? "");
+        rawPromptsByUid.set(uid, r);
         return {
-          id: String(r.id ?? ""),
+          id: uid,
           slug: typeof r.slug === "string" ? r.slug : undefined,
           name: (r.name as string) ?? "",
           text: (r.text as string) ?? "",
@@ -1166,7 +1169,10 @@ export async function exportPromptsAsSqliteZip(): Promise<void> {
   const db = await initDb();
   db.run(CREATE_PROMPTS_TABLE);
   db.run(CREATE_META_TABLE);
+  db.run(CREATE_PROMPTS_CATEGORY_TABLE);
+  db.run(CREATE_PROMPTS_TO_CATEGORY_TABLE);
   insertPrompts(db, prompts);
+  insertPromptCategories(db, prompts, rawPromptsByUid);
   insertMeta(db);
 
   const dbData = db.export();
