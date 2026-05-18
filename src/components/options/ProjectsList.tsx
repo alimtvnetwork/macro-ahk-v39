@@ -28,7 +28,7 @@ import { ProjectScriptSelector, type ScriptBinding } from "./ProjectScriptSelect
 import { JsonTreeEditor } from "./JsonTreeEditor";
 import { hasFolderEntry, parseDroppedFolder } from "@/lib/folder-parser";
 import { toast } from "sonner";
-import { exportProject } from "@/lib/project-exporter";
+import { exportProjectAsSqliteZip } from "@/lib/sqlite-bundle";
 
 interface UrlRule {
   pattern: string;
@@ -426,9 +426,13 @@ export function ProjectsList({ projects, loading, onSave, onDelete, availableScr
                   size="icon"
                   variant="ghost"
                   className="h-7 w-7"
-                  onClick={() => {
-                    exportProject(project);
-                    toast.success(`Exported "${project.name}"`);
+                  onClick={async () => {
+                    try {
+                      await exportProjectAsSqliteZip(project);
+                      toast.success(`Exported "${project.name}"`);
+                    } catch (error) {
+                      toast.error(`Export failed: ${error instanceof Error ? error.message : String(error)}`);
+                    }
                   }}
                 >
                   <Download className="h-3.5 w-3.5" />

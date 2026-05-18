@@ -187,7 +187,7 @@
 
 
 ### Follow-ups (queued, not in current task)
-1. Rewire `ProjectEditor.tsx` + `ProjectsSection.tsx` from `project-exporter.ts` → `exportProjectAsSqliteZip()`; delete the legacy file.
+1. ✅ **Done 2026-05-18** — Rewired `ProjectDetailView.tsx`, `ProjectsList.tsx`, `ProjectsListView.tsx` (the actual current components — `ProjectEditor`/`ProjectsSection` from the original note no longer exist) to `exportProjectAsSqliteZip()`; deleted `src/lib/project-exporter.ts` + its test. `ProjectsListView` "Export JSON" button collapsed into the single canonical "Export" (DB zip) action.
 2. Promote `dependencies` and `variables` from JSON-blob to first-class PascalCase tables (`Dependencies`, `Variables`) with a `SchemaVersion` bump — requires migration.
 3. Export `PromptsCategory` + `PromptsToCategory` to preserve multi-category prompt linkage (currently lossy — flattened to `Prompts.Category`).
 4. Add explicit `ImportStrictPascalCase` flag and gate the snake_case/camelCase fallback readers in `sqlite-bundle.ts:371-372` etc. behind `legacy=true`.

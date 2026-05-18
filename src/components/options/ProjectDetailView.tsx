@@ -90,7 +90,7 @@ const ProjectFilesPanel = lazy(() => import("./ProjectFilesPanel").then(m => ({ 
 const ProjectVariablesEditor = lazy(() => import("./ProjectVariablesEditor").then(m => ({ default: m.ProjectVariablesEditor })));
 const UpdaterPanel = lazy(() => import("./UpdaterPanel").then(m => ({ default: m.UpdaterPanel })));
 const RecorderVisualisationPanel = lazy(() => import("./recorder/RecorderVisualisationPanel"));
-import { exportProject } from "@/lib/project-exporter";
+import { exportProjectAsSqliteZip } from "@/lib/sqlite-bundle";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -440,9 +440,13 @@ function ProjectHeader({ project, onSave, onDelete, onBack }: ProjectHeaderProps
     markDirty();
   };
 
-  const handleExport = () => {
-    exportProject(project);
-    toast.success(`Exported "${project.name}"`);
+  const handleExport = async () => {
+    try {
+      await exportProjectAsSqliteZip(project);
+      toast.success(`Exported "${project.name}"`);
+    } catch (error) {
+      toast.error(`Export failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   const handleUpdate = () => {

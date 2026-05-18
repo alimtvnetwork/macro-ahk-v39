@@ -29,7 +29,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { StoredProject } from "@/hooks/use-projects-scripts";
 import { exportAllAsSqliteZip, exportProjectAsSqliteZip, exportProjectsAsSqliteZip, importFromSqliteZip, mergeFromSqliteZip, previewSqliteZip, type BundlePreview, type DiffItem } from "@/lib/sqlite-bundle";
-import { exportProject } from "@/lib/project-exporter";
 import { buildImportSummary, countCategory, SUMMARY_CATEGORY_ORDER } from "@/lib/import-summary";
 import { toast } from "sonner";
 
@@ -633,15 +632,7 @@ function ProjectCard({ project, index, onEdit, onDuplicate, onDelete }: ProjectC
             <ActionButton label="Edit" icon={<Pencil className="h-3 w-3" />} onClick={onEdit} />
             <ActionButton label="Duplicate" icon={<Copy className="h-3 w-3" />} onClick={onDuplicate} />
             <ActionButton
-              label="Export JSON"
-              icon={<FileText className="h-3 w-3" />}
-              onClick={() => {
-                exportProject(project as StoredProject);
-                toast.success(`Exported "${project.name}" as JSON manifest`);
-              }}
-            />
-            <ActionButton
-              label="Export DB"
+              label="Export"
               icon={exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Database className="h-3 w-3" />}
               onClick={handleExport}
             />
