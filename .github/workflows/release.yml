@@ -167,6 +167,7 @@ jobs:
   build-sdk:
     name: Build · Marco SDK
     needs: setup
+    if: needs.setup.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -204,6 +205,7 @@ jobs:
   build-xpath:
     name: Build · XPath
     needs: [setup, build-sdk]
+    if: needs.setup.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -247,6 +249,7 @@ jobs:
   build-macro-controller:
     name: Build · Macro Controller
     needs: [setup, build-sdk]
+    if: needs.setup.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
     steps:
