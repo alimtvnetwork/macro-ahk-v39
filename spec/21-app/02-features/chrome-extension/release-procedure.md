@@ -15,7 +15,8 @@ Two GitHub Actions workflows must be understood:
 | Workflow      | Triggers                                                | Output                                                                  |
 |---------------|---------------------------------------------------------|-------------------------------------------------------------------------|
 | `ci.yml`      | `push: main`, `pull_request: main`                      | Lint, tests, builds. **Workflow artifacts only** (1-day retention).     |
-| `release.yml` | `push: release/**`, `push: tags: v*`, `workflow_dispatch` | A real **GitHub Release** with `marco-extension-{VER}.zip`, installer scripts, checksums, and `RELEASE_NOTES.md`. |
+| `release.yml` | `push: release/**`, `push: tags: v*`, `create`, `release`, `workflow_dispatch`, `workflow_call` | A real **GitHub Release** with `marco-extension-{VER}.zip`, installer scripts, checksums, and `RELEASE_NOTES.md`. |
+| `release-watcher.yml` | `push: main` touching `.gitmap/release/*.json` or release workflow files | Calls `release.yml` in-process for the descriptor tag, so recovery is gated by the actual asset build/upload. |
 
 A green CI run is **necessary but not sufficient**. CI does not publish a
 Release. Only `release.yml` does.
@@ -57,6 +58,11 @@ This is safe to repeat — the asset upload is idempotent.
 
 A scheduled workflow (`.github/workflows/audit-releases.yml`, weekly + manual)
 audits every published `v*` release and reports any missing assets.
+
+The watcher must not use asynchronous `gh workflow run` as the recovery contract.
+It calls `release.yml` via `workflow_call`, so a watcher run is not green until
+the real Release Build has generated notes, verified required assets, and
+uploaded them to the existing GitHub Release.
 
 
 ## Forbidden paths

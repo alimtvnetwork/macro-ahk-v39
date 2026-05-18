@@ -37,6 +37,9 @@ completion. Known causes:
    running on that tag, making the changelog range `${VER}..HEAD` weak or empty.
 4. Release metadata files such as `.gitmap/release/*.json` are not authoritative
    because `assets: []` does not publish or verify anything by itself.
+5. Recovery dispatches that only queue `release.yml` asynchronously are not
+   authoritative because the watcher can pass before asset packaging/upload
+   succeeds.
 
 ## Required CI/CD behavior
 
@@ -51,6 +54,8 @@ completion. Known causes:
   the Chrome-extension ZIP.
 - A separate release-audit job should detect any existing `v*` GitHub Release
   that has only source archives or is missing required built assets.
+- Descriptor-based recovery should call the canonical release workflow via
+  `workflow_call`, so the watcher run is gated by the actual build/upload job.
 
 ## Operator rule
 

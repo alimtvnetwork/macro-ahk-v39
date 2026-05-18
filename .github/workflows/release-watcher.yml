@@ -12,14 +12,14 @@
 #
 # What this watcher does:
 #   On every push to main that touches `.gitmap/release/v*.json`,
-#   it reads the version from the descriptor, verifies the matching
-#   `vX.Y.Z` tag exists on origin, and dispatches the canonical
-#   release.yml workflow from main with that version. This is deliberate:
-#   dispatching with `--ref refs/tags/<tag>` runs the workflow file as it
-#   existed at that old tag, so fixes on main are ignored and recovery can
-#   still publish no assets. release.yml's workflow_dispatch path then
-#   checks out the exact tag for packaging, builds every asset, gates on the
-#   required-asset verification step, and uploads to the GitHub Release.
+#   `.gitmap/release/latest.json`, or the release workflow files, it reads
+#   the version from the descriptor, verifies the matching `vX.Y.Z` tag
+#   exists on origin, and calls the canonical release.yml workflow in-process
+#   with that version. This is deliberate: an async `gh workflow run` can be
+#   queued against stale workflow logic and the watcher can still pass while
+#   the release page remains source-only. release.yml's workflow_call path
+#   then checks out the exact tag for packaging, builds every asset, gates on
+#   the required-asset verification step, and uploads to the GitHub Release.
 #
 # This makes asset publication deterministic regardless of how
 # the tag was created.
@@ -34,6 +34,8 @@ on:
     paths:
       - ".gitmap/release/v*.json"
       - ".gitmap/release/latest.json"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-watcher.yml"
   workflow_dispatch:
 
 permissions:
@@ -45,9 +47,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  dispatch-release:
-    name: Dispatch release.yml for new descriptor
+  resolve-release:
+    name: Resolve release descriptor
     runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.resolve.outputs.skip }}
+      tag: ${{ steps.resolve.outputs.tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -102,17 +107,14 @@ jobs:
           fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "skip=false" >> "$GITHUB_OUTPUT"
-          echo "Will dispatch release.yml for ${TAG}"
+          echo "Will run release.yml for ${TAG}"
 
-      - name: Dispatch release.yml
-        if: steps.resolve.outputs.skip != 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.resolve.outputs.tag }}
-          WORKFLOW_REF: ${{ github.ref_name }}
-        run: |
-          set -euo pipefail
-          gh workflow run release.yml \
-            --ref "${WORKFLOW_REF}" \
-            -f version="${TAG}"
-          echo "Dispatched release.yml from ${WORKFLOW_REF} for ${TAG}"
+  run-release:
+    name: Run release build for descriptor
+    needs: resolve-release
+    if: needs.resolve-release.outputs.skip != 'true'
+    uses: ./.github/workflows/release.yml
+    permissions:
+      contents: write
+    with:
+      version: ${{ needs.resolve-release.outputs.tag }}

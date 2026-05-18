@@ -53,6 +53,12 @@ on:
         description: 'Existing tag to (re)publish, e.g. v2.192.0'
         required: true
         type: string
+  workflow_call:
+    inputs:
+      version:
+        description: 'Existing tag to (re)publish, e.g. v2.192.0'
+        required: true
+        type: string
 
 # Release builds must NEVER be cancelled — every release commit
 # must produce a GitHub Release regardless of newer commits.
@@ -115,10 +121,10 @@ jobs:
               echo "skip=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
+            VERSION="${{ inputs.version || github.event.inputs.version }}"
             if [[ -z "$VERSION" ]]; then
-              echo "::error::workflow_dispatch invoked without a version input"
+              echo "::error::${{ github.event_name }} invoked without a version input"
               exit 1
             fi
             # Validate the tag exists on the remote

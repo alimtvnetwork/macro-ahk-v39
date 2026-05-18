@@ -645,6 +645,11 @@ Creating or pushing a `release/*` branch (e.g., `release/v3.4.0`) or creating a
 8. Generates categorized release notes from commit history with Bash + PowerShell install commands
 9. Creates or updates the GitHub Release page with all assets attached
 
+If `.gitmap/release/latest.json` changes or the release workflow itself is
+fixed, **Release Watcher** calls the canonical **Release Build** workflow
+in-process. The watcher only passes after the actual asset build/upload passes,
+so a release page with only GitHub source archives is still a failed release.
+
 **No email or notification is sent** — check the [Releases page](https://github.com/alimtvnetwork/macro-ahk-v34/releases) for status.
 
 ### Re-running CI lint

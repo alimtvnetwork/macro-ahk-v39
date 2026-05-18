@@ -6,6 +6,30 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v3.4.1] — 2026-05-18 Release asset recovery gating
+
+### Root cause
+The release watcher still used `gh workflow run release.yml`, which only queued
+the real release build and then exited successfully. That async dispatch did not
+wait for asset packaging/upload, did not fail when `release.yml` failed, and
+could still leave the GitHub Release page source-only with placeholder body text
+(`Release v3.2.0`).
+
+### Fixed
+- **`.github/workflows/release.yml`** — added `workflow_call` support so the
+  canonical release build can be reused directly with a required `version` input.
+- **`.github/workflows/release-watcher.yml`** — replaced async `gh workflow run`
+  with an in-process reusable workflow call to `release.yml`. The watcher now
+  stays red until the actual build, changelog generation, required-asset gate,
+  and GitHub Release upload all complete.
+- **`.github/workflows/release-watcher.yml`** — watches release workflow file
+  changes too, so landing this fix replays the latest descriptor and repairs the
+  current source-only release page.
+- **`.lovable/cicd-issues/07-release-recovery-is-async-and-not-gated.md`** — RCA
+  for the repeated source-only Release page failure.
+
+---
+
 ## [v3.4.0] — 2026-05-18 Release-event trigger hardening (API-created releases)
 
 ### Why
