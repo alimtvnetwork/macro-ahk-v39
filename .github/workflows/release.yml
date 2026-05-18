@@ -69,6 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      ref: ${{ steps.version.outputs.ref }}
 
     steps:
       - name: Checkout repository
@@ -76,7 +77,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Resolve version
+      - name: Resolve version and ref
         id: version
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -85,16 +86,28 @@ jobs:
               echo "::error::workflow_dispatch invoked without a version input"
               exit 1
             fi
+            # Validate the tag exists on the remote
+            if ! git rev-parse --verify "refs/tags/${VERSION}" >/dev/null 2>&1; then
+              git fetch origin "refs/tags/${VERSION}:refs/tags/${VERSION}" 2>/dev/null || true
+            fi
+            if ! git rev-parse --verify "refs/tags/${VERSION}" >/dev/null 2>&1; then
+              echo "::error::workflow_dispatch version '${VERSION}' — tag refs/tags/${VERSION} not found on remote"
+              exit 1
+            fi
+            REF="refs/tags/${VERSION}"
           elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
             VERSION="${GITHUB_REF_NAME}"
+            REF="${GITHUB_REF}"
           elif [[ "$GITHUB_REF" == refs/heads/release/* ]]; then
             VERSION="${GITHUB_REF_NAME#release/}"
+            REF="${GITHUB_REF}"
           else
             echo "::error::Unexpected ref: $GITHUB_REF"
             exit 1
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Resolved version: ${VERSION}"
+          echo "ref=${REF}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: ${VERSION} (ref=${REF})"
 
       - name: Enforce lowercase .md filenames
         run: |
