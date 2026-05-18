@@ -189,9 +189,11 @@ function insertProjects(db: Database, projects: StoredProject[]): void {
   for (const p of projects) {
     stmt.run([
       p.id ?? null,
-      // v6: bump default schema version 1 → 2 so importers know the
-      // row-table promotion (Dependencies, Variables) is authoritative.
-      p.schemaVersion ?? 2,
+      // v6: this build always writes row-table promotions (Dependencies,
+      // Variables), so the emitted SchemaVersion is at least 2 regardless
+      // of the source row's prior value. Importers gate row-table reads
+      // on SchemaVersion >= 2.
+      Math.max(p.schemaVersion ?? 2, 2),
       p.name ?? "",
       p.slug ?? null,
       p.version ?? "1.0.0",
