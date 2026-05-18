@@ -1,0 +1,90 @@
+# ──────────────────────────────────────────────────────────────
+# Release Watcher
+#
+# Root cause this fixes:
+#   When a release tag (vX.Y.Z) is created out-of-band — e.g. via
+#   the GitHub web UI, GitHub API, or the Lovable release tooling
+#   that lands `.gitmap/release/vX.Y.Z.json` on main — the
+#   `push: tags: v*` trigger in release.yml does NOT always fire.
+#   The result: a tag exists, the Release page is created with
+#   only auto-generated source archives, and `marco-extension-*.zip`
+#   plus the rest of the built assets never get uploaded.
+#
+# What this watcher does:
+#   On every push to main that touches `.gitmap/release/v*.json`,
+#   it reads the version from the descriptor, verifies the matching
+#   `vX.Y.Z` tag exists on origin, and dispatches the canonical
+#   release.yml workflow with that version. release.yml's
+#   workflow_dispatch path then checks out the exact tag, builds
+#   every asset, gates on the required-asset verification step,
+#   and uploads to the GitHub Release.
+#
+# This makes asset publication deterministic regardless of how
+# the tag was created.
+# ──────────────────────────────────────────────────────────────
+
+name: Release Watcher
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".gitmap/release/v*.json"
+      - ".gitmap/release/latest.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: release-watcher-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch-release:
+    name: Dispatch release.yml for new descriptor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve target version from latest descriptor
+        id: resolve
+        run: |
+          set -euo pipefail
+          DESCRIPTOR=".gitmap/release/latest.json"
+          if [[ ! -f "$DESCRIPTOR" ]]; then
+            echo "::warning::No $DESCRIPTOR present — nothing to dispatch"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          TAG=$(node -e "const j=require('./.gitmap/release/latest.json'); process.stdout.write(j.tag || ('v'+j.version) || '')")
+          if [[ -z "$TAG" ]]; then
+            echo "::error::Could not derive tag from $DESCRIPTOR"
+            exit 1
+          fi
+          # Make sure the tag exists on origin before we dispatch
+          git fetch origin "refs/tags/${TAG}:refs/tags/${TAG}" 2>/dev/null || true
+          if ! git rev-parse --verify "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "::error::Descriptor references ${TAG} but tag not found on origin"
+            exit 1
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "Will dispatch release.yml for ${TAG}"
+
+      - name: Dispatch release.yml
+        if: steps.resolve.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          gh workflow run release.yml \
+            --ref "refs/tags/${TAG}" \
+            -f version="${TAG}"
+          echo "Dispatched release.yml for ${TAG}"
