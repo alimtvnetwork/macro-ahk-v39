@@ -478,10 +478,15 @@ jobs:
           VER: ${{ needs.setup.outputs.version }}
         run: |
           # Find the previous release tag
-          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | head -1 2>/dev/null || true)
+          # Find the previous release tag — EXCLUDE the current ${VER} so the
+          # range is never empty on a tag-triggered run. See plan.md Step 2.
+          PREV_TAG=$(git tag --sort=-version:refname \
+            | grep -E '^v[0-9]' \
+            | grep -v -x "${VER}" \
+            | head -1 2>/dev/null || true)
 
           if [ -n "$PREV_TAG" ]; then
-            echo "Generating changelog: ${PREV_TAG}..HEAD"
+            echo "Generating changelog: ${PREV_TAG}..${VER} (HEAD)"
             RANGE="${PREV_TAG}..HEAD"
           else
             echo "No previous tag found — using full history"
