@@ -20,6 +20,7 @@ _None — all known CI/CD issues resolved._
 | 03 | [`03-tag-created-out-of-band-does-not-trigger-release.md`](./cicd-issues/03-tag-created-out-of-band-does-not-trigger-release.md) | Tag created out-of-band does not trigger `release.yml` (descriptor → release watcher) | `.github/workflows/release.yml` + `.github/workflows/release-watcher.yml` | ✅ Resolved | 2026-05-18 |
 | 04 | [`04-create-event-release-ref-does-not-enter-release-mode.md`](./cicd-issues/04-create-event-release-ref-does-not-enter-release-mode.md) | Create event for `release/*` branch or `v*` tag does not enter release mode | `.github/workflows/release.yml` + `.github/workflows/release-watcher.yml` | ✅ Resolved | 2026-05-18 |
 | 05 | [`05-api-created-release-skips-release-yml.md`](./cicd-issues/05-api-created-release-skips-release-yml.md) | API-created GitHub Release skips `release.yml` (only stamped installer + source archives appear) | `.github/workflows/release.yml` | ✅ Resolved | 2026-05-18 |
+| 06 | [`06-release-watcher-dispatches-old-tag-workflow.md`](./cicd-issues/06-release-watcher-dispatches-old-tag-workflow.md) | Release watcher dispatches old tag workflow, so asset fixes do not run | `.github/workflows/release-watcher.yml` + `.github/workflows/release.yml` | ✅ Resolved | 2026-05-18 |
 
 ---
 
