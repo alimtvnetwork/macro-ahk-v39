@@ -396,11 +396,15 @@ export async function exportAllAsSqliteZip(): Promise<void> {
   db.run(CREATE_CONFIGS_TABLE);
   db.run(CREATE_PROMPTS_TABLE);
   db.run(CREATE_META_TABLE);
+  db.run(CREATE_DEPENDENCIES_TABLE);
+  db.run(CREATE_VARIABLES_TABLE);
 
   insertProjects(db, projRes.projects);
   insertScripts(db, scriptsRes.scripts);
   insertConfigs(db, configsRes.configs);
   insertPrompts(db, prompts);
+  insertDependencies(db, projRes.projects);
+  insertVariables(db, projRes.projects);
   insertMeta(db);
 
   const dbData = db.export();
