@@ -515,14 +515,14 @@ describe("sqlite-bundle — full round-trip", () => {
       );
     }
 
-    /* Meta — declares format_version='5' (this build's emit version). */
+    /* Meta — declares format_version='6' (this build's emit version). */
     const metaRows = db.exec(
       "SELECT Key, Value FROM Meta WHERE Key IN ('format_version', 'exported_at')",
     );
     const meta = Object.fromEntries(
       (metaRows[0]?.values ?? []).map((r) => [String(r[0]), String(r[1])]),
     );
-    expect(meta.format_version).toBe("5");
+    expect(meta.format_version).toBe("6");
     expect(meta.exported_at, "exported_at is an ISO timestamp").toMatch(
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
     );
