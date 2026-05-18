@@ -606,6 +606,59 @@ jobs:
 
           cat release-assets/RELEASE_NOTES.md
 
+      # ── Verify required release assets are present and non-trivial ────────
+      # See plan.md Step 3 and mem://constraints/release-assets-publish-contract.
+      - name: Verify required release assets
+        env:
+          VER: ${{ needs.setup.outputs.version }}
+        run: |
+          set -e
+          REQUIRED=(
+            "release-assets/marco-extension-${VER}.zip:10240"
+            "release-assets/macro-controller-${VER}.zip:1024"
+            "release-assets/marco-sdk-${VER}.zip:1024"
+            "release-assets/xpath-${VER}.zip:1024"
+            "release-assets/install.ps1:512"
+            "release-assets/install.sh:512"
+            "release-assets/VERSION.txt:1"
+            "release-assets/changelog.md:64"
+            "release-assets/checksums.txt:64"
+            "release-assets/RELEASE_NOTES.md:128"
+          )
+          MISSING=0
+          for entry in "${REQUIRED[@]}"; do
+            f="${entry%%:*}"
+            min="${entry##*:}"
+            if [ ! -f "$f" ]; then
+              echo "::error file=$f::Required release asset missing"
+              MISSING=$((MISSING+1))
+              continue
+            fi
+            sz=$(stat -c%s "$f")
+            if [ "$sz" -lt "$min" ]; then
+              echo "::error file=$f::Release asset too small (${sz} bytes, min ${min})"
+              MISSING=$((MISSING+1))
+            else
+              echo "✅ $f (${sz} bytes)"
+            fi
+          done
+          # prompts is conditional — required only when the folder exists
+          if [ -d "standalone-scripts/prompts" ]; then
+            f="release-assets/prompts-${VER}.zip"
+            if [ ! -s "$f" ]; then
+              echo "::error file=$f::prompts/ exists but ${f} is missing or empty"
+              MISSING=$((MISSING+1))
+            else
+              echo "✅ $f"
+            fi
+          fi
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::error::${MISSING} required release asset(s) missing — refusing to publish GitHub Release"
+            ls -la release-assets/ || true
+            exit 1
+          fi
+          echo "✅ All required release assets present"
+
       # ── Create GitHub Release ─────────────────────────────
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
