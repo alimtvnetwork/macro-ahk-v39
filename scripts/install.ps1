@@ -109,7 +109,13 @@ $script:SiblingSelected           = ''
 
 # Source the optional config file beside this script. Lookup order:
 #   $env:MARCO_INSTALLER_CONFIG (explicit) → next to install.ps1.
-$__cfgCandidate = if ($env:MARCO_INSTALLER_CONFIG) { $env:MARCO_INSTALLER_CONFIG } else { Join-Path $PSScriptRoot 'install.config.ps1' }
+$__cfgCandidate = if ($env:MARCO_INSTALLER_CONFIG) {
+    $env:MARCO_INSTALLER_CONFIG
+} elseif ($PSScriptRoot) {
+    Join-Path $PSScriptRoot 'install.config.ps1'
+} else {
+    $null
+}
 if ($__cfgCandidate -and (Test-Path -LiteralPath $__cfgCandidate)) {
     . $__cfgCandidate
 }
