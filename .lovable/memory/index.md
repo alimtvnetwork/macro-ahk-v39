@@ -21,6 +21,7 @@ Updated: just now
 - **Auth Contract**: Use single-path `getBearerToken()` contract. No legacy auth methods.
 - **Installer Contract**: All install scripts MUST conform to `spec/14-update/01-generic-installer-behavior.md` — strict on `--version`/release-URL, latest→main fallback otherwise, opt-in parallel sibling-repo discovery.
 - **CI/CD Issues**: Logged in `.lovable/cicd-issues/XX-name.md` and indexed in `.lovable/cicd-index.md`. Stay in folder after resolution (set `## Status ✅ Resolved`); do NOT move to `solved-issues/`.
+- **Release Assets Contract**: A GitHub Release is invalid until `release.yml` uploads built ZIPs, installers, checksums, changelog, and release notes; source archives/tags alone do not count.
 - **Write-Memory Protocol**: Current = `.lovable/prompts/03-write-memory.md` (v3.0). Adds CI/CD folder + verbatim-spec capture.
 - **Pre-Write Check**: Read `mem://standards/pre-write-check` and the relevant standards index entries before creating/rewriting any file under `standalone-scripts/`, `src/`, `chrome-extension/`, or `scripts/`.
 - **PascalCase Instruction Keys**: Every key in `instruction.ts`, `instruction.json`, `seed-manifest.json`, and runtime reads of those files MUST be PascalCase. Case-only rename — values, string-literal unions, and Chrome API contracts are unchanged. Boundary exemptions: Chrome APIs, `ProjectManifest` user-export schema, `StoredScript`/`StoredProject` storage rows. Enforced by `scripts/check-pascalcase-instruction-migration.mjs` (preflight CI job + `build-extension` `needs:`). Full mapping in `mem://standards/pascalcase-json-keys`.
@@ -29,6 +30,7 @@ Updated: just now
 ## Memories
 - [⛔ readme.txt prohibitions (SP-1..SP-8)](mem://constraints/readme-txt-prohibitions) — Sequenced hard ban; honor one-shot explicit writes only; mirrors strictly-avoid.md and spec/01-spec-authoring-guide/09-exceptions.md
 - [Chrome-extension dist path](mem://constraints/chrome-extension-dist-path) — Extension build output is `chrome-extension/` itself (NOT `chrome-extension/dist/`); release/CI must never reference legacy `/dist` subpath. RCA for v2.242.0 missing-asset regression.
+- [Release assets publish contract](mem://constraints/release-assets-publish-contract) — GitHub Release must contain built ZIPs/installers/checksums/notes; tag/source archives alone are invalid; workflow_dispatch must check out requested tag and notes must exclude current tag from previous-tag range.
 - [URL trigger + sentinel cache](mem://architecture/url-trigger-sentinel-cache) — v2.244.0: only 3 URL re-eval triggers (load/refresh/activate), per-tab `tabDecisionCache` fingerprint gate, `__marco_sentinel__` DOM marker; no polling, no retry, never throw from listener.
 - [Timezone](mem://localization/timezone) — Asia/Kuala_Lumpur for local timezone formatting
 - [Versioning policy](mem://workflow/versioning-policy) — Unified versioning across manifest, constants.ts, scripts

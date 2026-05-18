@@ -12,6 +12,110 @@
 
 ---
 
+## 🆕 Release Page CI/CD Hardening Plan — 8 Steps (queued)
+
+**Trigger**: User reported that a release tag was created, but the GitHub Release page has no Chrome extension ZIP or other built ZIP assets, and the release-page changelog/notes did not update correctly.
+
+**Status**: Plan written only. Awaiting `next` to implement Step 1.
+
+**Root cause found from repo evidence**:
+- A tag/source archive alone is not a real Marco release. The expected ZIPs/installers are uploaded only by `.github/workflows/release.yml` via `softprops/action-gh-release@v2` and `files: release-assets/*`.
+- `.gitmap/release/v2.250.0.json` currently records `"assets": []`, which confirms the metadata/tag exists but does not prove built assets were uploaded.
+- `release.yml` has a manual `workflow_dispatch` recovery path, but checkout currently uses the workflow ref/default branch, not necessarily the requested release tag. A manual replay can therefore build/upload assets and release notes from the wrong commit.
+- Release notes currently pick `PREV_TAG=$(git tag --sort=-version:refname | ... | head -1)`. On a tag-triggered run, that can select the current tag as the "previous" tag, making the generated changelog range `${VER}..HEAD` empty or misleading.
+- The workflow packages the Chrome extension from the correct folder (`chrome-extension/`, not `chrome-extension/dist/`), but it needs stronger required-asset verification before publishing so missing ZIPs cannot silently reach the Release page again.
+- Memory updated: `mem://constraints/release-assets-publish-contract` now records that a Release is invalid until built ZIPs, installers, checksums, changelog, and release notes are uploaded.
+
+### Step 1 — Fix release checkout/ref resolution
+
+- Update `.github/workflows/release.yml` so every mode resolves one canonical release version/ref:
+  - tag push: `refs/tags/vX.Y.Z`
+  - release branch push: `release/vX.Y.Z`
+  - workflow dispatch: validate the provided `vX.Y.Z` tag exists remotely and check out that exact tag/ref
+- Add fail-fast errors with exact path/reason if the requested tag/ref is missing.
+- Acceptance: manual replay for an existing tag builds the code from that tag, not the default branch head.
+
+### Step 2 — Fix release-notes changelog range
+
+- Exclude the current `${VER}` tag when selecting the previous release tag.
+- Prefer the nearest lower SemVer tag (example: current `v2.250.0` should use `v2.249.5..HEAD`, not `v2.250.0..HEAD`).
+- Add a fallback when no previous tag exists.
+- Acceptance: generated `RELEASE_NOTES.md` includes the actual changes since the previous release and does not collapse to an empty range.
+
+### Step 3 — Add required release-asset verification before publish
+
+- Add a verification step after packaging and before `softprops/action-gh-release`.
+- Required assets:
+  - `marco-extension-${VER}.zip`
+  - `macro-controller-${VER}.zip`
+  - `marco-sdk-${VER}.zip`
+  - `xpath-${VER}.zip`
+  - `install.ps1`
+  - `install.sh`
+  - `VERSION.txt`
+  - `changelog.md`
+  - `checksums.txt`
+  - `RELEASE_NOTES.md`
+- `prompts-${VER}.zip` remains required only when `standalone-scripts/prompts/` exists.
+- Validate non-empty files and minimum ZIP sizes where appropriate.
+- Acceptance: the workflow fails before GitHub Release creation/update if any required artifact is missing or suspiciously small.
+
+### Step 4 — Make Release page install/download instructions complete
+
+- Ensure generated `RELEASE_NOTES.md` includes one-liners for:
+  - Windows PowerShell pinned install: `irm https://github.com/${REPO}/releases/download/${VER}/install.ps1 | iex`
+  - Linux/macOS Bash pinned install: `curl -fsSL https://github.com/${REPO}/releases/download/${VER}/install.sh | bash`
+  - Latest-channel PowerShell and Bash one-liners from `raw.githubusercontent.com`.
+- Add direct manual download guidance for `marco-extension-${VER}.zip` and the load-unpacked Chrome steps.
+- Add a concise assets table listing every ZIP and installer.
+- Acceptance: the GitHub Release body itself is enough to install or manually download every shipped artifact.
+
+### Step 5 — Add a release-audit workflow for existing tags
+
+- Create `.github/workflows/audit-releases.yml` with `workflow_dispatch` and a scheduled check.
+- It should query GitHub Releases for `v*` tags and fail if a release is missing required built assets.
+- It must distinguish GitHub auto source archives from real uploaded assets.
+- Step summary should list each checked version and missing asset names.
+- Acceptance: a release page with only source archives is reported as failed, not silently accepted.
+
+### Step 6 — Update release documentation and RCA references
+
+- Update `spec/21-app/02-features/chrome-extension/release-procedure.md` with the corrected manual replay behavior and the required asset list.
+- Update `pipeline/03-release-workflow.md` to match the hardened workflow.
+- Add/update a concise issue note under `.lovable/cicd-issues/` and index it in `.lovable/cicd-index.md` per project memory.
+- Acceptance: docs explain exactly why the tag-only/source-archive state happened and how to recover it without creating another bad release.
+
+### Step 7 — Validate without publishing a real release
+
+- Run non-build/static checks only where possible:
+  - YAML/schema inspection for new workflow structure.
+  - Targeted script tests if a helper script is introduced.
+  - Version/changelog/readme consistency checks after docs changes.
+- Do not manually publish, push tags, or send CI notifications.
+- Acceptance: local verification confirms the workflow text, asset list, and generated notes logic are internally consistent.
+
+### Step 8 — Final version bump and changelog
+
+- Bump the release version after all CI/CD fixes are complete.
+- Ambiguity logged in `.lovable/question-and-ambiguity/49-release-version-bump-target.md`: current version is `v2.250.0`; a SemVer major bump is `v3.0.0`. Literal `v2.1.0` would be a downgrade and should not be used unless the user explicitly overrides.
+- Update unified version references across manifest/constants/standalone instruction manifests.
+- Add a top changelog entry summarizing the release-page CI/CD hardening.
+- Update root `readme.md` pinned release references to the final version.
+- Acceptance: `scripts/check-version-sync.mjs` and changelog/readme checks pass, then the user can release from Git.
+
+### Remaining items
+
+1. [ ] Step 1 — Fix release checkout/ref resolution.
+2. [ ] Step 2 — Fix release-notes changelog range.
+3. [ ] Step 3 — Add required release-asset verification before publish.
+4. [ ] Step 4 — Make Release page install/download instructions complete.
+5. [ ] Step 5 — Add release-audit workflow for existing tags.
+6. [ ] Step 6 — Update release documentation and RCA references.
+7. [ ] Step 7 — Validate without publishing a real release.
+8. [ ] Step 8 — Final major version bump to `v3.0.0` unless explicitly overridden, plus changelog/readme updates.
+
+---
+
 ## ✅ 2026-04-27 → 2026-05-16 — Open Lovable Tabs → Workspace Mapping (Closed)
 
 **Trigger**: User asked for a Macro Controller panel that lists all open Lovable tabs and shows which workspace each tab is bound to, then asked for automatic per-tab workspace detection via the existing message bus.

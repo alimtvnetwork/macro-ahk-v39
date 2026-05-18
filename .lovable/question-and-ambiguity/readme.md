@@ -66,3 +66,4 @@ file so the user can review and override later.
 - [46 — Storage PascalCase migrator scope](./46-storage-pascalcase-migrator-scope.md) — Option A (framework + no-op v1 migrator). Phase 2c-storage v2 PascalCase rewrite subsequently banned outright; see `mem://constraints/no-storage-pascalcase-migration`.
 - [47 — Installer checksum signing scope](./47-installer-checksum-signing-scope.md)
 - [48 — New-tab / empty-URL guard scope](./48-new-tab-no-url-guard-scope.md) — chose Option A (narrow `isNewTabOrBlankUrl()` covering empty/`about:blank`/`chrome://newtab`/`chrome-search://local-ntp*`/`edge://newtab`/`brave://newtab`/`opera://startpage`). Gates `handleNavigationCompleted` + `evaluateUrlMatches`. v2.249.5.
+- [49 — Release hardening final version target](./49-release-version-bump-target.md) — chose Option A: interpret requested major bump from current `v2.250.0` as `v3.0.0`; `v2.1.0` would be a downgrade and break latest-version ordering.
