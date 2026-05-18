@@ -87,7 +87,20 @@ jobs:
       - name: Resolve version and ref
         id: version
         run: |
-          if [[ "${{ github.event_name }}" == "create" ]]; then
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            if [[ -z "$VERSION" ]]; then
+              echo "::error::release event fired without a tag_name"
+              exit 1
+            fi
+            # Ensure the tag is fetched locally
+            git fetch origin "refs/tags/${VERSION}:refs/tags/${VERSION}" 2>/dev/null || true
+            if ! git rev-parse --verify "refs/tags/${VERSION}" >/dev/null 2>&1; then
+              echo "::error::release event for ${VERSION} — tag not found on remote"
+              exit 1
+            fi
+            REF="refs/tags/${VERSION}"
+          elif [[ "${{ github.event_name }}" == "create" ]]; then
             EVENT_REF="${{ github.event.ref }}"
             if [[ "${{ github.event.ref_type }}" == "tag" && "${{ github.event.ref }}" == v* ]]; then
               VERSION="${EVENT_REF}"
