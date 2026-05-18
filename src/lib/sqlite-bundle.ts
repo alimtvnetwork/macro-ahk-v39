@@ -861,6 +861,26 @@ function readConfigs(db: Database): StoredConfig[] {
   });
 }
 
+/**
+ * v6: read PromptsToCategory junction grouped by PromptUid. Empty map
+ * for v4/v5 bundles — readers fall back to Prompts.Category (singular).
+ */
+function readPromptCategoriesTable(db: Database): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  let rows;
+  try { rows = db.exec("SELECT PromptUid, CategoryName FROM PromptsToCategory"); } catch { return out; }
+  if (rows.length === 0 || rows[0].values.length === 0) return out;
+  for (const row of rows[0].values) {
+    const uid = String(row[0] ?? "");
+    const name = String(row[1] ?? "");
+    if (!uid || !name) continue;
+    const list = out.get(uid) ?? [];
+    list.push(name);
+    out.set(uid, list);
+  }
+  return out;
+}
+
 function readPrompts(db: Database): PromptEntry[] {
   try {
     let rows;
@@ -870,11 +890,22 @@ function readPrompts(db: Database): PromptEntry[] {
     const hasRows = rows.length > 0 && rows[0].values.length > 0;
     if (!hasRows) return [];
 
+    // v6 junction (empty in v4/v5 bundles).
+    const catsByPromptUid = readPromptCategoriesTable(db);
+
     const cols = rows[0].columns;
     return rows[0].values.map((row: SqlValue[]) => {
       const obj = Object.fromEntries(cols.map((c: SqlValue, i: number) => [c, row[i]]));
+      const uid = resolveUid(obj);
+      const junctionCats = catsByPromptUid.get(uid);
+      // v6 preferred: rebuild comma-separated list from junction.
+      // Fallback: pre-v6 Prompts.Category single value.
+      const singularCategory = (col(obj, "Category", "category") as string) ?? undefined;
+      const category = junctionCats && junctionCats.length > 0
+        ? junctionCats.join(", ")
+        : singularCategory;
       return {
-        id: resolveUid(obj),
+        id: uid,
         // v5 — Slug column is now actually written. v4 bundles return
         // undefined here, which the Task Next resolver treats as "no slug".
         slug: (obj["Slug"] as string) ?? undefined,
@@ -883,7 +914,7 @@ function readPrompts(db: Database): PromptEntry[] {
         order: (col(obj, "RunOrder", "run_order") as number) ?? 0,
         isDefault: col(obj, "IsDefault", "is_default") === 1,
         isFavorite: col(obj, "IsFavorite", "is_favorite") === 1,
-        category: (col(obj, "Category", "category") as string) ?? undefined,
+        category,
         createdAt: (col(obj, "CreatedAt", "created_at") as string),
         updatedAt: (col(obj, "UpdatedAt", "updated_at") as string),
       } as PromptEntry;
