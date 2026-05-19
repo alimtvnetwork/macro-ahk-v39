@@ -53,6 +53,7 @@ jobs:
     outputs:
       skip: ${{ steps.resolve.outputs.skip }}
       tag: ${{ steps.resolve.outputs.tag }}
+      source_ref: ${{ steps.resolve.outputs.source_ref }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -105,7 +106,15 @@ jobs:
             echo "::error::Descriptor references ${TAG} but tag not found on origin"
             exit 1
           fi
+          TAG_COMMIT=$(git rev-list -n 1 "refs/tags/${TAG}")
+          HEAD_COMMIT=$(git rev-parse HEAD)
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          if [[ "${TAG_COMMIT}" != "${HEAD_COMMIT}" ]]; then
+            echo "source_ref=${HEAD_COMMIT}" >> "$GITHUB_OUTPUT"
+            echo "Recovery source override: tag ${TAG} points at ${TAG_COMMIT}, but fixed workflow commit is ${HEAD_COMMIT}"
+          else
+            echo "source_ref=" >> "$GITHUB_OUTPUT"
+          fi
           echo "skip=false" >> "$GITHUB_OUTPUT"
           echo "Will run release.yml for ${TAG}"
 
@@ -118,3 +127,4 @@ jobs:
       contents: write
     with:
       version: ${{ needs.resolve-release.outputs.tag }}
+      source_ref: ${{ needs.resolve-release.outputs.source_ref }}
