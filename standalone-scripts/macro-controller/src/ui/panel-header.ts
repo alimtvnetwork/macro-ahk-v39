@@ -109,7 +109,7 @@ function _buildTitleElements(deps: PanelBuilderDeps, plCtx: PanelLayoutCtx) {
   hideBtn.onclick = function(e: Event) { e.stopPropagation(); destroyPanel(); };
 
   return {
-    elements: { title, wsNameEl, versionSpan, remixSplit, settingsBtn, authBadge, panelToggleSpan, hideBtn },
+    elements: { title, wsNameEl, versionSpan, remixSplit, authBadge, panelToggleSpan, hideBtn },
     wsNameEl, authBadge, panelToggleSpan, hideBtn,
   };
 }
