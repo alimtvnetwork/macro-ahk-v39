@@ -485,8 +485,6 @@ function ensureCardElement(): HTMLDivElement {
   el.addEventListener('mouseleave', hideCard);
   document.body.appendChild(el);
   return el;
-  document.body.appendChild(el);
-  return el;
 }
 
 function positionCard(card: HTMLElement, anchor: HTMLElement): void {
