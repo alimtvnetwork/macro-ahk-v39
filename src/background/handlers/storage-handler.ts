@@ -65,7 +65,7 @@ export async function handleGetStorageStats(): Promise<Record<string, unknown>> 
     const errorCount = countTable(errorsDb, "Errors");
     // Defensive: Sessions lives in logs.db — catch startup race where schema may not be ready
     let sessionCount = 0;
-    try { sessionCount = countTable(logsDb, "Sessions"); } catch { /* schema not ready */ }
+    try { sessionCount = countTable(logsDb, "Sessions"); } catch { /* schema not ready */ } // allow-swallow: Sessions schema may not exist yet at startup; sessionCount=0 is the safe default
 
     return {
         persistenceMode: mgr.getPersistenceMode(),

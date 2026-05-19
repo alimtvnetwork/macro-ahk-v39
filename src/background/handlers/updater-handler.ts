@@ -341,8 +341,8 @@ export function linkUpdaterToCategory(updaterId: number, categoryName: string): 
             [updaterId, categoryId],
         );
         dbManager?.markDirty();
-    } catch {
-        // UNIQUE constraint — already linked
+    } catch { // allow-swallow: UNIQUE constraint violation means link already exists — idempotent insert
+        // already linked
     }
 }
 

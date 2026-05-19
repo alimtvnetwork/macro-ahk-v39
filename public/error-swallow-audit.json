@@ -1,5 +1,5 @@
 {
-  "GeneratedAt": "2026-05-19T14:30:31.019Z",
+  "GeneratedAt": "2026-05-19T14:31:55.120Z",
   "Items": [
     {
       "Id": "e429c836984c",
@@ -33,33 +33,6 @@
       "Severity": "P1",
       "File": "src/background/handlers/sdk-selftest-handler.ts",
       "Line": 182,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "09a649e34ef2",
-      "Severity": "P1",
-      "File": "src/background/handlers/settings-handler.ts",
-      "Line": 118,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "4e60787e0fc9",
-      "Severity": "P1",
-      "File": "src/background/handlers/storage-handler.ts",
-      "Line": 68,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "4a1a6ba3e603",
-      "Severity": "P1",
-      "File": "src/background/handlers/updater-handler.ts",
-      "Line": 344,
       "Rule": "no-empty-catch",
       "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
       "Snippet": "catch {"
