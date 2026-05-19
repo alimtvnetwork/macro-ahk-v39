@@ -474,7 +474,7 @@ jobs:
       # ── Package assets ────────────────────────────────────
       - name: Package release assets
         env:
-          VER: ${{ needs.setup.outputs.version }}
+          VER: ${{ needs.setup.outputs.publish_tag }}
         run: |
           mkdir -p release-assets
 
@@ -553,7 +553,7 @@ jobs:
       - name: Generate release notes
         id: changelog
         env:
-          VER: ${{ needs.setup.outputs.version }}
+          VER: ${{ needs.setup.outputs.publish_tag }}
         run: |
           # Find the previous release tag
           # Find the previous release tag — EXCLUDE the current ${VER} so the
@@ -688,7 +688,7 @@ jobs:
       # See plan.md Step 3 and mem://constraints/release-assets-publish-contract.
       - name: Verify required release assets
         env:
-          VER: ${{ needs.setup.outputs.version }}
+          VER: ${{ needs.setup.outputs.publish_tag }}
         run: |
           set -e
           REQUIRED=(
@@ -741,10 +741,10 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.setup.outputs.version }}
-          name: "Marco Extension ${{ needs.setup.outputs.version }}"
+          tag_name: ${{ needs.setup.outputs.publish_tag }}
+          name: "Marco Extension ${{ needs.setup.outputs.publish_tag }}"
           body_path: release-assets/RELEASE_NOTES.md
           files: release-assets/*
           draft: false
-          prerelease: ${{ contains(needs.setup.outputs.version, '-') }}
-          make_latest: ${{ !contains(needs.setup.outputs.version, '-') }}
+          prerelease: ${{ contains(needs.setup.outputs.publish_tag, '-') }}
+          make_latest: ${{ !contains(needs.setup.outputs.publish_tag, '-') }}
