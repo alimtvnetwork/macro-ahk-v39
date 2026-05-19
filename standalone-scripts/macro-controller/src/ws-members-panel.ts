@@ -196,7 +196,7 @@ function footerFormHtml(): string {
     +       'border-radius:3px;background:' + cPanelBg + ';color:' + cPanelFg + ';font-size:11px;outline:none;">'
     +     '<select name="role" data-marco-field="invite-role" '
     +       'style="padding:3px 4px;border:1px solid ' + cPrimaryLight + ';border-radius:3px;'
-    +       'background:' + cPanelBg + ';color:' + cPanelFg + ';font-size:11px;">'
+    +       CSS_BG + cPanelBg + ';color:' + cPanelFg + ';font-size:11px;">'
     +       '<option value="member">Member</option>'
     +       '<option value="owner">Owner</option>'
     +     '</select>'
@@ -246,7 +246,7 @@ function ensurePanelEl(): HTMLDivElement {
   el.style.cssText = [
     'position:fixed', 'z-index:' + Z_INDEX,
     'min-width:300px', 'max-width:420px',
-    'background:' + cPanelBg, 'color:' + cPanelFg,
+    CSS_BG + cPanelBg, 'color:' + cPanelFg,
     'border:1px solid ' + cPrimaryLight,
     'border-radius:' + lDropdownRadius,
     'box-shadow:0 12px 32px rgba(0,0,0,0.6)',
@@ -388,7 +388,7 @@ function openMemberActionMenu(
   menu.style.cssText = [
     'position:fixed', 'z-index:' + (Z_INDEX + 1),
     'min-width:160px',
-    'background:' + cPanelBg, 'color:' + cPanelFg,
+    CSS_BG + cPanelBg, 'color:' + cPanelFg,
     'border:1px solid ' + cPrimary,
     'border-radius:' + lDropdownRadius,
     'box-shadow:0 8px 20px rgba(0,0,0,0.55)',
