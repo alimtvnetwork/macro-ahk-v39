@@ -86,7 +86,7 @@ async function resolveTargetTabId(): Promise<number | null> {
             const candidate = tabs.find((t) => t.id !== undefined && isWebTab(t.url));
             if (candidate?.id !== undefined) return candidate.id;
         } catch {
-            // try next query
+            // allow-swallow: tabs.query rejection falls through to the next query variant in the waterfall
         }
     }
 
