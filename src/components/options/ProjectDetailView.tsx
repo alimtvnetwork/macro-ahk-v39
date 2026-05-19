@@ -68,6 +68,7 @@ import { generateLlmGuide } from "@/lib/generate-llm-guide";
 import { exportKnowledgeBase } from "@/lib/developer-guide-bundle";
 import { generateDts } from "@/lib/generate-dts";
 import { toast } from "sonner";
+import { logError } from "./options-logger";
 import { sendMessage } from "@/lib/message-client";
 
 /* ------------------------------------------------------------------ */
