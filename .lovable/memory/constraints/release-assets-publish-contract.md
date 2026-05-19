@@ -40,6 +40,9 @@ completion. Known causes:
 5. Recovery dispatches that only queue `release.yml` asynchronously are not
    authoritative because the watcher can pass before asset packaging/upload
    succeeds.
+6. A stale immutable tag cannot contain fixes made after that tag was cut.
+   Recovery must separate the build source ref from the publish target tag, or
+   it will keep rebuilding the same broken tag source and never reach upload.
 
 ## Required CI/CD behavior
 
@@ -56,6 +59,9 @@ completion. Known causes:
   that has only source archives or is missing required built assets.
 - Descriptor-based recovery should call the canonical release workflow via
   `workflow_call`, so the watcher run is gated by the actual build/upload job.
+- Descriptor-based recovery may pass a fixed `source_ref` while keeping
+  `version=vX.Y.Z` as the upload target, so an already-published source-only
+  release can be repaired in place without another version bump.
 
 ## Operator rule
 
