@@ -86,7 +86,7 @@ function avatarBgFor(m: WorkspaceMember): string {
 
 function avatarHtml(m: WorkspaceMember): string {
   return '<span aria-hidden="true" style="flex-shrink:0;width:22px;height:22px;border-radius:50%;'
-    + 'background:' + avatarBgFor(m) + ';color:#f1f5f9;font-size:10px;font-weight:700;'
+    + CSS_BG + avatarBgFor(m) + ';color:#f1f5f9;font-size:10px;font-weight:700;'
     + 'display:inline-flex;align-items:center;justify-content:center;letter-spacing:0.3px;">'
     + escHtml(initialsFor(m)) + '</span>';
 }
