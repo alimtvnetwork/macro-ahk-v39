@@ -210,7 +210,7 @@ export function saveWebhookConfig(cfg: WebhookConfig): WebhookConfig {
         SecretToken: typeof cfg.SecretToken === "string" ? cfg.SecretToken : "",
     };
     if (ls) {
-        try { ls.setItem(CONFIG_STORAGE_KEY, JSON.stringify(normalized)); } catch { /* quota — ignore */ }
+        try { ls.setItem(CONFIG_STORAGE_KEY, JSON.stringify(normalized)); } catch { /* quota or storage unavailable */ } // allow-swallow: localStorage quota / unavailable — config in-memory is authoritative this session
     }
     return normalized;
 }
@@ -326,9 +326,7 @@ function writeLog(entries: ReadonlyArray<WebhookDeliveryResult>): void {
     if (!ls) return;
     try {
         ls.setItem(LOG_STORAGE_KEY, JSON.stringify(entries.slice(0, LOG_MAX_ENTRIES)));
-    } catch {
-        /* quota — ignore */
-    }
+    } catch { /* quota or storage unavailable */ } // allow-swallow: delivery-log write is best-effort; loss of one log entry must not break the run
 }
 
 export function getDeliveryLog(): ReadonlyArray<WebhookDeliveryResult> {
@@ -338,7 +336,7 @@ export function getDeliveryLog(): ReadonlyArray<WebhookDeliveryResult> {
 export function clearDeliveryLog(): void {
     const ls = safeLocalStorage();
     if (!ls) return;
-    try { ls.removeItem(LOG_STORAGE_KEY); } catch { /* ignore */ }
+    try { ls.removeItem(LOG_STORAGE_KEY); } catch { /* ignore */ } // allow-swallow: clearing the delivery log is best-effort cleanup
 }
 
 export interface RepairReport {

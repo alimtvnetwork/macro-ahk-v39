@@ -118,11 +118,9 @@ export function logBgError(
             projectId: context?.projectId,
             configId: context?.configId,
             scriptFile: context?.scriptFile,
-        } as MessageRequest).catch(() => {
-            // DB/session not ready — fall through to console.error
-        });
-    } catch {
-        // handleLogError threw synchronously (DB not bound) — fall through
+        } as MessageRequest).catch(() => { /* fall through to console.error */ }); // allow-swallow: DB/session not ready — console.error below preserves the error
+    } catch { // allow-swallow: handleLogError threw synchronously (DB not bound) — console.error below preserves the error
+        /* fall through */
     }
 
     // Step 3: Console.error LAST — always executes, preserves full stack trace

@@ -40,7 +40,7 @@ export async function rebuildNamespaceCache(project: StoredProject): Promise<voi
         let fileCache: Array<{ name: string; data: string }> = [];
         try {
             fileCache = getFilesByProject(project.id, 50);
-        } catch { /* db may not be bound yet */ }
+        } catch { /* db not bound yet — empty fileCache is the documented fallback */ } // allow-swallow: db not bound yet at cache rebuild time
 
         const nsScript = buildProjectNamespaceScript({
             codeName,
@@ -80,7 +80,7 @@ export async function rebuildNamespaceCache(project: StoredProject): Promise<voi
 export async function invalidateNamespaceCache(projectId: string): Promise<void> {
     try {
         await chrome.storage.local.remove(nsCacheKey(projectId));
-    } catch { /* best-effort */ }
+    } catch { /* best-effort remove */ } // allow-swallow: cache invalidation is best-effort; storage failure is benign
 }
 
 /**
