@@ -93,7 +93,12 @@ function pillHtml(status: WorkspaceStatus): string {
 /* Card body builder                                                   */
 /* ------------------------------------------------------------------ */
 
-function buildSubHeader(ws: WorkspaceCredit): string {
+/**
+ * Legacy sub-header builder — kept for diagnostic exports that still inline
+ * the plan/role/projects/git-sync metadata row. Not used by the v3.4.3 compact
+ * tooltip; the same data is surfaced via the plan chip + Meta section.
+ */
+export function buildSubHeader(ws: WorkspaceCredit): string {
   const parts: string[] = [];
   parts.push(escHtml(String(ws.planType || ws.tier || 'FREE')));
   if (ws.membershipRole || ws.role) parts.push(escHtml(String(ws.membershipRole || ws.role)));
@@ -329,24 +334,137 @@ function buildStatusTraceSection(explanation: StatusExplanation): string {
   return out.join('');
 }
 
-/** Build the inner HTML of the hover card for the given workspace. */
-export function buildWorkspaceHoverHtml(
+/* ------------------------------------------------------------------ */
+/* Compact zone (spec/22-app-issues/113 — v3.4.3+)                      */
+/*                                                                       */
+/*  Single ~280px tooltip with 3 zones:                                  */
+/*    1. Header — name + plan chip + status pill                         */
+/*    2. Priority facts — one-line credits, refill, expires              */
+/*    3. <details> Priority rules — collapsed by default                 */
+/* ------------------------------------------------------------------ */
+
+const C_SUCCESS = '#34d399';
+const C_WARNING = '#fde68a';
+const C_DESTRUCTIVE = '#fca5a5';
+const C_ACCENT = '#67e8f9';
+const C_MUTED = '#94a3b8';
+
+function availableColor(available: number, daily: number): string {
+  if (available <= 0) return C_DESTRUCTIVE;
+  const denom = daily > 0 ? daily : Math.max(1, available);
+  const ratio = available / denom;
+  if (ratio < 0.1) return C_DESTRUCTIVE;
+  if (ratio < 0.5) return C_WARNING;
+  return C_SUCCESS;
+}
+
+function dateColor(daysUntilEvent: number, expired = false): string {
+  if (expired || daysUntilEvent < 0) return C_DESTRUCTIVE;
+  if (daysUntilEvent <= 1) return C_WARNING;
+  return C_ACCENT;
+}
+
+function planChipHtml(ws: WorkspaceCredit): string {
+  const plan = String(ws.planType || ws.tier || 'FREE').toUpperCase();
+  return '<span style="font-size:9px;color:' + C_ACCENT
+    + ';background:rgba(103,232,249,0.12);border:1px solid rgba(103,232,249,0.35)'
+    + ';padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:0.3px;'
+    + 'margin-left:6px;vertical-align:middle;">' + escHtml(plan) + '</span>';
+}
+
+function compactRow(label: string, valueHtml: string): string {
+  return '<div style="display:flex;justify-content:space-between;gap:10px;padding:2px 0;font-size:11px;line-height:1.45;">'
+    + SPAN_COLOR_OPEN + C_MUTED + ';">' + escHtml(label) + '</span>'
+    + '<span style="color:#e2e8f0;font-weight:600;text-align:right;">' + valueHtml + '</span>'
+    + '</div>';
+}
+
+function creditsCompactRow(ws: WorkspaceCredit): string {
+  const avail = Math.round(ws.available || 0);
+  const daily = Math.round(ws.dailyLimit || ws.dailyFree || 0);
+  const used = Math.round(ws.totalCreditsUsed || 0);
+  const aColor = availableColor(avail, daily);
+  const html = SPAN_COLOR_OPEN + aColor + ';font-weight:700;">' + avail + '</span>'
+    + SPAN_COLOR_OPEN + C_MUTED + ';font-weight:400;"> avail · </span>'
+    + SPAN_COLOR_OPEN + '#e2e8f0;">' + daily + '</span>'
+    + SPAN_COLOR_OPEN + C_MUTED + ';font-weight:400;"> daily · </span>'
+    + SPAN_COLOR_OPEN + '#e2e8f0;">' + used + '</span>'
+    + SPAN_COLOR_OPEN + C_MUTED + ';font-weight:400;"> used</span>';
+  return compactRow('Credits', html);
+}
+
+function refillCompactRow(ws: WorkspaceCredit, status: WorkspaceStatus): string {
+  const iso = status.kind === KIND_ABOUT_TO_REFILL && status.refillIso
+    ? status.refillIso
+    : pickRefillEstimateIso(ws);
+  if (!iso) return '';
+  const days = daysUntil(iso);
+  const date = formatDateDDMMMYY(iso);
+  const rel = days < 0 ? 'overdue' : (days === 0 ? 'today' : 'in ' + formatDayCount(days));
+  const color = dateColor(days);
+  const html = SPAN_COLOR_OPEN + color + ';font-weight:700;">' + rel + '</span>'
+    + SPAN_COLOR_OPEN + C_MUTED + ';font-weight:400;"> (' + escHtml(date) + ')</span>';
+  return compactRow('Refill', html);
+}
+
+function expiresCompactRow(ws: WorkspaceCredit, status: WorkspaceStatus): string {
+  const iso = (ws.billingPeriodEndAt || '').trim();
+  const expired = status.kind === 'expired' || status.kind === 'fully-expired' || status.kind === 'expired-canceled';
+  if (!iso && !expired) return '';
+  if (!iso && status.sinceIso) {
+    const days = daysBetween(status.sinceIso);
+    const html = SPAN_COLOR_OPEN + C_DESTRUCTIVE + ';font-weight:700;">expired ' + formatDayCount(days) + ' ago</span>'
+      + SPAN_COLOR_OPEN + C_MUTED + ';font-weight:400;"> (' + escHtml(formatDateDDMMMYY(status.sinceIso)) + ')</span>';
+    return compactRow('Expires', html);
+  }
+  if (!iso) return '';
+  const days = daysUntil(iso);
+  const date = formatDateDDMMMYY(iso);
+  const rel = days < 0 ? 'expired ' + formatDayCount(-days) + ' ago' : (days === 0 ? 'today' : 'in ' + formatDayCount(days));
+  const color = dateColor(days, expired);
+  const html = SPAN_COLOR_OPEN + color + ';font-weight:700;">' + rel + '</span>'
+    + SPAN_COLOR_OPEN + C_MUTED + ';font-weight:400;"> (' + escHtml(date) + ')</span>';
+  return compactRow('Expires', html);
+}
+
+function buildPriorityDetailsHtml(
   ws: WorkspaceCredit,
   status: WorkspaceStatus,
-  cfg: WorkspaceLifecycleConfig = getWorkspaceLifecycleConfig(),
+  cfg: WorkspaceLifecycleConfig,
+  explanation: StatusExplanation,
 ): string {
-  const header = '<div style="font-size:13px;font-weight:700;color:#f1f5f9;margin-bottom:2px;line-height:1.3;">'
-    + escHtml(ws.fullName || ws.name) + pillHtml(status) + '</div>';
-  const explanation = explainEffectiveStatus(ws, cfg);
-  return header
-    + buildSubHeader(ws)
-    + buildCreditsSection(ws)
+  const inner = buildCreditsSection(ws)
     + buildSubscriptionSection(ws)
     + buildRefillSection(ws, status, cfg)
     + buildExpirySection(ws, status)
     + buildMetaSection(ws)
     + buildThresholdsSection(cfg)
     + buildStatusTraceSection(explanation);
+  return '<details data-marco-tip-details style="margin-top:8px;border-top:1px solid rgba(148,163,184,0.18);padding-top:6px;">'
+    + '<summary style="cursor:pointer;font-size:10px;font-weight:700;color:' + C_ACCENT
+    + ';letter-spacing:0.4px;text-transform:uppercase;list-style:none;user-select:none;">▸ Priority rules &amp; details</summary>'
+    + '<div style="margin-top:4px;">' + inner + '</div>'
+    + '</details>';
+}
+
+/** Build the inner HTML of the hover card for the given workspace. */
+export function buildWorkspaceHoverHtml(
+  ws: WorkspaceCredit,
+  status: WorkspaceStatus,
+  cfg: WorkspaceLifecycleConfig = getWorkspaceLifecycleConfig(),
+): string {
+  const explanation = explainEffectiveStatus(ws, cfg);
+  const header = '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;'
+    + 'font-size:13px;font-weight:700;color:#f1f5f9;margin-bottom:6px;line-height:1.3;">'
+    + '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'
+    + escHtml(ws.fullName || ws.name) + '</span>'
+    + planChipHtml(ws)
+    + pillHtml(status)
+    + '</div>';
+  const priority = creditsCompactRow(ws)
+    + refillCompactRow(ws, status)
+    + expiresCompactRow(ws, status);
+  return header + priority + buildPriorityDetailsHtml(ws, status, cfg, explanation);
 }
 
 
@@ -360,13 +478,16 @@ function ensureCardElement(): HTMLDivElement {
   el = document.createElement('div');
   el.id = HOVERCARD_ID;
   el.style.cssText = [
-    'position:fixed', 'z-index:2147483646', 'pointer-events:none',
+    'position:fixed', 'z-index:2147483646', 'pointer-events:auto',
     'min-width:240px', 'max-width:320px', 'padding:8px 10px',
     'background:rgba(15,23,42,0.97)', 'border:1px solid rgba(103,232,249,0.35)',
     'border-radius:6px', 'box-shadow:0 8px 24px rgba(0,0,0,0.5)',
     'color:#e2e8f0', 'font-family:system-ui,-apple-system,sans-serif',
     'line-height:1.4', 'display:none',
   ].join(';') + ';';
+  // Hide on leaving the card itself so the <details> toggle can be clicked
+  // without dismissing the panel.
+  el.addEventListener('mouseleave', hideCard);
   document.body.appendChild(el);
   return el;
 }
@@ -442,6 +563,9 @@ export function attachWorkspaceHoverCard(listEl: HTMLElement, lookup: WsLookup):
     if (!target.closest(SEL_WS_NAME)) return;
     const related = e.relatedTarget as HTMLElement | null;
     if (related && related.closest(SEL_WS_NAME)) return;
+    // Don't hide if the pointer moved onto the hover card itself —
+    // allow user to expand <details>.
+    if (related && related.closest('#' + HOVERCARD_ID)) return;
     hideCard();
   };
 
