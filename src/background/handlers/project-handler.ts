@@ -198,7 +198,13 @@ export async function handleSaveProject(
     const projects = await readAllProjects();
     const wasNew = !projects.some((p) => p.id === project.id);
 
-    const saved = upsertProject(projects, project);
+    // Phase 2a: heal script bindings (path → canonical StoredScript.name)
+    // before persisting so the next read of project.scripts in the UI lines
+    // up with availableScripts and "not available" rows disappear.
+    // No error swallowing — unresolved paths are logged via Logger.error.
+    const healed = await healProjectScriptBindings(project);
+
+    const saved = upsertProject(projects, healed);
     await writeAllProjects(projects);
 
     // ✅ 15.8: Rebuild namespace cache on save (fire-and-forget)
@@ -223,6 +229,51 @@ export async function handleSaveProject(
     }
 
     return { isOk: true, project: saved };
+}
+
+/**
+ * Rewrites each `project.scripts[].path` to the canonical `StoredScript.name`
+ * when a basename/case-insensitive match exists. Unresolved entries are
+ * preserved as-is and logged via `logCaughtError` so the diagnostics export
+ * captures them — never silently dropped.
+ *
+ * @see .lovable/plan.md "Phase 2 — Fix bindings + auto-attach"
+ */
+async function healProjectScriptBindings(project: StoredProject): Promise<StoredProject> {
+    const entries = project.scripts ?? [];
+    if (entries.length === 0) {
+        return project;
+    }
+
+    let storedScripts: StoredScript[];
+    try {
+        storedScripts = await readStoredScripts();
+    } catch (caught) {
+        logCaughtError(
+            BgLogTag.PROJECT_SAVE_CONFIG_SEED,
+            `healProjectScriptBindings: failed to read stored scripts for project "${project.id}" — bindings left as-is`,
+            caught,
+        );
+        throw caught;
+    }
+
+    const healedScripts = entries.map((entry) => {
+        const matched = findStoredScriptByProjectPath(storedScripts, entry.path);
+        if (matched === null) {
+            logCaughtError(
+                BgLogTag.PROJECT_SAVE_CONFIG_SEED,
+                `healProjectScriptBindings: project "${project.id}" references script path "${entry.path}" but no StoredScript.name matches — library names: [${storedScripts.map((s) => s.name).join(", ")}]`,
+                new Error("UnboundProjectScriptPath"),
+            );
+            return entry;
+        }
+        if (matched.name === entry.path) {
+            return entry;
+        }
+        return { ...entry, path: matched.name };
+    });
+
+    return { ...project, scripts: healedScripts };
 }
 
 /** Auto-derives slug and codeName from project name if not already set. */
