@@ -190,8 +190,8 @@ function applyV6Up(logsDb: SqlJsDatabase, _errorsDb: SqlJsDatabase): void {
         if (existing.length > 0 && (existing[0].values[0][0] as number) === 0) {
             logsDb.run("INSERT INTO UpdateSettings (AutoCheckIntervalMinutes, HasUserConfirmBeforeUpdate, HasChangelogFromVersionInfo, CacheExpiryMinutes) VALUES (1440, 0, 1, 10080)");
         }
-    } catch {
-        // Table may not exist yet in edge cases
+    } catch { // allow-swallow: UpdateSettings table may not exist yet on first-run; seed re-attempts on next migration pass
+        // table missing
     }
     console.log("[migration] v6: Added updater settings, caching, and changelog columns");
 }

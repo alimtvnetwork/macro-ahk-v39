@@ -164,8 +164,8 @@ export async function cacheDelete(category: CacheCategory, subKey = ""): Promise
             request.onsuccess = () => resolve();
             request.onerror = () => resolve(); // best-effort
         });
-    } catch {
-        // best-effort
+    } catch { // allow-swallow: IndexedDB cache delete is best-effort; stale entry will be re-validated on next read
+        // noop
     }
 }
 

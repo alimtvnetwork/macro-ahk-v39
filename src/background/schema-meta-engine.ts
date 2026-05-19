@@ -285,7 +285,7 @@ export function applyJsonSchema(db: SqlJsDatabase, schema: JsonSchemaDef): Migra
 
         db.run("COMMIT");
     } catch (err) {
-        try { db.run("ROLLBACK"); } catch { /* noop */ }
+        try { db.run("ROLLBACK"); } catch { /* noop */ } // allow-swallow: ROLLBACK after failed COMMIT may itself fail if no active txn; outer error is already recorded
         result.errors.push(`Transaction failed: ${String(err)}`);
     }
 
