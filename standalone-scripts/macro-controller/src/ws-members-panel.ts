@@ -300,6 +300,139 @@ function swapFooter(el: HTMLElement, expanded: boolean): void {
   }
 }
 
+// v3.4.3 (task 14) — Member action menu (Promote / Demote / Remove) anchored to ⋯
+const MEMBER_MENU_ID = 'marco-ws-member-menu';
+
+function closeMemberActionMenu(): void {
+  const existing = document.getElementById(MEMBER_MENU_ID);
+  if (existing) existing.remove();
+}
+
+function buildMenuItem(label: string, color: string, onClick: () => void): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = label;
+  btn.style.cssText =
+    'display:block;width:100%;text-align:left;padding:5px 10px;background:transparent;color:' + color +
+    ';border:none;font-size:11px;cursor:pointer;line-height:1.3;';
+  btn.onmouseenter = function () { btn.style.background = 'rgba(148,163,184,0.15)'; };
+  btn.onmouseleave = function () { btn.style.background = 'transparent'; };
+  btn.onclick = function (e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeMemberActionMenu();
+    onClick();
+  };
+  return btn;
+}
+
+function performRemove(panelEl: HTMLElement, wsId: string, wsName: string, userId: string, label: string): void {
+  if (!window.confirm('Remove "' + label + '" from this workspace?')) return;
+  const row = panelEl.querySelector('[data-marco-member-row][data-marco-user-id="' + cssEscape(userId) + '"]') as HTMLElement | null;
+  const prevOpacity = row ? row.style.opacity : '';
+  if (row) {
+    row.style.opacity = '0.4';
+    row.style.pointerEvents = 'none';
+  }
+  removeMember(wsId, userId)
+    .then(function () {
+      showToast('🗑️ Removed ' + label, 'success');
+      loadAndRender(panelEl, wsId, wsName);
+    })
+    .catch(function (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      showToast('❌ Remove failed: ' + msg, 'error');
+      if (row) {
+        row.style.opacity = prevOpacity;
+        row.style.pointerEvents = '';
+      }
+    });
+}
+
+function performPromoteDemote(panelEl: HTMLElement, wsId: string, wsName: string, userId: string, label: string, nextRole: 'member' | 'owner'): void {
+  const verb = nextRole === 'owner' ? 'Promote to Owner' : 'Demote to Member';
+  if (!window.confirm(verb + ': "' + label + '"?')) return;
+  updateMemberRole(wsId, userId, nextRole)
+    .then(function () {
+      showToast('👑 ' + label + ' → ' + nextRole, 'success');
+      loadAndRender(panelEl, wsId, wsName);
+    })
+    .catch(function (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      showToast('❌ Role change failed: ' + msg, 'error');
+    });
+}
+
+// CSS.escape polyfill (Safari/older WebView).
+function cssEscape(value: string): string {
+  const css = (window as unknown as { CSS?: { escape?: (s: string) => string } }).CSS;
+  if (css && typeof css.escape === 'function') return css.escape(value);
+  return value.replace(/[^a-zA-Z0-9_-]/g, function (ch) { return '\\' + ch; });
+}
+
+function openMemberActionMenu(
+  panelEl: HTMLElement,
+  anchor: HTMLElement,
+  wsId: string,
+  wsName: string,
+  userId: string,
+  role: string,
+  label: string,
+): void {
+  closeMemberActionMenu();
+  if (!userId) return;
+  const menu = document.createElement('div');
+  menu.id = MEMBER_MENU_ID;
+  const rect = anchor.getBoundingClientRect();
+  menu.style.cssText = [
+    'position:fixed', 'z-index:' + (Z_INDEX + 1),
+    'min-width:160px',
+    'background:' + cPanelBg, 'color:' + cPanelFg,
+    'border:1px solid ' + cPrimary,
+    'border-radius:' + lDropdownRadius,
+    'box-shadow:0 8px 20px rgba(0,0,0,0.55)',
+    'padding:4px 0', 'font-size:11px',
+    'top:' + (rect.bottom + 4) + 'px',
+    'left:' + Math.max(8, rect.right - 160) + 'px',
+  ].join(';') + ';';
+
+  if (role === 'owner') {
+    menu.appendChild(buildMenuItem('↓ Demote to Member', '#fde68a', function () {
+      performPromoteDemote(panelEl, wsId, wsName, userId, label, 'member');
+    }));
+  } else {
+    menu.appendChild(buildMenuItem('↑ Promote to Owner', '#fde68a', function () {
+      performPromoteDemote(panelEl, wsId, wsName, userId, label, 'owner');
+    }));
+  }
+  menu.appendChild(buildMenuItem('🗑️ Remove member', '#fca5a5', function () {
+    performRemove(panelEl, wsId, wsName, userId, label);
+  }));
+
+  document.body.appendChild(menu);
+
+  // Dismiss on outside click / Esc.
+  setTimeout(function () {
+    const outside = function (e: MouseEvent): void {
+      const t = e.target as Node | null;
+      if (t && menu.contains(t)) return;
+      closeMemberActionMenu();
+      document.removeEventListener('mousedown', outside, true);
+      document.removeEventListener('keydown', key, true);
+    };
+    const key = function (e: KeyboardEvent): void {
+      if (e.key !== 'Escape') return;
+      closeMemberActionMenu();
+      document.removeEventListener('mousedown', outside, true);
+      document.removeEventListener('keydown', key, true);
+    };
+    document.addEventListener('mousedown', outside, true);
+    document.addEventListener('keydown', key, true);
+  }, 10);
+}
+
+
+
 // v3.4.3 (task 13) — Submit invite + optimistic insert. Reverts on failure.
 function submitInvite(el: HTMLElement, wsId: string, wsName: string, form: HTMLFormElement): void {
   const emailInput = form.querySelector('[data-marco-field="invite-email"]') as HTMLInputElement | null;
