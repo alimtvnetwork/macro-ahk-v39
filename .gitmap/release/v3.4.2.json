@@ -7,9 +7,9 @@
   "assets": [],
   "assetRecovery": {
     "status": "requested",
-    "attempt": 4,
+    "attempt": 5,
     "rca": ".lovable/cicd-issues/08-stale-release-tag-cannot-contain-recovery-fixes.md",
-    "reason": "Live GitHub release still lacks uploaded assets; rerun fixed direct recovery with hard chrome-extension manifest check and every plugin ZIP."
+    "reason": "Live GitHub release still lacks uploaded assets; rerun after fixing release.yml input-first recovery resolution for refs/heads/main caller context."
   },
   "changelog": [
     "Bumped extension, SDK, and standalone-script versions to **3.4.2**.",
