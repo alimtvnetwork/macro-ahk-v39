@@ -748,3 +748,40 @@ jobs:
           draft: false
           prerelease: ${{ contains(needs.setup.outputs.publish_tag, '-') }}
           make_latest: ${{ !contains(needs.setup.outputs.publish_tag, '-') }}
+
+      - name: Verify GitHub Release upload completed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          VER: ${{ needs.setup.outputs.publish_tag }}
+        run: |
+          set -euo pipefail
+          REQUIRED=(
+            "marco-extension-${VER}.zip"
+            "macro-controller-${VER}.zip"
+            "marco-sdk-${VER}.zip"
+            "xpath-${VER}.zip"
+            "install.ps1"
+            "install.sh"
+            "VERSION.txt"
+            "changelog.md"
+            "checksums.txt"
+            "RELEASE_NOTES.md"
+          )
+          if [ -d "standalone-scripts/prompts" ]; then
+            REQUIRED+=("prompts-${VER}.zip")
+          fi
+          ASSETS=$(gh release view "${VER}" --repo "${REPO}" --json assets --jq '.assets[].name')
+          MISSING=0
+          for asset in "${REQUIRED[@]}"; do
+            if ! printf '%s\n' "${ASSETS}" | grep -qx "${asset}"; then
+              echo "::error::GitHub Release ${VER} is missing uploaded asset: ${asset}"
+              MISSING=$((MISSING+1))
+            fi
+          done
+          if [ "${MISSING}" -gt 0 ]; then
+            echo "::error::${MISSING} uploaded release asset(s) missing after action-gh-release completed"
+            printf '%s\n' "${ASSETS}"
+            exit 1
+          fi
+          echo "✅ GitHub Release ${VER} contains all required uploaded assets"
