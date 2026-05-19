@@ -526,6 +526,7 @@ export function ProjectScriptSelector({ availableScripts, availableConfigs, sele
           onMoveUp={() => handleMove(binding.scriptId, -1)}
           onMoveDown={() => handleMove(binding.scriptId, 1)}
           linkMap={linkMap}
+          isUnbound={unboundScriptNames?.has(binding.scriptName) ?? false}
         />
       ))}
     </div>
