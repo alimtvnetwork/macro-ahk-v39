@@ -3,9 +3,10 @@
 #
 # Purpose:
 #   The live GitHub Release for v3.4.2 has zero uploaded assets. This workflow
-#   calls the canonical release pipeline from the current fixed commit and uses
-#   v3.4.2 only as the publish target. It exists to repair the already-created
-#   source-only Release page in place.
+#   builds assets from current fixed main and uploads them directly to the
+#   existing v3.4.2 Release page. It deliberately avoids the full release.yml
+#   lint/test gates because those gates already blocked upload once; recovery
+#   must repair the published page first.
 #
 # NOTE: No email or notification integrations — by design.
 # ──────────────────────────────────────────────────────────────
@@ -18,7 +19,6 @@ on:
       - main
     paths:
       - ".github/workflows/recover-v3-4-2-release-assets.yml"
-      - ".github/workflows/release.yml"
       - ".gitmap/release/v3.4.2.json"
   workflow_dispatch:
 
@@ -32,9 +32,166 @@ concurrency:
 jobs:
   recover:
     name: Build and upload v3.4.2 assets
-    uses: ./.github/workflows/release.yml
-    permissions:
-      contents: write
-    with:
-      version: v3.4.2
-      source_ref: ${{ github.sha }}
+    runs-on: ubuntu-latest
+    env:
+      VER: v3.4.2
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout fixed source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build recoverable release outputs
+        run: |
+          set -euo pipefail
+          pnpm run build:sdk
+          pnpm run build:xpath
+          pnpm run build:macro-controller
+          pnpm run build:prompts
+          pnpm run build:extension
+
+      - name: Package release assets
+        run: |
+          set -euo pipefail
+          rm -rf release-assets
+          mkdir -p release-assets
+
+          cp readme.md chrome-extension/readme.md
+          echo "${VER}" > chrome-extension/VERSION
+          find chrome-extension -name '*.map' -delete
+
+          (cd chrome-extension && zip -r "../release-assets/marco-extension-${VER}.zip" .)
+          (cd standalone-scripts/macro-controller && zip -r "../../release-assets/macro-controller-${VER}.zip" .)
+          (cd standalone-scripts/marco-sdk && zip -r "../../release-assets/marco-sdk-${VER}.zip" .)
+          (cd standalone-scripts/xpath && zip -r "../../release-assets/xpath-${VER}.zip" .)
+          if [ -d standalone-scripts/prompts ]; then
+            (cd standalone-scripts/prompts && zip -r "../../release-assets/prompts-${VER}.zip" .)
+          fi
+
+          cp scripts/install.sh release-assets/install.sh
+          cp scripts/install.ps1 release-assets/install.ps1
+          chmod +x release-assets/install.sh
+          echo "${VER}" > release-assets/VERSION.txt
+          cp changelog.md release-assets/changelog.md
+
+          (cd release-assets && sha256sum * > checksums.txt)
+
+      - name: Generate release notes
+        run: |
+          set -euo pipefail
+          REPO="${GITHUB_REPOSITORY}"
+          {
+            echo "## Marco Extension ${VER}"
+            echo ""
+            echo "### Assets"
+            echo ""
+            echo "| Asset | Description |"
+            echo "|-------|-------------|"
+            echo "| \`marco-extension-${VER}.zip\` | Chrome extension — load unpacked in \`chrome://extensions\` |"
+            echo "| \`macro-controller-${VER}.zip\` | Standalone macro controller |"
+            echo "| \`marco-sdk-${VER}.zip\` | SDK library |"
+            echo "| \`xpath-${VER}.zip\` | XPath utility |"
+            echo "| \`prompts-${VER}.zip\` | Prompt templates |"
+            echo "| \`install.ps1\` | Unified PowerShell installer |"
+            echo "| \`install.sh\` | Unified Bash installer |"
+            echo "| \`VERSION.txt\` | Version identifier |"
+            echo "| \`changelog.md\` | Full project changelog |"
+            echo "| \`checksums.txt\` | SHA256 checksums |"
+            echo ""
+            echo "### Quick Install"
+            echo ""
+            echo "**Windows (PowerShell):**"
+            echo "\`\`\`powershell"
+            echo "irm https://github.com/${REPO}/releases/download/${VER}/install.ps1 | iex"
+            echo "\`\`\`"
+            echo ""
+            echo "**Linux / macOS:**"
+            echo "\`\`\`bash"
+            echo "curl -fsSL https://github.com/${REPO}/releases/download/${VER}/install.sh | bash"
+            echo "\`\`\`"
+            echo ""
+            echo "### Checksums (SHA256)"
+            echo ""
+            echo "\`\`\`"
+            cat release-assets/checksums.txt
+            echo "\`\`\`"
+          } > release-assets/RELEASE_NOTES.md
+
+      - name: Verify local recovery assets
+        run: |
+          set -euo pipefail
+          REQUIRED=(
+            "release-assets/marco-extension-${VER}.zip"
+            "release-assets/macro-controller-${VER}.zip"
+            "release-assets/marco-sdk-${VER}.zip"
+            "release-assets/xpath-${VER}.zip"
+            "release-assets/install.ps1"
+            "release-assets/install.sh"
+            "release-assets/VERSION.txt"
+            "release-assets/changelog.md"
+            "release-assets/checksums.txt"
+            "release-assets/RELEASE_NOTES.md"
+          )
+          if [ -d standalone-scripts/prompts ]; then
+            REQUIRED+=("release-assets/prompts-${VER}.zip")
+          fi
+          for f in "${REQUIRED[@]}"; do
+            if [ ! -s "$f" ]; then
+              echo "::error file=$f::Required recovery asset missing or empty"
+              exit 1
+            fi
+          done
+          ls -lh release-assets/
+
+      - name: Upload assets to existing GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload "${VER}" release-assets/* --repo "${GITHUB_REPOSITORY}" --clobber
+          gh release edit "${VER}" --repo "${GITHUB_REPOSITORY}" --title "Release ${VER}" --notes-file release-assets/RELEASE_NOTES.md --latest
+
+      - name: Verify live GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REQUIRED=(
+            "marco-extension-${VER}.zip"
+            "macro-controller-${VER}.zip"
+            "marco-sdk-${VER}.zip"
+            "xpath-${VER}.zip"
+            "install.ps1"
+            "install.sh"
+            "VERSION.txt"
+            "changelog.md"
+            "checksums.txt"
+            "RELEASE_NOTES.md"
+          )
+          if [ -d standalone-scripts/prompts ]; then
+            REQUIRED+=("prompts-${VER}.zip")
+          fi
+          ASSETS=$(gh release view "${VER}" --repo "${GITHUB_REPOSITORY}" --json assets --jq '.assets[].name')
+          for asset in "${REQUIRED[@]}"; do
+            if ! printf '%s\n' "${ASSETS}" | grep -qx "${asset}"; then
+              echo "::error::Live GitHub Release ${VER} is missing asset: ${asset}"
+              printf '%s\n' "${ASSETS}"
+              exit 1
+            fi
+          done
+          echo "✅ Live GitHub Release ${VER} contains all required uploaded assets"

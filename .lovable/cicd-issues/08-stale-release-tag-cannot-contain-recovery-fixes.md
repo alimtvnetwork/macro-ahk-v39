@@ -38,10 +38,12 @@ tag.
 
 After that was fixed, the live GitHub API still showed `v3.4.2` with **zero**
 uploaded assets. The remaining operational gap was that descriptor/watch-based
-recovery still depends on GitHub receiving and scheduling the watcher event. For
-an already-broken latest release, that is too indirect: there must be a direct,
-version-specific recovery workflow that runs from `main` and calls the canonical
-release pipeline with `version=v3.4.2` and `source_ref=${{ github.sha }}`.
+recovery and reusable `release.yml` recovery still run the full release pipeline
+before upload. If any pre-upload lint/test/build gate fails, the already-created
+Release page remains empty again. For an already-broken latest release, recovery
+must be self-contained: build only the assets needed for the Release page,
+upload them directly with `gh release upload --clobber`, edit the release body,
+then verify the live GitHub asset list.
 
 ## Status
 
@@ -67,9 +69,11 @@ release pipeline with `version=v3.4.2` and `source_ref=${{ github.sha }}`.
   `.gitmap/release/v3.4.2.json` and `latest.json` are changed, the concrete
   `v*.json` descriptor wins instead of being overwritten by the first candidate.
 - Added `.github/workflows/recover-v3-4-2-release-assets.yml`, a direct one-shot
-  recovery workflow triggered by this fix. It calls `release.yml` with
-  `version=v3.4.2` and `source_ref=${{ github.sha }}` so the Release page is
-  repaired without waiting for descriptor heuristics.
+  recovery workflow triggered by this fix. It builds the extension and plugin
+  ZIPs from fixed `main`, copies `install.ps1` / `install.sh`, generates
+  checksums and release notes, uploads all assets with `gh release upload
+  --clobber`, edits the existing `v3.4.2` Release body, and verifies the live
+  GitHub Release asset list.
 - Asset names, `VERSION.txt`, checksums, release notes, and `action-gh-release`
   still use the target tag (`v3.4.2`), so the existing Release page is repaired
   in place instead of requiring another version bump.
@@ -82,6 +86,9 @@ release pipeline with `version=v3.4.2` and `source_ref=${{ github.sha }}`.
   list, not only local `release-assets/` files.
 - When the latest release is already source-only, use a direct recovery workflow
   or manual `workflow_dispatch`; do not rely only on indirect descriptor replay.
+- Recovery for an already-published empty Release page must not depend on the
+  full release pipeline's unrelated pre-upload gates; upload repair assets first,
+  then audit the live page.
 - Re-running Release Watcher after this change can repair existing source-only
   releases by rebuilding from fixed `main` and uploading to the existing tag.
 
