@@ -50,6 +50,15 @@ const MIN_INJECTION_AGE_MS = 2000;
  */
 const lastProbedFingerprint: Map<number, string> = new Map();
 
+/** Tabs with a probe currently in-flight — second concurrent call short-circuits. */
+const probeInFlight: Set<number> = new Set();
+
+/** Clears per-tab SPA state. Exported for use by service-worker tab-close handler. */
+export function clearSpaReinjectStateForTab(tabId: number): void {
+    lastProbedFingerprint.delete(tabId);
+    probeInFlight.delete(tabId);
+}
+
 /* ------------------------------------------------------------------ */
 /*  Public API                                                         */
 /* ------------------------------------------------------------------ */
@@ -59,7 +68,14 @@ export function registerSpaReinject(): void {
     chrome.webNavigation.onHistoryStateUpdated.addListener(
         handleHistoryStateUpdated,
     );
-    console.log("[spa-reinject] Registered onHistoryStateUpdated listener");
+    try {
+        chrome.tabs.onRemoved.addListener((tabId) => {
+            clearSpaReinjectStateForTab(tabId);
+        });
+    } catch (err) {
+        logCaughtError(BgLogTag.MARCO, "spa-reinject tabs.onRemoved registration failed", err);
+    }
+    console.log("[spa-reinject] Registered onHistoryStateUpdated + tab-close cleanup");
 }
 
 /* ------------------------------------------------------------------ */
