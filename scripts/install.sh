@@ -39,10 +39,10 @@ fi
 #
 # Examples:
 #   # Release-page one-liner (URL-pinned):
-#   curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v34/releases/download/v2.158.0/install.sh | bash
+#   curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v35/releases/download/v2.158.0/install.sh | bash
 #
 #   # From main (latest channel):
-#   curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v34/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v35/main/scripts/install.sh | bash
 #
 #   # Explicit override:
 #   ./install.sh --version v2.150.0
@@ -66,7 +66,7 @@ if [ -n "${__CONST_DIR}" ] && [ -f "${__CONST_DIR}/installer-constants.sh" ]; th
 fi
 unset __CONST_DIR
 
-REPO="${MARCO_DEFAULT_REPO:-alimtvnetwork/macro-ahk-v34}"
+REPO="${MARCO_DEFAULT_REPO:-alimtvnetwork/macro-ahk-v35}"
 VERSION_REGEX="${MARCO_VERSION_REGEX:-^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$}"
 # Sentinel returned by fetch_latest_version when the API responds 200 OK
 # but reports zero releases. Triggers spec §2 step 5 main-branch fallback

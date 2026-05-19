@@ -4,7 +4,7 @@
 **Date**: 2026-04-24
 **Status**: Open — refactor pending sign-off
 **Reference file**: `standalone-scripts/payment-banner-hider/src/index.ts`
-**Upstream**: https://github.com/alimtvnetwork/macro-ahk-v34/blob/main/standalone-scripts/payment-banner-hider/src/index.ts
+**Upstream**: https://github.com/alimtvnetwork/macro-ahk-v35/blob/main/standalone-scripts/payment-banner-hider/src/index.ts
 
 ---
 

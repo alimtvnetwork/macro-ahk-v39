@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/alimtvnetwork/macro-ahk-v34/schemas/standalone-registry-report.schema.json",
+  "$id": "https://github.com/alimtvnetwork/macro-ahk-v35/schemas/standalone-registry-report.schema.json",
   "title": "Standalone Registry Report",
   "description": "Stable JSON payload emitted by `node scripts/report-standalone-registry.mjs --json`. CI tools (annotators, dashboards, slack bots, status pages) MUST validate every payload against this schema before consuming it. Pin against `schemaVersion` to detect breaking changes — a major bump on `schemaVersion` will land alongside an updated `$id` here.",
   "type": "object",

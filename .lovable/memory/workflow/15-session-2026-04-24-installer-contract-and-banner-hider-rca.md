@@ -6,7 +6,7 @@
 - Added `scripts/installer-contract.json` — single source of truth (repo, semver regex, exit codes 0–6, flags, endpoints, sibling-discovery defaults, checksum settings, AC-IDs).
 - New `scripts/generate-installer-constants.mjs` emits `installer-constants.{sh,ps1}` consumed (opt-in, with inline fallbacks preserved for curl-piped standalone installs) by both installers.
 - New `scripts/check-installer-contract.mjs` drift detector: verifies generated files in sync, every `exit N` declared, every CLI flag declared, default-repo strings agree.
-- **Long-standing bug fixed:** `install.ps1` was hardcoded to `macro-ahk-v34` while `install.sh` used `macro-ahk-v34`.
+- **Long-standing bug fixed:** `install.ps1` was hardcoded to `macro-ahk-v35` while `install.sh` used `macro-ahk-v35`.
 - Suite status: drift detector ✓, resolver **46/46**, mock-server **62/62**, vitest **484/484**.
 - Version → **v2.228.0**.
 

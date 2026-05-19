@@ -77,7 +77,7 @@
 
 **What happens**: After clicking Run/Re-inject:
 1. The popup shows "✅ Injected!" and the injection results panel shows success
-2. Console shows `[Marco Controller v1.0.0] Loaded | Project: macro-ahk-v34`
+2. Console shows `[Marco Controller v1.0.0] Loaded | Project: macro-ahk-v35`
 3. But **no visible UI panel** appears on the target page
 
 **Root cause (multiple factors)**:
