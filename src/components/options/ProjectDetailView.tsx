@@ -1629,7 +1629,6 @@ function ScriptsTabContent({ project, availableScripts, availableConfigs, onSave
     const projectPaths = (project.scripts ?? []).map((s) => s.path);
     const libraryNames = availableScripts.map((s) => s.name);
     const unbound = Array.from(unboundPaths);
-    /* eslint-disable no-console -- intentional diagnostic group, not error logging */
     console.groupCollapsed(
       `[Options.ScriptsTab] project="${project.name}" scripts=${projectPaths.length} unbound=${unbound.length}`,
     );
@@ -1637,7 +1636,6 @@ function ScriptsTabContent({ project, availableScripts, availableConfigs, onSave
     console.log("availableScripts names:", libraryNames);
     console.log("unbound paths:", unbound);
     console.groupEnd();
-    /* eslint-enable no-console */
     if (unbound.length > 0) {
       logError(
         "ScriptsTab.UnboundBinding",
