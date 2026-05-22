@@ -390,6 +390,52 @@ function createTitleBar(panel: HTMLElement): HTMLElement {
     return bar;
 }
 
+/**
+ * Search bar — filters projects by name / id / repo / branch as the user
+ * types. Calls `onChange` on every input event so the body re-renders
+ * against the current `state.searchQuery`.
+ */
+function createSearchBar(onChange: () => void): HTMLElement {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'padding:6px 10px;border-bottom:1px solid rgba(124,58,237,0.20);background:rgba(0,0,0,0.20);display:flex;align-items:center;gap:6px;';
+
+    const icon = document.createElement('span');
+    icon.textContent = '🔍';
+    icon.style.cssText = 'font-size:11px;opacity:0.8;';
+
+    const input = document.createElement('input');
+    input.type = 'search';
+    input.placeholder = 'Search projects by name, repo, branch, or id…';
+    input.value = state.searchQuery;
+    input.style.cssText =
+        'flex:1;background:rgba(0,0,0,0.35);color:#f1f5f9;border:1px solid rgba(124,58,237,0.30);'
+        + 'border-radius:4px;padding:4px 8px;font-size:11px;font-family:inherit;outline:none;';
+    input.addEventListener('input', function () {
+        state.searchQuery = input.value;
+        onChange();
+    });
+    // Prevent the drag handler / global shortcuts from swallowing keystrokes.
+    input.addEventListener('keydown', function (e) { e.stopPropagation(); });
+
+    const clear = document.createElement('button');
+    clear.type = 'button';
+    clear.textContent = '✕';
+    clear.title = 'Clear search';
+    clear.style.cssText = 'background:transparent;border:none;color:#94a3b8;cursor:pointer;font-size:12px;padding:2px 6px;';
+    clear.onclick = function (): void {
+        input.value = '';
+        state.searchQuery = '';
+        onChange();
+        input.focus();
+    };
+
+    wrap.appendChild(icon);
+    wrap.appendChild(input);
+    wrap.appendChild(clear);
+    return wrap;
+}
+
+
 function createFooter(
     onRefresh: () => void,
     onExport: (statusEl: HTMLElement) => void,
