@@ -50,6 +50,7 @@ import {
     handleImportProject,
     handleSaveProject,
     handleSetActiveProject,
+    handleGetAutoAttachDecisions,
 } from "./handlers/project-handler";
 
 
