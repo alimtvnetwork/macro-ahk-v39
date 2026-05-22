@@ -693,12 +693,22 @@ async function fetchAuthTokenFromSessionExchange(
 ): Promise<string | null> {
     if (!hasSessionCookie || !projectId) return null;
 
+    // HEFF: single attempt, no retry, no refresh-loop. 401/403 are reported
+    // and propagated as null (unified-auth-contract handles re-auth elsewhere).
+    const url = `${AUTH_API_BASE}/projects/${projectId}/auth-token`;
     try {
-        const response = await fetch(`${AUTH_API_BASE}/projects/${projectId}/auth-token`, {
+        const response = await fetch(url, {
             method: "GET",
             credentials: "include",
         });
-        if (!response.ok) return null;
+        if (!response.ok) {
+            logBgWarnError(
+                BgLogTag.CONFIG_AUTH,
+                `HEFF: HTTP ${response.status} on GET ${url} — auth-token exchange failed; ` +
+                `do NOT retry. Loop halted. Awaiting user instruction.`,
+            );
+            return null;
+        }
 
         const payload = await response.json() as unknown;
         return extractJwtFromAuthTokenPayload(payload);
