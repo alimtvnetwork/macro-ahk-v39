@@ -193,7 +193,7 @@ function _buildSettingsTabs(deps: SettingsDeps, getPromptsConfig: () => Resolved
   return { tabBtns, panels, tabPanels: { tabBar, panelsContainer: tabPanels }, generalResult };
 }
 
-function _buildSettingsFooter(btnStyle: string, deps: SettingsDeps, _panels: HTMLElement[], overlay: HTMLElement): HTMLElement {
+function _buildSettingsFooter(btnStyle: string, deps: SettingsDeps, _panels: HTMLElement[], overlay: HTMLElement, generalResult: GeneralPanelResult): HTMLElement {
   const { showToast, log } = deps;
   const footer = document.createElement('div');
   footer.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid ' + cPanelBorder + ';flex-shrink:0;';
@@ -215,15 +215,32 @@ function _buildSettingsFooter(btnStyle: string, deps: SettingsDeps, _panels: HTM
   saveBtn2.textContent = '💾 Save';
   saveBtn2.style.cssText = btnStyle + CssFragment.Background + cSuccess + ';color:#1e1e2e;padding:6px 20px;font-size:12px;font-weight:600;';
   saveBtn2.onclick = function() {
-    log('Settings saved', 'info');
-    showToast('✅ Settings saved', 'info');
-    overlay.remove();
+    _persistOverrideToggles(generalResult).then(function() {
+      log('Settings saved', 'info');
+      showToast('✅ Settings saved', 'info');
+      overlay.remove();
+    }).catch(function(err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      showToast('❌ Save failed: ' + msg, 'error');
+    });
   };
 
   footer.appendChild(cancelBtn2);
   footer.appendChild(resetBtn);
   footer.appendChild(saveBtn2);
   return footer;
+}
+
+async function _persistOverrideToggles(generalResult: GeneralPanelResult): Promise<void> {
+  if (!generalResult.toggles) return;
+  const current = getSettingsOverrides();
+  const next = {
+    ...current,
+    enableCanceledCreditOverride: generalResult.toggles.enableCanceledCreditOverride?.checked ?? true,
+    enableWorkspaceStatusLabels: generalResult.toggles.enableWorkspaceStatusLabels?.checked ?? true,
+    enableWorkspaceHoverDetails: generalResult.toggles.enableWorkspaceHoverDetails?.checked ?? true,
+  };
+  await saveSettingsOverrides(next);
 }
 
 function _applyXPathSettings(xpResult: XPathPanelResult): void {
