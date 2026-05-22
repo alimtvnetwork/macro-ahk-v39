@@ -51,6 +51,8 @@ const LOADER_DEFAULT_IDS = [
   'default-read-memory',
   'default-write-memory',
   'default-coding-guidelines',
+  'default-logo-create',
+  'default-proof-read',
 ];
 
 describe('Prompt parity check — DEFAULT_PROMPTS ↔ DB seed', () => {
