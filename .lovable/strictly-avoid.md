@@ -48,6 +48,21 @@
 
 See: `.lovable/memory/constraints/readme-txt-format.md` and `mem://constraints/readme-txt-prohibitions`.
 
+## HTTP fail-fast (no retry, no fanout)
+
+On ANY 4xx/5xx (especially 404/405) from a scripted/automated HTTP call: STOP the loop on the first occurrence. No retry. No backoff. No "try the next project/repo". No heavy follow-up ops. Emit one report:
+
+```
+HTTP <status> on <METHOD> <full-url>
+Body: <≤500 chars | null>
+Reason: <one sentence>
+Loop halted. Awaiting user instruction.
+```
+
+Then wait for the user. Repeated failure fanout has caused Lovable platform blocks.
+
+See: `.lovable/memory/constraints/http-error-fail-fast.md` and `spec/03-error-manage/01-error-resolution/05-http-error-fail-fast.md`.
+
 ## Folder structure
 
 - **`.lovable/memories/` (with trailing `s`):** Wrong path. Canonical is `.lovable/memory/`.
