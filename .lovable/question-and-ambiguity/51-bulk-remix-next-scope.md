@@ -33,3 +33,7 @@ Add a session map `Map<workspaceId, {projectId, projectName}>` populated wheneve
 ## Decision
 
 Pending. Skipping implementation this loop and moving to a different P3 instead.
+
+
+## Resolution (2026-05-22)
+Implemented Option A: `remix-bulk.actionBulkRemixNext()` iterates `getLoopWsCheckedIds()`, fetches `projects.list` per ws, prefers family-matched project (base name minus V-suffix) and falls back to first entry. Header dropdown gains `🚀 Bulk Remix Next` with live checked-count sublabel. Sequential per `no-retry-policy`; final toast = N/M succeeded.
