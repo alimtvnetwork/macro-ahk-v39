@@ -48,6 +48,13 @@ export interface ProjectSettings {
     onlyRunAsDependency?: boolean;
     /** When true, this project's scripts can dynamically request scripts from other approved projects. */
     allowDynamicRequests?: boolean;
+    /**
+     * Auto-attach gate (default false). When true AND every other condition in
+     * mem://features/auto-attach-policy.md (C1..C8) is satisfied, library scripts
+     * whose UrlMatches cover this project's URL are auto-attached on save.
+     * URL match alone is NEVER sufficient — see background/auto-attach.ts.
+     */
+    autoStart?: boolean;
 }
 
 /** Dependency on a shared project. See spec/21-app/02-features/devtools-and-injection/sdk-convention.md */
