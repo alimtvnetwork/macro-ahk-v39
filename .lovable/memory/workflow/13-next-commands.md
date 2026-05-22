@@ -72,7 +72,7 @@ Trigger phrases the user may type to query this file:
 ## P3 — Optional Follow-ups (project-remix dropdown, v2.217.0)
 
 - [ ] **Bulk Remix Next** — toolbar button to remix every workspace's current project in sequence
-- [ ] **Remix history pane** — log of all remixes performed this session (name, source, dest workspace, timestamp)
+- [x] 2026-05-22 — **Remix history pane** — new `remix-history.ts` (in-memory ring, MAX_HISTORY_ENTRIES=50, session-only); `recordRemix()` invoked from `remix-modal.ts` (mode='manual') and `remix-dropdown.ts` Remix Next (mode='next'); header dropdown gains `📜 Remix history` item → `showRemixHistoryPanel()` (KL-formatted timestamps, Clear button).
 - [x] 2026-05-22 — **Lowercase v separator config** — added `remix.nextVCasing` ('preserve' | 'upper' | 'lower') in `remix-config.ts`; `resolveNextName`/`buildName` accept casing param; Remix Next passes `cfg.nextVCasing`. Default 'preserve' (existing behavior unchanged).
 - [x] 2026-05-22 — **Open in current tab option** — added `remix.openInCurrentTab` config flag + `openRemixRedirect()` helper in `remix-config.ts`; both `remix-modal.ts` and `remix-dropdown.ts` (Remix Next) now route through it. Default false (new tab).
 

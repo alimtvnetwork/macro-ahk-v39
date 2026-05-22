@@ -15,6 +15,7 @@ import { showRemixModal } from './remix-modal';
 import { getRemixConfig, openRemixRedirect } from './remix-config';
 import { fetchWorkspaceProjectNames, submitRemix } from './remix-fetch';
 import { resolveNextName } from './remix-name-resolver';
+import { recordRemix, showRemixHistoryPanel } from './remix-history';
 import { showToast } from './toast';
 import { logError } from './error-utils';
 import { log } from './logging';
@@ -62,6 +63,13 @@ export async function actionRemixNext(ctx: RemixActionContext): Promise<void> {
       includeCustomKnowledge: cfg.defaultIncludeCustomKnowledge,
     });
     showToast('✅ Remixed → "' + name + '"', 'success');
+    recordRemix({
+      timestamp: Date.now(),
+      source: ctx.currentProjectName,
+      destination: name,
+      workspaceId: ctx.workspaceId,
+      mode: 'next',
+    });
     if (result.redirectUrl) {
       openRemixRedirect(result.redirectUrl);
     }
@@ -126,6 +134,9 @@ export function showHeaderRemixDropdown(anchorEl: HTMLElement, ctx: RemixActionC
   }));
   dd.appendChild(buildDropdownItem('⏭️ Remix Next', 'Auto-increment to next V suffix', function () {
     void actionRemixNext(ctx);
+  }));
+  dd.appendChild(buildDropdownItem('📜 Remix history', 'Session log of remixes', function () {
+    showRemixHistoryPanel(anchorEl);
   }));
 
   // Last item — drop the bottom border.

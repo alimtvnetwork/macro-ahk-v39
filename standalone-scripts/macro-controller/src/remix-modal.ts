@@ -14,6 +14,7 @@
 import { cPanelBg, cPanelFg, cPanelBorder, cPrimary, cPrimaryLight, lDropdownRadius } from './shared-state';
 import { getRemixConfig, openRemixRedirect } from './remix-config';
 import { submitRemix } from './remix-fetch';
+import { recordRemix } from './remix-history';
 import { showToast } from './toast';
 import { logError } from './error-utils';
 import { log } from './logging';
@@ -203,6 +204,13 @@ export function showRemixModal(opts: RemixModalOpts): void {
       });
       log('[Remix] ✅ created "' + projectName + '" id=' + (result.newProjectId || '?'), 'success');
       showToast('🔀 Remixed → "' + projectName + '"', 'success');
+      recordRemix({
+        timestamp: Date.now(),
+        source: opts.currentProjectName,
+        destination: projectName,
+        workspaceId: opts.workspaceId,
+        mode: 'manual',
+      });
       hideRemixModal();
       if (result.redirectUrl) {
         openRemixRedirect(result.redirectUrl);
