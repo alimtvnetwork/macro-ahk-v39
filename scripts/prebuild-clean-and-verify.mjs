@@ -81,5 +81,6 @@ try {
 }
 clearCaches();
 verifyStepLibrary();
-console.log("✅ [prebuild-clean-and-verify] Cache cleared, step-library verified — safe to bundle.\n");
+runNoBareFetchLint();
+console.log("✅ [prebuild-clean-and-verify] Cache cleared, step-library verified, lint clean — safe to bundle.\n");
 
