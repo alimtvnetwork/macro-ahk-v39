@@ -6,6 +6,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [v3.5.2] — 2026-05-22 HTTP Fail-Fast Enforcement (Steps 1–10)
+
+### Added
+- **`src/shared/http-fail-fast.ts`** — `httpFailFast(response, ctx)` helper that throws `HttpFailFastError` on any non-2xx HTTP response, carrying the spec §5 report shape (`status`, `method`, `url`, `body`, `reason`, `report`).
+- **`HttpFailFastError` class** — discriminates network failures (`TypeError`) from HTTP failures via `isNetworkError()`. Exposes `status`, `method`, `url`, `bodySnippet`, `reason`, and a human-readable `report` string.
+- **`src/components/HttpFailFastBanner.tsx`** — global dismissible banner that listens for `marco:http-fail-fast` window events, renders the latest failure with `AlertOctagon` icon, and provides "Copy report" + "Dismiss" buttons. Mounted in `Popup.tsx` and `Options.tsx`.
+- **`scripts/lint/no-bare-fetch.mjs`** — pre-build lint guard that fails CI if a bare `fetch(...)` call appears without an adjacent `httpFailFast(` guard on the next non-comment line.
+- **`.lovable/checklists/http-fail-fast.md`** — agent checklist covering hard rules (no bare `fetch`, no retry, no fan-out), pre/post-write checklists, quick-reference snippets, and anti-pattern examples.
+- **`standalone-scripts/macro-controller/scripts/verify-http-fail-fast.mjs`** — macro-controller verification suite (11 assertions) asserting: (a) throws on 4xx/5xx with correct report shape, (b) sequential `for...of` loop halts on first non-2xx with no second call issued, (c) `marco:http-fail-fast` CustomEvent fires exactly once per error with correct detail payload, (d) no retry tokens exist in `http-fail-fast.ts`, (e) `isNetworkError()` discriminates correctly.
+
+### Changed
+- **P0 callers wrapped** — project Git checks (`repo-enumeration.ts`), dashboard auto-attach probes (`updater-handler.ts`), member fetch (`member-fetch.ts`), and token refresh probes (`config-auth-handler.ts`) all route through `httpFailFast()`. Sequential loops replace any `Promise.all` fan-outs so one 4xx/5xx halts the batch.
+- **`result-webhook.ts`** — already fail-fast; now imports the shared `HttpFailFastError` type for consistent reporting.
+- **Build pipeline** — `prebuild-clean-and-verify.mjs` wires `no-bare-fetch.mjs` as a pre-build gate.
+- **Bumped** extension, SDK, macro-controller, xpath, lovable-common, lovable-owner-switch, and lovable-user-add instruction manifests to **3.5.2**.
+
+---
+
 ## [v3.5.1] — 2026-05-22 Projects Modal cache, search, and UX
 
 ### Added
