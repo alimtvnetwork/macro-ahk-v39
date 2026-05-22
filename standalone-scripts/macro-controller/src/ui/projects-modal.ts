@@ -316,11 +316,18 @@ function renderBlock(b: WorkspaceBlock, tabIndex: OpenTabIndex): string {
         for (const p of closed) body += renderProjectRow(p, tabIndex, false);
     }
 
+    const collapsed = state.collapsed.has(b.ws.id);
+    const caret = collapsed ? '▸' : '▾';
     return '<div style="margin-bottom:8px;">'
-        + '<div style="font-size:10px;color:' + cPrimaryLighter + ';font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 0;border-bottom:1px solid rgba(124,58,237,0.3);margin-bottom:2px;">'
-        + escapeHtml(wsName) + headerSuffix
+        + '<div data-ws-toggle="' + escapeHtml(b.ws.id) + '" '
+        +   'style="font-size:10px;color:' + cPrimaryLighter + ';font-weight:700;text-transform:uppercase;'
+        +   'letter-spacing:0.5px;padding:2px 4px;border-bottom:1px solid rgba(124,58,237,0.3);'
+        +   'margin-bottom:2px;cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;" '
+        +   'title="Click to ' + (collapsed ? 'expand' : 'collapse') + '">'
+        +   '<span style="display:inline-block;width:10px;color:#94a3b8;">' + caret + '</span>'
+        +   '<span style="flex:1;">' + escapeHtml(wsName) + headerSuffix + '</span>'
         + '</div>'
-        + body
+        + (collapsed ? '' : body)
         + '</div>';
 }
 
