@@ -3,9 +3,7 @@
   "compilerOptions": {
     "types": [
       "chrome"
-    ],
-    "incremental": true,
-    "tsBuildInfoFile": ".cache/tsbuildinfo/macro-controller.tsbuildinfo"
+    ]
   },
   "include": [
     "standalone-scripts/macro-controller/src/**/*.ts",
