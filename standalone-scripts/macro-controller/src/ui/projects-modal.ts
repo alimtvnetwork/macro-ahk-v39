@@ -270,6 +270,19 @@ function attachRowClicks(body: HTMLElement): void {
     body.addEventListener('click', function (e: Event): void {
         const target = e.target as HTMLElement | null;
         if (!target) return;
+
+        // Workspace header toggle takes precedence over row click.
+        const toggle = target.closest('[data-ws-toggle]') as HTMLElement | null;
+        if (toggle) {
+            const wsId = toggle.getAttribute('data-ws-toggle') ?? '';
+            if (!wsId) return;
+            if (state.collapsed.has(wsId)) state.collapsed.delete(wsId);
+            else state.collapsed.add(wsId);
+            saveCollapsedState();
+            renderBody(body);
+            return;
+        }
+
         const row = target.closest('[data-open-url]') as HTMLElement | null;
         if (!row) return;
         const url = row.getAttribute('data-open-url') ?? '';
