@@ -20,6 +20,8 @@ import { ensureDefaultProjectSingleScript } from "../default-project-seeder";
 import { initProjectDb } from "../project-db-manager";
 import { seedConfigToDb } from "../config-seeder";
 import { ensureBuiltinScriptsExist } from "../builtin-script-guard";
+import { runAutoAttach, persistAutoAttachDecisions, type PersistedAutoAttachRecord } from "../auto-attach-runner";
+import { STORAGE_KEY_AUTO_ATTACH_DECISIONS } from "../../shared/constants";
 import { runAutoAttach } from "../auto-attach-runner";
 import {
     generateId,
