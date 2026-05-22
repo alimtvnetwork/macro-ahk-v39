@@ -158,7 +158,12 @@ async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }
     // 1. Snapshot known workspaces.
     const workspaces = (loopCreditState.perWorkspace || []).slice();
     if (workspaces.length === 0) {
-        body.innerHTML = renderEmpty('No workspaces loaded yet — open the workspace list first.');
+        body.innerHTML = ''
+            + '<div style="text-align:center;padding:20px 12px;color:' + cPanelFgDim + ';font-size:11px;">'
+            +   '<div style="font-size:24px;margin-bottom:6px;opacity:0.6;">📭</div>'
+            +   '<div style="color:#cbd5e1;margin-bottom:4px;">No workspaces loaded yet.</div>'
+            +   '<div style="font-size:10px;">Open the workspace list first, then reopen this modal.</div>'
+            + '</div>';
         return;
     }
 
@@ -276,6 +281,25 @@ function attachRowClicks(body: HTMLElement): void {
         const target = e.target as HTMLElement | null;
         if (!target) return;
 
+        // Clear-all-filters action from the zero-results panel.
+        const clearAll = target.closest('[data-clear-filters]') as HTMLElement | null;
+        if (clearAll) {
+            const panel = body.closest('#' + DIALOG_ID) as HTMLElement | null;
+            state.searchQuery = '';
+            const input = panel?.querySelector('[data-search-input]') as HTMLInputElement | null;
+            if (input) input.value = '';
+            if (state.filterOpenOnly) {
+                const c = panel?.querySelector('[data-chip="open"]') as HTMLButtonElement | null;
+                c?.click();
+            }
+            if (state.filterHasRepo) {
+                const c = panel?.querySelector('[data-chip="repo"]') as HTMLButtonElement | null;
+                c?.click();
+            }
+            renderBody(body);
+            return;
+        }
+
         // Workspace header toggle takes precedence over row click.
         const toggle = target.closest('[data-ws-toggle]') as HTMLElement | null;
         if (toggle) {
@@ -337,10 +361,28 @@ function renderAll(blocks: ReadonlyArray<WorkspaceBlock>, tabIndex: OpenTabIndex
         + (filterActive ? ' · <span style="color:#fbbf24;">' + matchCount + ' match' + (matchCount === 1 ? '' : 'es') + '</span>' : '')
         + (capturedAt ? ' · ' + escapeHtml(capturedAt) : '')
         + '</div>';
+    let visibleBlocks = 0;
     for (const b of filtered) {
         // Hide workspace block entirely when filter is active and yields no projects.
         if (filterActive && (b.projects?.length ?? 0) === 0 && !b.loading && !b.error) continue;
         html += renderBlock(b, tabIndex);
+        visibleBlocks++;
+    }
+    if (filterActive && matchCount === 0 && visibleBlocks === 0) {
+        const activeChips: string[] = [];
+        if (q) activeChips.push('search "' + escapeHtml(q) + '"');
+        if (onlyOpen) activeChips.push('open-in-tab');
+        if (onlyRepo) activeChips.push('has-repo');
+        html += '<div style="text-align:center;padding:24px 12px;color:' + cPanelFgDim + ';font-size:11px;'
+            + 'border:1px dashed rgba(124,58,237,0.35);border-radius:6px;margin-top:4px;">'
+            + '<div style="font-size:22px;margin-bottom:6px;opacity:0.6;">🔍</div>'
+            + '<div style="color:#cbd5e1;margin-bottom:6px;">No projects match your filters.</div>'
+            + '<div style="font-size:10px;margin-bottom:10px;">Active: ' + activeChips.join(' · ') + '</div>'
+            + '<button data-clear-filters="1" type="button" '
+            +   'style="background:rgba(124,58,237,0.25);border:1px solid ' + cPrimary + ';color:#e9d5ff;'
+            +   'padding:4px 12px;border-radius:4px;cursor:pointer;font-size:10px;font-family:monospace;">'
+            +   'Clear all filters</button>'
+            + '</div>';
     }
     return html;
 }
@@ -361,9 +403,16 @@ function renderBlock(b: WorkspaceBlock, tabIndex: OpenTabIndex): string {
     if (b.loading) {
         body = '<div style="color:#64748b;font-size:10px;padding:3px 4px;font-style:italic;">Fetching projects…</div>';
     } else if (b.error) {
-        body = '<div style="color:#fca5a5;font-size:10px;padding:3px 4px;">⚠ ' + escapeHtml(b.error) + '</div>';
+        body = '<div style="color:#fca5a5;font-size:10px;padding:4px 6px;background:rgba(239,68,68,0.08);'
+            + 'border-left:2px solid #ef4444;border-radius:2px;">'
+            + '<div style="margin-bottom:2px;">⚠ Failed to load projects.</div>'
+            + '<div style="color:#cbd5e1;opacity:0.8;font-family:monospace;word-break:break-word;">'
+            + escapeHtml(b.error) + '</div>'
+            + '<div style="color:#94a3b8;margin-top:3px;font-style:italic;">Click ↻ Refresh to retry.</div>'
+            + '</div>';
     } else if ((b.projects?.length ?? 0) === 0) {
-        body = '<div style="color:#64748b;font-size:10px;padding:3px 4px;font-style:italic;">No projects.</div>';
+        body = '<div style="color:#64748b;font-size:10px;padding:3px 4px;font-style:italic;">'
+            + 'No projects in this workspace yet.</div>';
     } else {
         // Show open ones first.
         const open = (b.projects ?? []).filter(function (p) { return isOpen(p.id, tabIndex); });
@@ -492,6 +541,7 @@ function createSearchBar(onChange: () => void): HTMLElement {
     icon.style.cssText = 'font-size:11px;opacity:0.8;';
 
     const input = document.createElement('input');
+    input.setAttribute('data-search-input', '1');
     input.type = 'search';
     input.placeholder = 'Search projects by name, repo, branch, or id…';
     input.value = state.searchQuery;
@@ -547,11 +597,13 @@ function createSearchBar(onChange: () => void): HTMLElement {
         function () { return state.filterOpenOnly; },
         function () { state.filterOpenOnly = !state.filterOpenOnly; },
     );
+    chipOpen.setAttribute('data-chip', 'open');
     const chipRepo = makeChip(
         'Has repo', 'Show only projects with a GitHub repo configured',
         function () { return state.filterHasRepo; },
         function () { state.filterHasRepo = !state.filterHasRepo; },
     );
+    chipRepo.setAttribute('data-chip', 'repo');
 
     const chipsLabel = document.createElement('span');
     chipsLabel.textContent = 'Filter:';
