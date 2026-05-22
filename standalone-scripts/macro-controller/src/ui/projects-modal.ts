@@ -20,6 +20,7 @@ import { cPanelBg, cPrimary, cPrimaryBgA, cPrimaryLighter, cPanelFgDim, loopCred
 import { sendToExtension } from './prompt-loader';
 import { log } from '../logging';
 import { logError } from '../error-utils';
+import { readProjectListCache, writeProjectListCache } from '../projects-cache';
 import type { DraggableElement, WorkspaceCredit } from '../types';
 
 const DIALOG_ID = 'marco-projects-modal';
