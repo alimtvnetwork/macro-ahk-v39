@@ -390,6 +390,7 @@ function renderAll(blocks: ReadonlyArray<WorkspaceBlock>, tabIndex: OpenTabIndex
     return html;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 function renderBlock(b: WorkspaceBlock, tabIndex: OpenTabIndex): string {
     const wsName = b.ws.fullName || b.ws.name || b.ws.id;
     const openCount = b.projects
