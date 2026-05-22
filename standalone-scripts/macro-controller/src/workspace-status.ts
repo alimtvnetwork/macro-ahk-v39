@@ -212,13 +212,18 @@ export function getEffectiveStatus(
 /* ------------------------------------------------------------------ */
 
 /**
- * Returns true when the override should apply (canceled OR fully expired).
- * Past-due workspaces are NOT overridden — they may still be paying.
+ * Returns true when the override should apply.
+ *
+ * Scope:
+ *   - expired-canceled, fully-expired, expired — subscription has lapsed
+ *   - about-to-expire (past_due / unpaid) — payment is overdue, billing &
+ *     rollover should not be counted as spendable until resolved
  */
 export function shouldApplyCanceledOverride(status: WorkspaceStatus): boolean {
   return status.kind === 'expired-canceled'
       || status.kind === 'fully-expired'
-      || status.kind === 'expired';
+      || status.kind === 'expired'
+      || status.kind === 'about-to-expire';
 }
 
 /**

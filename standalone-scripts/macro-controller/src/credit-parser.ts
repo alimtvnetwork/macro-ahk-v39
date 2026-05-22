@@ -11,6 +11,7 @@ import { calcTotalCredits, calcAvailableCredits } from './credit-api';
 import { loopCreditState, state } from './shared-state';
 import { getEffectiveStatus, shouldApplyCanceledOverride, applyCanceledCreditOverride } from './workspace-status';
 import { getWorkspaceLifecycleConfig } from './workspace-lifecycle-config';
+import { getSettingsOverrides } from './settings-store';
 import { enrichProZeroWorkspaces } from './pro-zero/pro-zero-enrichment';
 
 // ============================================
@@ -213,6 +214,12 @@ function parseWorkspaceItem(rawItem: Record<string, unknown>, wsIdx: number): im
 // ============================================
 function applyLifecycleOverrides(perWs: import('./types').WorkspaceCredit[]): void {
   const cfg = getWorkspaceLifecycleConfig();
+  // Default true — only opt-out disables the override.
+  const enabled = getSettingsOverrides().enableCanceledCreditOverride !== false;
+  if (!enabled) {
+    log('Lifecycle overrides disabled via enableCanceledCreditOverride=false', 'info');
+    return;
+  }
   let overridden = 0;
   for (const ws of perWs) {
     const status = getEffectiveStatus(ws, cfg);

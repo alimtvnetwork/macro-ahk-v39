@@ -65,9 +65,9 @@ Trigger phrases the user may type to query this file:
 
 ## P3 — Optional Follow-ups (canceled-credit override, v2.215.0)
 
-- [ ] **Include `about-to-expire` (past_due) in the override** — currently they keep billing/rollover
-- [ ] **Add a debug log** `[override] {wsName}: avail {before}→{after}, billing {before}→0, rollover {before}→0`
-- [ ] **Add config flag** `enableCanceledCreditOverride` (default true) opt-out
+- [x] **Include `about-to-expire` (past_due) in the override** — 2026-05-22, added to `shouldApplyCanceledOverride` in workspace-status.ts
+- [x] **Add a debug log** — 2026-05-22, already present in credit-parser.ts `applyLifecycleOverrides` as `lifecycle override [kind] <ws>: available X → Y (billing X → 0, rollover X → 0)`
+- [x] **Add config flag** `enableCanceledCreditOverride` — 2026-05-22, added to SettingsOverrides (default true); credit-parser.ts skips overrides when set to false
 
 ## P3 — Optional Follow-ups (project-remix dropdown, v2.217.0)
 

@@ -28,6 +28,8 @@ export interface SettingsOverrides {
   refillWarningThresholdDays?: number;
   /** pro_0 credit-balance IndexedDB cache TTL (minutes). Spec §9.1 / §11. */
   proZeroCreditBalanceCacheTtlMinutes?: number;
+  /** Master switch for the canceled/expired credit override. Default true. */
+  enableCanceledCreditOverride?: boolean;
 }
 
 type SettingsListener = (overrides: SettingsOverrides) => void;
@@ -56,6 +58,9 @@ function sanitize(raw: unknown): SettingsOverrides {
   }
   if (isFiniteNonNegative(r.proZeroCreditBalanceCacheTtlMinutes)) {
     out.proZeroCreditBalanceCacheTtlMinutes = Math.floor(r.proZeroCreditBalanceCacheTtlMinutes);
+  }
+  if (typeof r.enableCanceledCreditOverride === 'boolean') {
+    out.enableCanceledCreditOverride = r.enableCanceledCreditOverride;
   }
   return out;
 }

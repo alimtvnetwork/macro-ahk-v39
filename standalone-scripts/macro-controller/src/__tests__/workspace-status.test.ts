@@ -181,7 +181,7 @@ describe('applyCanceledCreditOverride', () => {
     expect(ws.available).toBe(165);
   });
 
-  it('shouldApplyCanceledOverride returns true for expired/canceled/fully-expired only', () => {
+  it('shouldApplyCanceledOverride returns true for expired/canceled/fully-expired/about-to-expire only', () => {
     const ws = makeWs({});
     expect(shouldApplyCanceledOverride(getEffectiveStatus(ws, CFG, NOW))).toBe(false);
   });
