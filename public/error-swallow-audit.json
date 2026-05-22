@@ -1,5 +1,5 @@
 {
-  "GeneratedAt": "2026-05-19T16:35:16.209Z",
+  "GeneratedAt": "2026-05-22T03:24:59.531Z",
   "Items": [
     {
       "Id": "1c2c48d60ac9",
@@ -276,96 +276,6 @@
       "Severity": "P2",
       "File": "src/components/webhook/CopyLogButton.tsx",
       "Line": 23,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "27e57a4c7d03",
-      "Severity": "P2",
-      "File": "src/hooks/use-auto-run-chain-after-recording.ts",
-      "Line": 107,
-      "Rule": "no-noop-promise-catch",
-      "Message": "Promise .catch() handler is a no-op — rejection is silently swallowed.",
-      "Snippet": ".catch(() => { })"
-    },
-    {
-      "Id": "4bc1e9b86ef7",
-      "Severity": "P2",
-      "File": "src/hooks/use-editor-theme.ts",
-      "Line": 21,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "1ee22d851ce3",
-      "Severity": "P2",
-      "File": "src/hooks/use-editor-theme.ts",
-      "Line": 34,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "5751c78a871b",
-      "Severity": "P2",
-      "File": "src/hooks/use-error-count.ts",
-      "Line": 58,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "52fcbc2bef45",
-      "Severity": "P2",
-      "File": "src/hooks/use-error-count.ts",
-      "Line": 111,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "9f0f2def5a6d",
-      "Severity": "P2",
-      "File": "src/hooks/use-keyword-events.ts",
-      "Line": 144,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "49f0dacaf415",
-      "Severity": "P2",
-      "File": "src/hooks/use-library-link-map.ts",
-      "Line": 61,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "0e2a037f3dd9",
-      "Severity": "P2",
-      "File": "src/hooks/use-popup-data.ts",
-      "Line": 275,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "2b822b04f69f",
-      "Severity": "P2",
-      "File": "src/hooks/use-step-library.ts",
-      "Line": 535,
-      "Rule": "no-empty-catch",
-      "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
-      "Snippet": "catch {"
-    },
-    {
-      "Id": "2ea6ff1b7b7a",
-      "Severity": "P2",
-      "File": "src/hooks/use-version-check.ts",
-      "Line": 69,
       "Rule": "no-empty-catch",
       "Message": "Empty catch block — error is silently dropped, no Logger.error() call.",
       "Snippet": "catch {"

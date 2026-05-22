@@ -9,6 +9,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { sendMessage } from "@/lib/message-client";
+import { logError } from "./hook-logger";
 
 interface ScriptInfoResponse {
   isOk: boolean;
@@ -66,8 +67,8 @@ function getManifestVersion(): ManifestVersionInfo {
             : null,
       };
     }
-  } catch {
-    /* not in extension context */
+  } catch (caught) {
+    logError("useVersionCheck.readManifest", "chrome.runtime.getManifest() threw — not in an extension context, returning null version", caught);
   }
 
   return {

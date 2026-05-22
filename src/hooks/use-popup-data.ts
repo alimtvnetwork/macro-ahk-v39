@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { sendMessage } from "@/lib/message-client";
 import { freezeClickTrail, readFrozenClickTrail, type ClickTrailEntry } from "@/lib/click-trail";
+import { logError } from "./hook-logger";
 
 interface ActiveProjectData {
   activeProject: {
@@ -272,7 +273,7 @@ async function hydrateBootFailureSnapshot(
     // Live failure but no persisted record yet (race) — synthesise an ID.
     const fallbackId = `${statusRes.bootStep}|${(statusRes.bootError ?? "").slice(0, 80)}`;
     setFrozenTrail(freezeClickTrail(fallbackId));
-  } catch {
-    // chrome.storage may be unavailable mid-failure — degrade silently.
+  } catch (caught) {
+    logError("usePopupData.hydrateBootFailureSnapshot", "chrome.storage read failed mid-boot-failure — frozen click trail unavailable, UI will degrade gracefully", caught);
   }
 }

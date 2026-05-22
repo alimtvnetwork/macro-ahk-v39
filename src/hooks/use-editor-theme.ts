@@ -2,7 +2,8 @@
  * Global editor theme hook — persists the user's Monaco theme choice in localStorage.
  */
 
-import { useState, useCallback, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
+import { logError } from "./hook-logger";
 
 export type EditorThemeName = "dracula" | "monokai" | "nord" | "light";
 
@@ -18,7 +19,9 @@ function getSnapshot(): EditorThemeName {
   try {
     const v = localStorage.getItem(STORAGE_KEY);
     if (v && VALID.has(v)) return v as EditorThemeName;
-  } catch { /* SSR / sandbox */ }
+  } catch (caught) {
+    logError("useEditorTheme.getSnapshot", "localStorage read failed — falling back to default theme (SSR/sandbox?)", caught);
+  }
   return DEFAULT_THEME;
 }
 
@@ -31,7 +34,11 @@ export function useEditorTheme() {
   );
 
   const setTheme = useCallback((t: EditorThemeName) => {
-    try { localStorage.setItem(STORAGE_KEY, t); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch (caught) {
+      logError("useEditorTheme.setTheme", `localStorage write failed for key "${STORAGE_KEY}" — theme will not persist across reloads`, caught);
+    }
     emit();
   }, []);
 

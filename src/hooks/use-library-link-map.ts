@@ -10,6 +10,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { sendMessage } from "@/lib/message-client";
+import { logError } from "./hook-logger";
 
 export type LinkState = "synced" | "pinned" | "detached";
 
@@ -58,8 +59,8 @@ export function useLibraryLinkMap(projectId?: number | null): {
       ]);
       setAssets(assetsRes.assets ?? []);
       setLinks(linksRes.links ?? []);
-    } catch {
-      // silently fail — badges are non-critical
+    } catch (caught) {
+      logError("useLibraryLinkMap.load", "LIBRARY_GET_ASSETS/LIBRARY_GET_LINKS failed — link badges will be empty until next reload", caught);
     } finally {
       setLoading(false);
     }

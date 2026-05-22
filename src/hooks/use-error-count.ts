@@ -15,6 +15,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { sendMessage } from "@/lib/message-client";
+import { logError } from "./hook-logger";
 
 // eslint-disable-next-line max-lines-per-function -- hook with broadcast listener + visibility-aware polling fallback
 export function useErrorCount(pollIntervalMs = 30_000) {
@@ -24,7 +25,8 @@ export function useErrorCount(pollIntervalMs = 30_000) {
     try {
       const result = await sendMessage<{ errors: Array<{ id: string }> }>({ type: "GET_ACTIVE_ERRORS" });
       setCount(result.errors?.length ?? 0);
-    } catch {
+    } catch (caught) {
+      logError("useErrorCount.refresh", "GET_ACTIVE_ERRORS failed — badge will show 0 until next poll", caught);
       setCount(0);
     }
   }, []);
@@ -55,8 +57,8 @@ export function useErrorCount(pollIntervalMs = 30_000) {
       try {
         runtime!.onMessage!.addListener(handleBroadcast);
         listenerAttached = true;
-      } catch {
-        /* Extension context invalidated — fall back to polling */
+      } catch (caught) {
+        logError("useErrorCount.attachBroadcast", "chrome.runtime.onMessage.addListener threw — extension context likely invalidated, falling back to polling", caught);
       }
     }
 
@@ -108,8 +110,8 @@ export function useErrorCount(pollIntervalMs = 30_000) {
       if (listenerAttached) {
         try {
           runtime!.onMessage!.removeListener(handleBroadcast);
-        } catch {
-          /* already invalidated */
+        } catch (caught) {
+          logError("useErrorCount.detachBroadcast", "chrome.runtime.onMessage.removeListener threw — context already invalidated", caught);
         }
       }
     };

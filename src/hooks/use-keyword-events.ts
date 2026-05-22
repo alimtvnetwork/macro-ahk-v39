@@ -10,6 +10,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { logError } from "./hook-logger";
 
 const STORAGE_KEY = "marco-keyword-events-v1";
 
@@ -135,13 +136,18 @@ function load(): KeywordEvent[] {
         return parsed.filter((e): e is KeywordEvent =>
             !!e && typeof e === "object" && typeof (e as KeywordEvent).Id === "string",
         );
-    } catch {
+    } catch (caught) {
+        logError("useKeywordEvents.load", `localStorage read/parse failed for key "${STORAGE_KEY}" — returning empty event list`, caught);
         return [];
     }
 }
 
 function save(events: readonly KeywordEvent[]): void {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); } catch { /* quota / SSR */ }
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    } catch (caught) {
+        logError("useKeywordEvents.save", `localStorage write failed for key "${STORAGE_KEY}" (quota exceeded or SSR) — events not persisted`, caught);
+    }
 }
 
 // eslint-disable-next-line max-lines-per-function -- single hook owns the full event+step API surface
