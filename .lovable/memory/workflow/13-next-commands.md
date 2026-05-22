@@ -74,7 +74,7 @@ Trigger phrases the user may type to query this file:
 - [ ] **Bulk Remix Next** — toolbar button to remix every workspace's current project in sequence
 - [ ] **Remix history pane** — log of all remixes performed this session (name, source, dest workspace, timestamp)
 - [ ] **Lowercase v separator config** — let user pin `v` casing regardless of input ("foo-V2" → "foo-v3")
-- [ ] **Open in current tab option** — modal toggle "open in this tab" instead of new tab
+- [x] 2026-05-22 — **Open in current tab option** — added `remix.openInCurrentTab` config flag + `openRemixRedirect()` helper in `remix-config.ts`; both `remix-modal.ts` and `remix-dropdown.ts` (Remix Next) now route through it. Default false (new tab).
 
 ## P3 — Optional Follow-ups (settings modal, v2.218.0)
 
