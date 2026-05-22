@@ -40,20 +40,40 @@ function readRawLifecycleConfig(): Partial<WorkspaceLifecycleConfigInput> {
  * Safe to call repeatedly — cheap, no side effects.
  */
 export function getWorkspaceLifecycleConfig(): WorkspaceLifecycleConfig {
+  return getWorkspaceLifecycleConfigFor(undefined);
+}
+
+/**
+ * Per-workspace resolver. When `wsId` is provided and a matching entry exists
+ * in `overrides.perWorkspace`, its `expiryGracePeriodDays` /
+ * `refillWarningThresholdDays` win over the global override.
+ *
+ * Override priority (highest → lowest):
+ *   1. settings-store `perWorkspace[wsId]` (when wsId provided)
+ *   2. settings-store global override
+ *   3. window.__MARCO_CONFIG__.creditStatus.lifecycle
+ *   4. DEFAULT_* named constants
+ */
+export function getWorkspaceLifecycleConfigFor(wsId: string | undefined): WorkspaceLifecycleConfig {
   const raw = readRawLifecycleConfig();
   const overrides = getSettingsOverrides();
+  const perWs = wsId && overrides.perWorkspace ? overrides.perWorkspace[wsId] : undefined;
 
-  const grace = typeof overrides.expiryGracePeriodDays === 'number'
-    ? overrides.expiryGracePeriodDays
-    : (typeof raw.expiryGracePeriodDays === 'number' && raw.expiryGracePeriodDays >= 0
-      ? raw.expiryGracePeriodDays
-      : DEFAULT_EXPIRY_GRACE_PERIOD_DAYS);
+  const grace = typeof perWs?.expiryGracePeriodDays === 'number'
+    ? perWs.expiryGracePeriodDays
+    : (typeof overrides.expiryGracePeriodDays === 'number'
+      ? overrides.expiryGracePeriodDays
+      : (typeof raw.expiryGracePeriodDays === 'number' && raw.expiryGracePeriodDays >= 0
+        ? raw.expiryGracePeriodDays
+        : DEFAULT_EXPIRY_GRACE_PERIOD_DAYS));
 
-  const refill = typeof overrides.refillWarningThresholdDays === 'number'
-    ? overrides.refillWarningThresholdDays
-    : (typeof raw.refillWarningThresholdDays === 'number' && raw.refillWarningThresholdDays >= 0
-      ? raw.refillWarningThresholdDays
-      : DEFAULT_REFILL_WARNING_THRESHOLD_DAYS);
+  const refill = typeof perWs?.refillWarningThresholdDays === 'number'
+    ? perWs.refillWarningThresholdDays
+    : (typeof overrides.refillWarningThresholdDays === 'number'
+      ? overrides.refillWarningThresholdDays
+      : (typeof raw.refillWarningThresholdDays === 'number' && raw.refillWarningThresholdDays >= 0
+        ? raw.refillWarningThresholdDays
+        : DEFAULT_REFILL_WARNING_THRESHOLD_DAYS));
 
   const rawLabels = raw.enableWorkspaceStatusLabels !== false
     ? (raw.enableWorkspaceStatusLabels !== undefined ? raw.enableWorkspaceStatusLabels : DEFAULT_ENABLE_WORKSPACE_STATUS_LABELS)
