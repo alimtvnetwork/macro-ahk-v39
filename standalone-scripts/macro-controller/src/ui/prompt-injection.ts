@@ -274,6 +274,7 @@ function _buildCategorySelect(initialData: Record<string, unknown>): { catWrap: 
 
 // ── Prompt Modal Footer ──
  
+// eslint-disable-next-line max-lines-per-function
 function _buildPromptModalFooter(
   isEdit: boolean,
   editPrompt: EditablePrompt | null,

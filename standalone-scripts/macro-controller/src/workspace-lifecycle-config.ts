@@ -54,6 +54,7 @@ export function getWorkspaceLifecycleConfig(): WorkspaceLifecycleConfig {
  *   3. window.__MARCO_CONFIG__.creditStatus.lifecycle
  *   4. DEFAULT_* named constants
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function getWorkspaceLifecycleConfigFor(wsId: string | undefined): WorkspaceLifecycleConfig {
   const raw = readRawLifecycleConfig();
   const overrides = getSettingsOverrides();

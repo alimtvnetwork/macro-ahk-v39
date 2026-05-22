@@ -79,6 +79,7 @@ export interface BulkRemixSourceHint {
  * Run Remix Next against every currently checked workspace, sequentially.
  * Surfaces progress and a final summary via toast.
  */
+// eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
 export async function actionBulkRemixNext(hint: BulkRemixSourceHint = {}): Promise<void> {
   const checked = Object.keys(getLoopWsCheckedIds());
   if (checked.length === 0) {

@@ -152,6 +152,7 @@ export function removeProjectsModal(): void {
     existing.remove();
 }
 
+// eslint-disable-next-line max-lines-per-function
 async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }): Promise<void> {
     body.innerHTML = renderEmpty('Loading workspaces…');
 
@@ -277,6 +278,7 @@ async function fetchProjects(wsId: string): Promise<ProjectEntry[]> {
 }
 
 function attachRowClicks(body: HTMLElement): void {
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     body.addEventListener('click', function (e: Event): void {
         const target = e.target as HTMLElement | null;
         if (!target) return;
@@ -327,6 +329,7 @@ function renderEmpty(text: string): string {
     return '<div style="color:' + cPanelFgDim + ';font-size:11px;padding:6px;">' + escapeHtml(text) + '</div>';
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 function renderAll(blocks: ReadonlyArray<WorkspaceBlock>, tabIndex: OpenTabIndex, capturedAt: string | null, query: string): string {
     const q = (query || '').trim().toLowerCase();
     const onlyOpen = state.filterOpenOnly;
@@ -387,6 +390,7 @@ function renderAll(blocks: ReadonlyArray<WorkspaceBlock>, tabIndex: OpenTabIndex
     return html;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 function renderBlock(b: WorkspaceBlock, tabIndex: OpenTabIndex): string {
     const wsName = b.ws.fullName || b.ws.name || b.ws.id;
     const openCount = b.projects
@@ -528,6 +532,7 @@ function createTitleBar(panel: HTMLElement): HTMLElement {
  * types. Calls `onChange` on every input event so the body re-renders
  * against the current `state.searchQuery`.
  */
+// eslint-disable-next-line max-lines-per-function
 function createSearchBar(onChange: () => void): HTMLElement {
     const wrap = document.createElement('div');
     wrap.style.cssText = 'padding:6px 10px;border-bottom:1px solid rgba(124,58,237,0.20);background:rgba(0,0,0,0.20);display:flex;flex-direction:column;gap:6px;';
