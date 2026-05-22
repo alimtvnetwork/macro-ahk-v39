@@ -45,16 +45,15 @@ function getByXPathAsElement(xpath: string): Element | null {
 // Register ourselves as the render function for background revalidation
 setRenderDropdownFn(renderPromptsDropdown);
 
-// CQ16: Extracted from renderPromptsDropdown closure
-function positionTaskNextSub(taskNextItem: HTMLElement, taskNextSub: HTMLElement): void {
-  const rect = taskNextItem.getBoundingClientRect();
-  const subW = 180;
-  if (rect.right + subW > window.innerWidth) {
-    taskNextSub.style.left = (rect.left - subW) + 'px';
-  } else {
-    taskNextSub.style.left = rect.right + 'px';
-  }
-  taskNextSub.style.top = rect.top + 'px';
+// CQ16: Keep the inline Task Next panel visible inside the prompts dropdown.
+function keepTaskNextSubInView(promptsDropdown: HTMLElement, taskNextSub: HTMLElement): void {
+  window.requestAnimationFrame(function () {
+    const dropRect = promptsDropdown.getBoundingClientRect();
+    const subRect = taskNextSub.getBoundingClientRect();
+    if (subRect.bottom > dropRect.bottom) {
+      promptsDropdown.scrollTop += Math.ceil(subRect.bottom - dropRect.bottom + 6);
+    }
+  });
 }
 
 // CQ16: Extracted from renderPromptsDropdown closure
@@ -473,30 +472,42 @@ function renderTaskNextSubmenu(container: HTMLElement, ctx: PromptContext, taskN
   container.appendChild(taskNextItem);
 }
 
-function _buildTaskNextMenuShell(_promptsDropdown: HTMLElement): { taskNextItem: HTMLElement; taskNextSub: HTMLElement } {
+function _buildTaskNextMenuShell(promptsDropdown: HTMLElement): { taskNextItem: HTMLElement; taskNextSub: HTMLElement } {
   const taskNextItem = document.createElement('div');
-  taskNextItem.style.cssText = 'position:relative;display:flex;align-items:center;justify-content:space-between;padding:6px 8px;cursor:pointer;font-size:11px;color:' + cPrimaryLight + ';border-bottom:1px solid rgba(124,58,237,0.3);font-weight:600;';
-  taskNextItem.textContent = '⏭ Task Next';
+  taskNextItem.style.cssText = 'border-bottom:1px solid rgba(124,58,237,0.3);';
+  const taskNextRow = document.createElement('div');
+  taskNextRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 8px;cursor:pointer;font-size:11px;color:' + cPrimaryLight + ';font-weight:600;';
+  taskNextRow.textContent = '⏭ Task Next';
   const taskNextArrow = document.createElement('span');
   taskNextArrow.textContent = '▸';
   taskNextArrow.style.cssText = 'font-size:10px;margin-left:4px;';
-  taskNextItem.appendChild(taskNextArrow);
+  taskNextRow.appendChild(taskNextArrow);
 
   const taskNextSub = document.createElement('div');
   taskNextSub.setAttribute('data-task-next-sub', '1');
-  taskNextSub.style.cssText = 'display:none;position:fixed;min-width:180px;background:' + cPanelBg + ';border:1px solid ' + cPrimary + ';border-radius:' + lDropdownRadius + ';z-index:100010;box-shadow:' + lDropdownShadow + ';';
-  document.body.appendChild(taskNextSub);
-  taskNextSub.onmouseover = function() { taskNextSub.style.display = 'block'; };
-  taskNextSub.onmouseout = function() { taskNextSub.style.display = 'none'; };
+  taskNextSub.style.cssText = 'display:none;position:static;margin:0 6px 6px 6px;min-width:0;background:rgba(0,0,0,0.18);border:1px solid ' + cPrimary + ';border-radius:' + lDropdownRadius + ';box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);';
+  taskNextItem.appendChild(taskNextRow);
+  taskNextItem.appendChild(taskNextSub);
 
-  taskNextItem.onmouseover = function() { (this as HTMLElement).style.background = cBtnMenuHover; positionTaskNextSub(taskNextItem, taskNextSub); taskNextSub.style.display = 'block'; };
+  const showSub = function(): void {
+    taskNextRow.style.background = cBtnMenuHover;
+    taskNextArrow.textContent = '▾';
+    taskNextSub.style.display = 'block';
+    keepTaskNextSubInView(promptsDropdown, taskNextSub);
+  };
+  const hideSub = function(): void {
+    taskNextRow.style.background = 'transparent';
+    taskNextArrow.textContent = '▸';
+    taskNextSub.style.display = 'none';
+  };
+  taskNextRow.onmouseover = showSub;
+  taskNextRow.onclick = function(e: Event) {
+    e.stopPropagation();
+    if (taskNextSub.style.display === 'none') showSub(); else hideSub();
+  };
   taskNextItem.onmouseout = function() {
-    const self = taskNextItem;
     setTimeout(function() {
-      if (!taskNextSub.matches(':hover') && !self.matches(':hover')) {
-        self.style.background = 'transparent';
-        taskNextSub.style.display = 'none';
-      }
+      if (!taskNextItem.matches(':hover')) hideSub();
     }, 100);
   };
 

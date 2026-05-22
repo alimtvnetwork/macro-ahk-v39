@@ -28,7 +28,7 @@ Trigger phrases the user may type to query this file:
 
 ## P0 — Blocked / High Priority
 
-- [ ] **UI issue — prompt section near buttons** — User reports clicking the prompt section near buttons does not open properly. Screenshot appears to show Lovable platform chatbox prompt picker, which is not editable from this project. **Blocked on clarification:** identify which extension component (Options, popup, injected panel) has the issue, or confirm this is platform-side.
+- [x] **UI issue — prompt section near buttons** — 2026-05-22, fixed injected controller Prompts → Task Next panel: submenu now opens inline inside the dropdown/controller instead of fixed-positioning outside and colliding with nearby buttons.
 - [x] **Test infra fix** — macro-controller has no vitest suite; item was stale (2026-05-22).
 - [ ] **Task 1.2** — E2E Chrome verification (manual smoke pass on installer build)
 - [ ] **Dashboard "scripts not available" — Phase 2b** — auto-attach scripts to project by URL condition. Phase 1 (diagnostic log + Unbound badge) and Phase 2a (heal bindings on save in `handleSaveProject`) shipped. Phase 2b needs user-confirmed source for per-script URL matches (seed-manifest `TargetUrls` per source project vs project's own `targetUrls`). See `.lovable/question-and-ambiguity/20-dashboard-scripts-not-available-and-auto-attach.md`.
