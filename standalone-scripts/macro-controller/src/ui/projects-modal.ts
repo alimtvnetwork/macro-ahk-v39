@@ -20,7 +20,7 @@ import { cPanelBg, cPrimary, cPrimaryBgA, cPrimaryLighter, cPanelFgDim, loopCred
 import { sendToExtension } from './prompt-loader';
 import { log } from '../logging';
 import { logError } from '../error-utils';
-import { readProjectListCache, writeProjectListCache } from '../projects-cache';
+import { readProjectListCache, writeProjectListCache, clearProjectListCache } from '../projects-cache';
 import type { DraggableElement, WorkspaceCredit } from '../types';
 
 const DIALOG_ID = 'marco-projects-modal';
@@ -89,7 +89,7 @@ export function showProjectsModal(): void {
     panel.appendChild(body);
 
     const footer = createFooter(
-        function () { void loadAndRender(body); },
+        function () { void loadAndRender(body, { bypassCache: true }); },
         function (statusEl) { exportCsv(statusEl); },
     );
     panel.appendChild(footer);
@@ -105,7 +105,7 @@ export function removeProjectsModal(): void {
     existing.remove();
 }
 
-async function loadAndRender(body: HTMLElement): Promise<void> {
+async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }): Promise<void> {
     body.innerHTML = renderEmpty('Loading workspaces…');
 
     // 1. Snapshot known workspaces.
@@ -120,9 +120,18 @@ async function loadAndRender(body: HTMLElement): Promise<void> {
 
     // 3. Initialise blocks — seed from SQLite cache when available so the UI
     //    fills instantly while the network fetch refreshes in the background.
-    const cached = await Promise.all(workspaces.map(function (ws) {
-        return readProjectListCache(ws.id);
-    }));
+    //    Refresh button passes bypassCache=true to clear and force re-fetch.
+    const bypassCache = opts?.bypassCache === true;
+    if (bypassCache) {
+        await Promise.all(workspaces.map(function (ws) {
+            return clearProjectListCache(ws.id);
+        }));
+    }
+    const cached = bypassCache
+        ? workspaces.map(function () { return null; })
+        : await Promise.all(workspaces.map(function (ws) {
+            return readProjectListCache(ws.id);
+        }));
     const blocks: WorkspaceBlock[] = workspaces.map(function (ws, i) {
         const cachedProjects = cached[i];
         return {
