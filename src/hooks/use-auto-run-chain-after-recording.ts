@@ -12,6 +12,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import { logError } from "./hook-logger";
 
 import type { RecordingSession } from "@/background/recorder/recorder-session-types";
 import type { KeywordEvent } from "@/hooks/use-keyword-events";
@@ -104,10 +105,11 @@ export function useAutoRunChainAfterRecording(opts: UseAutoRunChainOptions): voi
                 if (cancelled) { return; }
                 endCbRef.current?.(result);
             })
-            .catch(() => {
+            .catch((caught: unknown) => {
                 // The chain runner traps its own errors and resolves with a
                 // result; this catch is purely defensive against custom
                 // runners passed in by tests.
+                logError("useAutoRunChainAfterRecording", "Custom runner rejected — default runner always resolves; investigate test/runner injection", caught);
             });
 
         return () => { cancelled = true; };
