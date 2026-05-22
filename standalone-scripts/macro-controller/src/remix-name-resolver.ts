@@ -50,9 +50,15 @@ export function parseName(name: string): ParsedName {
 }
 
 /** Build a name from parsed parts at a given numeric version. */
-export function buildName(parsed: ParsedName, n: number, fallbackSeparator: string): string {
+export function buildName(
+  parsed: ParsedName,
+  n: number,
+  fallbackSeparator: string,
+  vCasing: 'preserve' | 'upper' | 'lower' = 'preserve',
+): string {
   const sep = parsed.vLetter ? parsed.separator : fallbackSeparator;
-  const v = parsed.vLetter || 'V';
+  const inputV = parsed.vLetter || 'V';
+  const v = vCasing === 'upper' ? 'V' : vCasing === 'lower' ? 'v' : inputV;
   return parsed.base + sep + v + String(n);
 }
 
@@ -61,7 +67,7 @@ export function buildName(parsed: ParsedName, n: number, fallbackSeparator: stri
  *
  * @param currentName   the project being remixed
  * @param existingNames lowercase set of names already in the workspace
- * @param config        injected so callers can override separator
+ * @param config        injected so callers can override separator and V casing
  * @returns the resolved name and the number of collision-increments performed
  *
  * Throws when `maxCollisionIncrements` is exceeded so the UI can surface
@@ -70,16 +76,21 @@ export function buildName(parsed: ParsedName, n: number, fallbackSeparator: stri
 export function resolveNextName(
   currentName: string,
   existingNames: Set<string>,
-  config: { nextSuffixSeparator: string; maxCollisionIncrements: number },
+  config: {
+    nextSuffixSeparator: string;
+    maxCollisionIncrements: number;
+    nextVCasing?: 'preserve' | 'upper' | 'lower';
+  },
 ): { name: string; collisionsResolved: number } {
   if (!currentName || !currentName.trim()) {
     throw new Error('resolveNextName: currentName is empty');
   }
   const parsed = parseName(currentName);
+  const casing = config.nextVCasing || 'preserve';
   // Start at current+1 so "Foo-V2" → "Foo-V3", "Foo" (current=1) → "Foo-V2".
   let candidateNum = parsed.current + 1;
   let collisions = 0;
-  let candidate = buildName(parsed, candidateNum, config.nextSuffixSeparator);
+  let candidate = buildName(parsed, candidateNum, config.nextSuffixSeparator, casing);
 
   while (existingNames.has(candidate.toLowerCase())) {
     candidateNum += 1;
@@ -90,7 +101,7 @@ export function resolveNextName(
           + ' collision increments starting from ' + currentName,
       );
     }
-    candidate = buildName(parsed, candidateNum, config.nextSuffixSeparator);
+    candidate = buildName(parsed, candidateNum, config.nextSuffixSeparator, casing);
   }
 
   return { name: candidate, collisionsResolved: collisions };
