@@ -29,6 +29,7 @@ import { useStatus } from "@/hooks/use-extension-data";
 import type { WasmProbeSnapshot } from "@/hooks/use-extension-data";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, ShieldAlert, FileWarning, Copy, Check, Wrench, ExternalLink, RotateCw, Terminal, FileCode } from "lucide-react";
+import { logError } from "./options-logger";
 
 /* ----------------------------------------------------------------------- */
 /*  Runtime CSP probe                                                       */

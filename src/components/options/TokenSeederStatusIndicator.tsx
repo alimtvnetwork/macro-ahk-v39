@@ -21,6 +21,7 @@ import {
 import { ShieldOff, Timer, ChevronDown } from "lucide-react";
 import { sendMessage } from "@/lib/message-client";
 import {
+import { logError } from "./options-logger";
     loadDiagnosticsCache,
     saveDiagnosticsCache,
 } from "./token-seeder-diagnostics-cache";

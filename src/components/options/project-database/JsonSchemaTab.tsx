@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { sendMessage } from "@/lib/message-client";
 import { ErrorModal } from "./ErrorModal";
 import { createErrorModel, type ErrorModel } from "@/types/error-model";
+import { logError } from "../options-logger";
 
 /* ------------------------------------------------------------------ */
 /*  Example template                                                    */

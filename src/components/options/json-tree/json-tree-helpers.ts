@@ -1,4 +1,5 @@
 import type { JsonValue, JsonObject, JsonArray } from "./json-tree-types";
+import { logError } from "../options-logger";
 
 /** Safely parse a JSON string, returning null on failure. */
 export function safeParse(str: string): JsonValue {

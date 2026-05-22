@@ -130,6 +130,7 @@ import WebhookSettingsDialog from "./WebhookSettingsDialog";
 import InputSourceDialog from "./InputSourceDialog";
 import StepWaitDialog from "./StepWaitDialog";
 import {
+import { logError } from "./options-logger";
     readAllStepWaits,
     type WaitConfig,
 } from "@/background/recorder/step-library/step-wait";

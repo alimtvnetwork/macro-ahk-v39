@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { sendMessage } from "@/lib/message-client";
 import { toast } from "sonner";
+import { logError } from "./options-logger";
 
 /* ------------------------------------------------------------------ */
 /*  Interval Options                                                   */

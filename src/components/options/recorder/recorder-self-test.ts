@@ -10,6 +10,7 @@
  */
 
 import { sendMessage } from "@/lib/message-client";
+import { logError } from "../options-logger";
 
 /** SelectorKindId.Css per src/background/recorder-db-schema.ts */
 const SELECTOR_KIND_CSS = 3;

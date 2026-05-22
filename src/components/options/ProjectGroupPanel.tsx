@@ -47,6 +47,7 @@ import {
   ArrowDownToLine,
 } from "lucide-react";
 import { toast } from "sonner";
+import { logError } from "./options-logger";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */

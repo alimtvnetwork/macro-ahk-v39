@@ -6,6 +6,7 @@ import { useEditorTheme } from "@/hooks/use-editor-theme";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
+import { logError } from "./options-logger";
   AlignLeft,
   Upload,
   AlertTriangle,
