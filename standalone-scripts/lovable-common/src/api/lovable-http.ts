@@ -48,11 +48,11 @@ const buildInit = (request: LovableHttpRequest): RequestInit => {
     return init;
 };
 
-const readBodyOrThrow = async (response: Response, endpoint: string): Promise<string> => {
+const readBodyOrThrow = async (response: Response, endpoint: string, method: string): Promise<string> => {
     const bodyText = await response.text();
 
     if (!isOk(response.status)) {
-        throw new LovableApiError(`Lovable API ${response.status}`, response.status, endpoint, bodyText);
+        throw new LovableApiError(`Lovable API ${response.status}`, response.status, endpoint, bodyText, method);
     }
 
     return bodyText;
@@ -60,7 +60,7 @@ const readBodyOrThrow = async (response: Response, endpoint: string): Promise<st
 
 export const lovableHttpJson = async (request: LovableHttpRequest): Promise<object> => {
     const response = await fetch(request.endpoint, buildInit(request));
-    const bodyText = await readBodyOrThrow(response, request.endpoint);
+    const bodyText = await readBodyOrThrow(response, request.endpoint, request.method);
     const safeText = bodyText.length === 0 ? EMPTY_JSON_BODY : bodyText;
     const parsed: object = JSON.parse(safeText);
 
