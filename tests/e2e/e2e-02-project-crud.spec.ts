@@ -315,7 +315,8 @@ async function createProject(page: Page, name: string): Promise<void> {
 // React UI unification (S-021) lands; see
 // .lovable/question-and-ambiguity/44-e2e-02-react-options-skip.md
 // for the full rationale and re-enable steps.
-test.describe.serial.skip('E2E-02 — Project CRUD Lifecycle', () => {
+test.describe.skip('E2E-02 — Project CRUD Lifecycle', () => {
+  test.describe.configure({ mode: 'serial' });
   // Each test walks four readiness gates (SW seed → page reseed → interactive
   // log → "New Project" CTA) before any UI assertion. Worst-case stacking of
   // those waits plus the actual CRUD interactions exceeds the global 60s
