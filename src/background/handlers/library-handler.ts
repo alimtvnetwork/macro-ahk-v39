@@ -50,6 +50,25 @@ function getDb(): SqlJsDatabase {
 
 function markDirty(): void {
     dbManager?.markDirty();
+    broadcastLibraryChanged();
+}
+
+/**
+ * Broadcast a `LIBRARY_CHANGED` message so other Options/popup tabs can refresh
+ * their cached groups/assets/links list. Fail-quiet when no receivers are
+ * listening (the common case when only one Options tab is open).
+ *
+ * @see src/background/handlers/error-handler.ts:broadcastErrorCountChange for prior art.
+ */
+function broadcastLibraryChanged(): void {
+    try {
+        if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) return;
+        chrome.runtime.sendMessage({ type: "LIBRARY_CHANGED" }).catch((sendErr) => {
+            console.debug("[library] LIBRARY_CHANGED broadcast had no receiver:", sendErr);
+        });
+    } catch (broadcastErr) {
+        console.warn("[library] broadcastLibraryChanged failed:", broadcastErr);
+    }
 }
 
 const SQL_LAST_INSERT_ROWID = "SELECT last_insert_rowid()";
