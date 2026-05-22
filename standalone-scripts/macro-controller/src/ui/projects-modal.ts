@@ -70,14 +70,17 @@ interface ModalState {
     blocks: WorkspaceBlock[];
     tabIndex: OpenTabIndex | null;
     exporting: boolean;
+    /** Free-text filter, lowercased; empty string = no filter. */
+    searchQuery: string;
 }
-const state: ModalState = { blocks: [], tabIndex: null, exporting: false };
+const state: ModalState = { blocks: [], tabIndex: null, exporting: false, searchQuery: '' };
 
 export function showProjectsModal(): void {
     removeProjectsModal();
     state.blocks = [];
     state.tabIndex = null;
     state.exporting = false;
+    state.searchQuery = '';
 
     const panel = createPanel();
     const titleBar = createTitleBar(panel);
@@ -86,6 +89,9 @@ export function showProjectsModal(): void {
     const body = document.createElement('div');
     body.style.cssText = 'padding:10px;max-height:60vh;overflow-y:auto;';
     body.innerHTML = renderEmpty('Loading workspaces…');
+
+    const search = createSearchBar(function () { renderBody(body); });
+    panel.appendChild(search);
     panel.appendChild(body);
 
     const footer = createFooter(
@@ -96,6 +102,13 @@ export function showProjectsModal(): void {
 
     document.body.appendChild(panel);
     void loadAndRender(body);
+}
+
+/** Render the current blocks + filter into the body element. */
+function renderBody(body: HTMLElement): void {
+    const tabIndex = state.tabIndex ?? { byProjectId: new Map(), byUrlProjectId: new Map() };
+    body.innerHTML = renderAll(state.blocks, tabIndex, null, state.searchQuery);
+    attachRowClicks(body);
 }
 
 export function removeProjectsModal(): void {
@@ -148,8 +161,7 @@ async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }
     const tabIndex = await openTabsPromise;
     state.blocks = blocks;
     state.tabIndex = tabIndex;
-    body.innerHTML = renderAll(blocks, tabIndex, null);
-    attachRowClicks(body);
+    renderBody(body);
 
     // 4. Fetch each workspace's projects in parallel (single attempt — no
     //    retry per mem://constraints/no-retry-policy). On success persist
@@ -174,8 +186,7 @@ async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }
         }).then(function () {
             state.blocks = blocks;
             // Re-render after each completes for incremental feedback.
-            body.innerHTML = renderAll(blocks, tabIndex, null);
-            attachRowClicks(body);
+            renderBody(body);
         });
     }));
 }
@@ -245,14 +256,36 @@ function renderEmpty(text: string): string {
     return '<div style="color:' + cPanelFgDim + ';font-size:11px;padding:6px;">' + escapeHtml(text) + '</div>';
 }
 
-function renderAll(blocks: ReadonlyArray<WorkspaceBlock>, tabIndex: OpenTabIndex, capturedAt: string | null): string {
+function renderAll(blocks: ReadonlyArray<WorkspaceBlock>, tabIndex: OpenTabIndex, capturedAt: string | null, query: string): string {
+    const q = (query || '').trim().toLowerCase();
+    const filtered: WorkspaceBlock[] = q
+        ? blocks.map(function (b) {
+            if (!b.projects) return b;
+            const projects = b.projects.filter(function (p) {
+                return p.name.toLowerCase().includes(q)
+                    || p.id.toLowerCase().includes(q)
+                    || p.githubRepo.toLowerCase().includes(q)
+                    || p.githubBranch.toLowerCase().includes(q);
+            });
+            return { ws: b.ws, projects, error: b.error, loading: b.loading };
+        })
+        : blocks.slice();
+
     const totalOpen = tabIndex.byProjectId.size + tabIndex.byUrlProjectId.size;
+    const matchCount = q
+        ? filtered.reduce(function (acc, b) { return acc + (b.projects?.length ?? 0); }, 0)
+        : 0;
     let html = '<div style="font-size:10px;color:#94a3b8;padding:0 0 6px 0;">'
         + blocks.length + ' workspace' + (blocks.length === 1 ? '' : 's')
         + ' · ' + totalOpen + ' open project tab' + (totalOpen === 1 ? '' : 's')
+        + (q ? ' · <span style="color:#fbbf24;">' + matchCount + ' match' + (matchCount === 1 ? '' : 'es') + '</span>' : '')
         + (capturedAt ? ' · ' + escapeHtml(capturedAt) : '')
         + '</div>';
-    for (const b of blocks) html += renderBlock(b, tabIndex);
+    for (const b of filtered) {
+        // Hide workspace block entirely when filter is active and yields no projects.
+        if (q && (b.projects?.length ?? 0) === 0 && !b.loading && !b.error) continue;
+        html += renderBlock(b, tabIndex);
+    }
     return html;
 }
 
@@ -356,6 +389,52 @@ function createTitleBar(panel: HTMLElement): HTMLElement {
     attachDrag(panel, bar, closeBtn);
     return bar;
 }
+
+/**
+ * Search bar — filters projects by name / id / repo / branch as the user
+ * types. Calls `onChange` on every input event so the body re-renders
+ * against the current `state.searchQuery`.
+ */
+function createSearchBar(onChange: () => void): HTMLElement {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'padding:6px 10px;border-bottom:1px solid rgba(124,58,237,0.20);background:rgba(0,0,0,0.20);display:flex;align-items:center;gap:6px;';
+
+    const icon = document.createElement('span');
+    icon.textContent = '🔍';
+    icon.style.cssText = 'font-size:11px;opacity:0.8;';
+
+    const input = document.createElement('input');
+    input.type = 'search';
+    input.placeholder = 'Search projects by name, repo, branch, or id…';
+    input.value = state.searchQuery;
+    input.style.cssText =
+        'flex:1;background:rgba(0,0,0,0.35);color:#f1f5f9;border:1px solid rgba(124,58,237,0.30);'
+        + 'border-radius:4px;padding:4px 8px;font-size:11px;font-family:inherit;outline:none;';
+    input.addEventListener('input', function () {
+        state.searchQuery = input.value;
+        onChange();
+    });
+    // Prevent the drag handler / global shortcuts from swallowing keystrokes.
+    input.addEventListener('keydown', function (e) { e.stopPropagation(); });
+
+    const clear = document.createElement('button');
+    clear.type = 'button';
+    clear.textContent = '✕';
+    clear.title = 'Clear search';
+    clear.style.cssText = 'background:transparent;border:none;color:#94a3b8;cursor:pointer;font-size:12px;padding:2px 6px;';
+    clear.onclick = function (): void {
+        input.value = '';
+        state.searchQuery = '';
+        onChange();
+        input.focus();
+    };
+
+    wrap.appendChild(icon);
+    wrap.appendChild(input);
+    wrap.appendChild(clear);
+    return wrap;
+}
+
 
 function createFooter(
     onRefresh: () => void,
