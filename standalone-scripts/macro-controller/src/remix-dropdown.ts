@@ -135,6 +135,9 @@ export function showHeaderRemixDropdown(anchorEl: HTMLElement, ctx: RemixActionC
   dd.appendChild(buildDropdownItem('⏭️ Remix Next', 'Auto-increment to next V suffix', function () {
     void actionRemixNext(ctx);
   }));
+  dd.appendChild(buildDropdownItem('📜 Remix history', 'Session log of remixes', function () {
+    showRemixHistoryPanel(anchorEl);
+  }));
 
   // Last item — drop the bottom border.
   const last = dd.lastElementChild as HTMLElement | null;
