@@ -20,7 +20,7 @@
 import { cPanelBg, cPanelFg, cPanelBorder, cPrimary, cPrimaryLight, lDropdownRadius } from './shared-state';
 import { getSettingsOverrides, saveSettingsOverrides, clearSettingsOverrides, type SettingsOverrides } from './settings-store';
 import { getWorkspaceLifecycleConfig } from './workspace-lifecycle-config';
-import { DEFAULT_EXPIRY_GRACE_PERIOD_DAYS, DEFAULT_REFILL_WARNING_THRESHOLD_DAYS } from './constants';
+import { DEFAULT_EXPIRY_GRACE_PERIOD_DAYS, DEFAULT_REFILL_WARNING_THRESHOLD_DAYS, DEFAULT_PROJECTS_CACHE_TTL_HOURS } from './constants';
 import { PRO_ZERO_CACHE_TTL_DEFAULT_MIN } from './pro-zero/pro-zero-constants';
 import { getProZeroCacheTtlMinutes } from './pro-zero/pro-zero-cache-ttl';
 import { showToast } from './toast';
