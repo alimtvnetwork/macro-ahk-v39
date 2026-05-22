@@ -161,8 +161,7 @@ async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }
     const tabIndex = await openTabsPromise;
     state.blocks = blocks;
     state.tabIndex = tabIndex;
-    body.innerHTML = renderAll(blocks, tabIndex, null);
-    attachRowClicks(body);
+    renderBody(body);
 
     // 4. Fetch each workspace's projects in parallel (single attempt — no
     //    retry per mem://constraints/no-retry-policy). On success persist
