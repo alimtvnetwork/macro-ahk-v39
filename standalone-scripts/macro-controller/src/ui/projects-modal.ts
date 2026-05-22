@@ -158,7 +158,12 @@ async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }
     // 1. Snapshot known workspaces.
     const workspaces = (loopCreditState.perWorkspace || []).slice();
     if (workspaces.length === 0) {
-        body.innerHTML = renderEmpty('No workspaces loaded yet — open the workspace list first.');
+        body.innerHTML = ''
+            + '<div style="text-align:center;padding:20px 12px;color:' + cPanelFgDim + ';font-size:11px;">'
+            +   '<div style="font-size:24px;margin-bottom:6px;opacity:0.6;">📭</div>'
+            +   '<div style="color:#cbd5e1;margin-bottom:4px;">No workspaces loaded yet.</div>'
+            +   '<div style="font-size:10px;">Open the workspace list first, then reopen this modal.</div>'
+            + '</div>';
         return;
     }
 
