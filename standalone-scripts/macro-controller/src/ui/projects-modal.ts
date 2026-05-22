@@ -522,6 +522,7 @@ function createSearchBar(onChange: () => void): HTMLElement {
     icon.style.cssText = 'font-size:11px;opacity:0.8;';
 
     const input = document.createElement('input');
+    input.setAttribute('data-search-input', '1');
     input.type = 'search';
     input.placeholder = 'Search projects by name, repo, branch, or id…';
     input.value = state.searchQuery;
