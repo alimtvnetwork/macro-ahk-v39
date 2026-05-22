@@ -15,6 +15,7 @@ import { showRemixModal } from './remix-modal';
 import { getRemixConfig, openRemixRedirect } from './remix-config';
 import { fetchWorkspaceProjectNames, submitRemix } from './remix-fetch';
 import { resolveNextName } from './remix-name-resolver';
+import { recordRemix, showRemixHistoryPanel } from './remix-history';
 import { showToast } from './toast';
 import { logError } from './error-utils';
 import { log } from './logging';
