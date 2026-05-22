@@ -156,18 +156,11 @@ export const apiRegistry: ApiRegistry = Object.freeze({
             description: "List up to 200 projects in a workspace (used for remix-name collision check)",
             timeoutMs: 10_000,
         }),
-        /**
-         * Fetch a single project's metadata (used to read GitHub repo / branch
-         * for the Projects-modal CSV export). Tolerates partial responses —
-         * caller treats missing `github_repo` / `github_branch` as blank.
-         */
-        get: Object.freeze({
-            url: "/projects/{projectId}",
-            method: "GET" as const,
-            auth: true,
-            description: "Get a project's metadata (id, name, github_repo, github_branch, last_message_at, …)",
-            timeoutMs: 10_000,
-        }),
+        // NOTE: `get` (GET /projects/{projectId}) removed 2026-05-22 —
+        // server returns HTTP 405 (route reserved for non-GET verbs).
+        // Project metadata (`github_repo`, `github_branch`,
+        // `last_message_at`) is already returned by `list` above.
+        // See `.lovable/question-and-ambiguity/52-projects-get-405.md`.
     }),
 
     remix: Object.freeze({

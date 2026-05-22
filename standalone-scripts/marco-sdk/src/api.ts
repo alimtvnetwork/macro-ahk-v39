@@ -229,7 +229,9 @@ const memberships = Object.freeze({
 });
 
 const projects = Object.freeze({
-    /** List projects in a workspace (used for remix-name collision pre-check). */
+    /** List projects in a workspace (used for remix-name collision pre-check
+     * and Projects-modal enrichment — list response carries `name`,
+     * `github_repo`, `github_branch`, `last_message_at` per project). */
     list(wsId: string, options?: ApiCallOptions): Promise<ApiResponse> {
         return callEndpoint(apiRegistry.projects.list, {
             ...options,
@@ -237,17 +239,10 @@ const projects = Object.freeze({
         });
     },
 
-    /**
-     * Fetch a single project's metadata. Used by the Projects-modal CSV export
-     * to enrich each row with `github_repo`, `github_branch`, and the most
-     * recent activity timestamp. Caller MUST tolerate missing fields.
-     */
-    get(projectId: string, options?: ApiCallOptions): Promise<ApiResponse> {
-        return callEndpoint(apiRegistry.projects.get, {
-            ...options,
-            params: { projectId, ...options?.params },
-        });
-    },
+    // NOTE: `get(projectId)` was removed 2026-05-22 — the bare
+    // `GET /projects/{id}` route returns HTTP 405. All metadata callers
+    // need is already present in the list response; see Q52 in
+    // `.lovable/question-and-ambiguity/52-projects-get-405.md`.
 });
 
 const remix = Object.freeze({
