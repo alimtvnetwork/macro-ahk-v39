@@ -235,28 +235,33 @@ function GroupDetailPanel({ group, onBack, onRefresh }: GroupDetailPanelProps) {
     [allProjects, memberIdSet],
   );
 
-  const handleAddMember = useCallback(async () => {
-    if (!addProjectId) {
-      toast.error("Select a project");
-      return;
-    }
+  const addMemberById = useCallback(async (projectUuid: string) => {
+    if (!projectUuid || memberIdSet.has(projectUuid)) return;
     setAdding(true);
     try {
       await sendMessage({
         type: "LIBRARY_ADD_GROUP_MEMBER" as never,
         groupId: group.Id,
-        projectId: addProjectId,
+        projectId: projectUuid,
       } as never);
-      const name = projectsById.get(addProjectId)?.name ?? addProjectId;
+      const name = projectsById.get(projectUuid)?.name ?? projectUuid;
       toast.success(`"${name}" added to group`);
-      setAddProjectId("");
       loadMembers();
     } catch (err) {
       toast.error("Add failed: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setAdding(false);
     }
-  }, [addProjectId, group.Id, loadMembers, projectsById]);
+  }, [group.Id, loadMembers, memberIdSet, projectsById]);
+
+  const handleAddMember = useCallback(async () => {
+    if (!addProjectId) {
+      toast.error("Select a project");
+      return;
+    }
+    await addMemberById(addProjectId);
+    setAddProjectId("");
+  }, [addProjectId, addMemberById]);
 
   const handleRemoveMember = useCallback(async (member: ProjectGroupMember) => {
     try {
