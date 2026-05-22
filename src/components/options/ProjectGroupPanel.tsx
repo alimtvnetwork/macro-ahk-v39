@@ -7,7 +7,7 @@
  * @see spec/21-app/02-features/misc-features/cross-project-sync.md §8 Groups
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { sendMessage } from "@/lib/message-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
