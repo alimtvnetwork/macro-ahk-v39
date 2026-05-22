@@ -26,7 +26,23 @@ import {
     type LibraryScriptForAttach,
     type AttachDecision,
 } from "./auto-attach";
-import { logBgWarnError, BgLogTag } from "./bg-logger";
+import { logBgWarnError, BgLogTag, logCaughtError } from "./bg-logger";
+import { STORAGE_KEY_AUTO_ATTACH_DECISIONS } from "../shared/constants";
+
+export interface PersistedAutoAttachDecision {
+    scriptId: string;
+    scriptName: string;
+    ok: boolean;
+    reason: AttachDecision["reason"];
+    detail: string;
+}
+
+export interface PersistedAutoAttachRecord {
+    projectId: string;
+    projectName: string;
+    evaluatedAt: string;
+    decisions: PersistedAutoAttachDecision[];
+}
 
 const TAG = BgLogTag.SCRIPT_RESOLVER;
 
