@@ -20,6 +20,7 @@ import { ensureDefaultProjectSingleScript } from "../default-project-seeder";
 import { initProjectDb } from "../project-db-manager";
 import { seedConfigToDb } from "../config-seeder";
 import { ensureBuiltinScriptsExist } from "../builtin-script-guard";
+import { runAutoAttach } from "../auto-attach-runner";
 import {
     generateId,
     nowTimestamp,
