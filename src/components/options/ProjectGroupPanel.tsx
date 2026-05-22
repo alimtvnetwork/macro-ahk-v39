@@ -7,7 +7,7 @@
  * @see spec/21-app/02-features/misc-features/cross-project-sync.md §8 Groups
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { sendMessage } from "@/lib/message-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { StoredProject } from "@/hooks/use-projects-scripts";
 import {
   Dialog,
   DialogContent,
@@ -63,7 +65,8 @@ interface ProjectGroup {
 interface ProjectGroupMember {
   Id: number;
   GroupId: number;
-  ProjectId: number;
+  /** v9+ contract: UUID string referencing StoredProject.id (chrome.storage.local). */
+  ProjectIdUuid: string;
 }
 
 interface ProjectGroupPanelProps {
