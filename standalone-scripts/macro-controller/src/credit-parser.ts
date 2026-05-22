@@ -213,7 +213,6 @@ function parseWorkspaceItem(rawItem: Record<string, unknown>, wsIdx: number): im
 // Idempotent — re-running on the same array is a no-op.
 // ============================================
 function applyLifecycleOverrides(perWs: import('./types').WorkspaceCredit[]): void {
-  const cfg = getWorkspaceLifecycleConfig();
   // Default true — only opt-out disables the override.
   const enabled = getSettingsOverrides().enableCanceledCreditOverride !== false;
   if (!enabled) {
