@@ -78,7 +78,7 @@ Trigger phrases the user may type to query this file:
 
 ## P3 — Optional Follow-ups (settings modal, v2.218.0)
 
-- [ ] **Expose more keys** — add toggles for `enableWorkspaceStatusLabels` + `enableWorkspaceHoverDetails` to the same modal
+- [x] 2026-05-22 — **Expose more keys** — added Settings → General toggles for `enableCanceledCreditOverride`, `enableWorkspaceStatusLabels`, `enableWorkspaceHoverDetails`; persisted via `saveSettingsOverrides`; lifecycle resolver honors user override over JSON config.
 - [ ] **Export/import overrides** — JSON download + paste-to-import for sharing settings
 - [ ] **Per-workspace overrides** — let grace/refill be tuned per workspace ID, not just globally
 
