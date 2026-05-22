@@ -66,6 +66,12 @@ function sanitize(raw: unknown): SettingsOverrides {
   if (typeof r.enableCanceledCreditOverride === 'boolean') {
     out.enableCanceledCreditOverride = r.enableCanceledCreditOverride;
   }
+  if (typeof r.enableWorkspaceStatusLabels === 'boolean') {
+    out.enableWorkspaceStatusLabels = r.enableWorkspaceStatusLabels;
+  }
+  if (typeof r.enableWorkspaceHoverDetails === 'boolean') {
+    out.enableWorkspaceHoverDetails = r.enableWorkspaceHoverDetails;
+  }
   return out;
 }
 
