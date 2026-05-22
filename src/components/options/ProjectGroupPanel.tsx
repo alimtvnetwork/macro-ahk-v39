@@ -278,7 +278,9 @@ function GroupDetailPanel({ group, onBack, onRefresh }: GroupDetailPanelProps) {
 
   let parsedSettings: Record<string, unknown> | null = null;
   if (group.SharedSettingsJson) {
-    try { parsedSettings = JSON.parse(group.SharedSettingsJson); } catch { /* ignore */ }
+    try { parsedSettings = JSON.parse(group.SharedSettingsJson); } catch (caught) {
+      logError("ProjectGroupPanel.parseSettings", `Group "${group.Id}" has invalid SharedSettingsJson — rendering with parsedSettings=null`, caught);
+    }
   }
 
   return (

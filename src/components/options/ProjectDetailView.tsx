@@ -1108,8 +1108,8 @@ function ActivityLogSection({ projectId, projectSlug }: { projectId: string; pro
         if (Array.isArray(response)) {
           setLogs(response as ActivityLogEntry[]);
         }
-      } catch {
-        // Activity log not available — show empty state
+      } catch (caught) {
+        logError("ProjectDetailView.ActivityLogTab.loadLogs", `GET_ACTIVITY_LOG failed for projectId="${projectId}" — showing empty state`, caught);
       } finally {
         setLoading(false);
       }

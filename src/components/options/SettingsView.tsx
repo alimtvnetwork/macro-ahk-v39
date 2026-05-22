@@ -133,8 +133,8 @@ export function SettingsView() {
         if (result.settings) {
           setSettings({ ...DEFAULT_SETTINGS, ...result.settings });
         }
-      } catch {
-        // Use defaults if settings not available
+      } catch (caught) {
+        logError("SettingsView.load", "GET_SETTINGS failed — using DEFAULT_SETTINGS", caught);
       } finally {
         setLoading(false);
       }

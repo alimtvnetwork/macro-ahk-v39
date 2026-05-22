@@ -485,8 +485,8 @@ function buildFixSteps(scenario: FixScenario, onRestartOptions: () => void): Fix
             try {
                 const chr = (globalThis as { chrome?: { tabs?: { create?: (props: { url: string }) => void } } }).chrome;
                 chr?.tabs?.create?.({ url: "chrome://extensions" });
-            } catch {
-                /* no-op — chrome:// URLs cannot be opened from web preview */
+            } catch (caught) {
+                logError("WasmStatusBanner.openExtensionsAction", "chrome.tabs.create({url:'chrome://extensions'}) threw — expected when running in web preview (chrome:// URLs cannot be opened)", caught);
             }
         },
     };
@@ -603,8 +603,8 @@ function buildFixSteps(scenario: FixScenario, onRestartOptions: () => void): Fix
                             try {
                                 const chr = (globalThis as { chrome?: { tabs?: { create?: (props: { url: string }) => void } } }).chrome;
                                 chr?.tabs?.create?.({ url: PREFLIGHT_DOCS_URL });
-                            } catch {
-                                /* no-op */
+                            } catch (caught) {
+                                logError("WasmStatusBanner.openCheckerSource", `chrome.tabs.create({url:"${PREFLIGHT_DOCS_URL}"}) threw — expected when running outside extension context`, caught);
                             }
                         },
                     },

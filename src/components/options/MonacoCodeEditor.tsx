@@ -506,8 +506,8 @@ export function MonacoCodeEditor({ value, onChange, language, height = "240px", 
     try {
       registerCustomThemes(monaco);
       registerJsIntelliSense(monaco as Parameters<typeof registerJsIntelliSense>[0]);
-    } catch {
-      // Non-critical: IntelliSense / themes just won't be enhanced
+    } catch (caught) {
+      logError("MonacoCodeEditor.handleBeforeMount", "registerCustomThemes/registerJsIntelliSense threw — IntelliSense and custom themes will not be available in this editor instance", caught);
     }
   };
 
@@ -518,7 +518,9 @@ export function MonacoCodeEditor({ value, onChange, language, height = "240px", 
 
   const handleFormat = useCallback(() => {
     if (language === "json") {
-      try { onChange(JSON.stringify(JSON.parse(safeValue), null, 2)); return; } catch { /* invalid */ }
+      try { onChange(JSON.stringify(JSON.parse(safeValue), null, 2)); return; } catch (caught) {
+        logError("MonacoCodeEditor.handleFormat", "JSON.parse failed during format — user content is not valid JSON, leaving as-is", caught);
+      }
     }
     if (language === "markdown") { onChange(formatMarkdown(safeValue)); return; }
     if (useFallback) return;

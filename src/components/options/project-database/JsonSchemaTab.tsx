@@ -226,7 +226,9 @@ export function JsonSchemaTab({ projectSlug, onMigrationComplete }: Props) {
             if (c.Unique) col.Unique = true;
             if (c.Default) col.Default = c.Default;
             if (c.ValidationJson) {
-              try { col.Validation = JSON.parse(c.ValidationJson); } catch { /* skip */ }
+              try { col.Validation = JSON.parse(c.ValidationJson); } catch (caught) {
+                logError("JsonSchemaTab.exportDdl", `Column "${c.Name}" has invalid ValidationJson — skipping Validation field`, caught);
+              }
             }
             return col;
           });
@@ -303,7 +305,9 @@ export function JsonSchemaTab({ projectSlug, onMigrationComplete }: Props) {
             if (c.Unique) col.Unique = true;
             if (c.Default) col.Default = c.Default;
             if (c.ValidationJson) {
-              try { col.Validation = JSON.parse(c.ValidationJson); } catch { /* skip */ }
+              try { col.Validation = JSON.parse(c.ValidationJson); } catch (caught) {
+                logError("JsonSchemaTab.exportCopy", `Column "${c.Name}" has invalid ValidationJson — skipping Validation field`, caught);
+              }
             }
             return col;
           });

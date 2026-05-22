@@ -40,8 +40,8 @@ export function PromptVariablesCard() {
           .filter(([k]) => !builtInSet.has(k))
           .map(([key, value]) => ({ key, value }));
         setCustomVars(customs);
-      } catch {
-        // silent
+      } catch (caught) {
+        logError("PromptVariablesCard.load", "GET_PROMPT_VARIABLES failed — card will render with empty custom vars list", caught);
       }
     };
     void load();
