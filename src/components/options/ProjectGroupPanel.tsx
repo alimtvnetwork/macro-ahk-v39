@@ -212,6 +212,28 @@ function GroupDetailPanel({ group, onBack, onRefresh }: GroupDetailPanelProps) {
   // during initial mount — switching groups stranded stale member lists.
   useEffect(() => { loadMembers(); }, [loadMembers]);
 
+  // Cross-tab sync: when another Options/popup tab mutates library state,
+  // background broadcasts LIBRARY_CHANGED — re-pull this group's members
+  // so a drag-assign in tab A appears in tab B without manual refresh.
+  useEffect(() => {
+    const runtime = (typeof chrome !== "undefined" ? chrome.runtime : undefined) as
+      | { onMessage?: { addListener: (fn: (msg: unknown) => void) => void; removeListener: (fn: (msg: unknown) => void) => void } }
+      | undefined;
+    if (!runtime?.onMessage) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const listener = (message: unknown) => {
+      const msg = message as { type?: string } | null;
+      if (msg?.type !== "LIBRARY_CHANGED") return;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => { void loadMembers(); }, 150);
+    };
+    runtime.onMessage.addListener(listener);
+    return () => {
+      if (timer) clearTimeout(timer);
+      runtime.onMessage!.removeListener(listener);
+    };
+  }, [loadMembers]);
+
   // Load full project roster from chrome.storage.local for the picker dropdown.
   useEffect(() => {
     (async () => {
