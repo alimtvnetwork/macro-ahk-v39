@@ -27,6 +27,36 @@ const PANEL_ID = 'marco-ws-members-panel';
 const Z_INDEX = 100002;
 const CSS_BG = 'background:';
 
+/** Copy text via Clipboard API with legacy textarea fallback; toast on result. */
+function copyToClipboard(value: string, label: string): void {
+  if (!value) {
+    showToast('⚠️ Nothing to copy', 'info');
+    return;
+  }
+  const preview = value.length > 40 ? value.slice(0, 37) + '…' : value;
+  const onOk = function (): void { showToast('📋 ' + label + ' copied: ' + preview, 'success'); };
+  const onFail = function (msg: string): void { showToast('❌ Copy failed: ' + msg, 'error'); };
+  const nav = navigator as Navigator & { clipboard?: { writeText: (s: string) => Promise<void> } };
+  if (nav.clipboard && typeof nav.clipboard.writeText === 'function') {
+    nav.clipboard.writeText(value).then(onOk).catch(function (err: unknown) {
+      onFail(err instanceof Error ? err.message : String(err));
+    });
+    return;
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = value;
+    ta.style.cssText = 'position:fixed;top:-1000px;left:-1000px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) onOk(); else onFail('execCommand returned false');
+  } catch (err: unknown) {
+    onFail(err instanceof Error ? err.message : String(err));
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  HTML helpers                                                       */
 /* ------------------------------------------------------------------ */
