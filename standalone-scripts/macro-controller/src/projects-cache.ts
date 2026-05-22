@@ -26,11 +26,27 @@
 
 import { logError } from './error-utils';
 import { log } from './logging';
+import { getSettingsOverrides } from './settings-store';
+import { DEFAULT_PROJECTS_CACHE_TTL_HOURS } from './constants';
 
 const KEY_PREFIX = 'MacroProjectListCache:';
 
 /** Default cache TTL — 48 h. Overridable per call (Step 7 setting). */
-export const DEFAULT_PROJECT_CACHE_TTL_MS = 48 * 60 * 60 * 1000;
+export const DEFAULT_PROJECT_CACHE_TTL_MS = DEFAULT_PROJECTS_CACHE_TTL_HOURS * 60 * 60 * 1000;
+
+/**
+ * Resolve the effective TTL for the projects cache, in ms.
+ * Reads `projectsCacheTtlHours` from settings-store; falls back to the
+ * default 48 h constant when unset / invalid.
+ */
+export function getProjectsCacheTtlMs(): number {
+    const o = getSettingsOverrides();
+    const h = o.projectsCacheTtlHours;
+    if (typeof h === 'number' && Number.isFinite(h) && h >= 0) {
+        return Math.floor(h) * 60 * 60 * 1000;
+    }
+    return DEFAULT_PROJECT_CACHE_TTL_MS;
+}
 
 export interface CachedProject {
     readonly Id: string;

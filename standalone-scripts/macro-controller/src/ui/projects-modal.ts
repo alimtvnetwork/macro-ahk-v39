@@ -20,7 +20,7 @@ import { cPanelBg, cPrimary, cPrimaryBgA, cPrimaryLighter, cPanelFgDim, loopCred
 import { sendToExtension } from './prompt-loader';
 import { log } from '../logging';
 import { logError } from '../error-utils';
-import { readProjectListCache, writeProjectListCache, clearProjectListCache } from '../projects-cache';
+import { readProjectListCache, writeProjectListCache, clearProjectListCache, getProjectsCacheTtlMs } from '../projects-cache';
 import type { DraggableElement, WorkspaceCredit } from '../types';
 
 const DIALOG_ID = 'marco-projects-modal';
@@ -123,23 +123,27 @@ async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }
     //    Refresh button passes bypassCache=true to clear and force re-fetch.
     const bypassCache = opts?.bypassCache === true;
     if (bypassCache) {
-        await Promise.all(workspaces.map(function (ws) {
-            return clearProjectListCache(ws.id);
-        }));
+        for (const ws of workspaces) clearProjectListCache(ws.id);
     }
-    const cached = bypassCache
+    const cachedRows = bypassCache
         ? workspaces.map(function () { return null; })
         : await Promise.all(workspaces.map(function (ws) {
             return readProjectListCache(ws.id);
         }));
     const blocks: WorkspaceBlock[] = workspaces.map(function (ws, i) {
-        const cachedProjects = cached[i];
-        return {
-            ws,
-            projects: cachedProjects, // null when missing/expired
-            error: null,
-            loading: true,
-        };
+        const row = cachedRows[i];
+        const seeded: ProjectEntry[] | null = row
+            ? row.Projects.map(function (p) {
+                return {
+                    id: p.Id,
+                    name: p.Name,
+                    githubRepo: p.GithubRepo,
+                    githubBranch: p.GithubBranch,
+                    lastMessageAt: p.LastMessageAt,
+                };
+            })
+            : null;
+        return { ws, projects: seeded, error: null, loading: true };
     });
     const tabIndex = await openTabsPromise;
     state.blocks = blocks;
@@ -153,7 +157,15 @@ async function loadAndRender(body: HTMLElement, opts?: { bypassCache?: boolean }
     await Promise.all(workspaces.map(function (ws, i) {
         return fetchProjects(ws.id).then(function (projects) {
             blocks[i] = { ws, projects, error: null, loading: false };
-            writeProjectListCache(ws.id, projects);
+            writeProjectListCache(ws.id, projects.map(function (p) {
+                return {
+                    Id: p.id,
+                    Name: p.name,
+                    GithubRepo: p.githubRepo,
+                    GithubBranch: p.githubBranch,
+                    LastMessageAt: p.lastMessageAt,
+                };
+            }), getProjectsCacheTtlMs());
         }).catch(function (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err);
             // Keep any cached projects visible on failure so the UI is not blanked.

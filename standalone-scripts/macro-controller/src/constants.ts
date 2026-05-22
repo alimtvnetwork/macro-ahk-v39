@@ -60,6 +60,8 @@ export const TOKEN_REFRESH_RETRY_MS = 1500;
 // Overridable via __MARCO_CONFIG__.creditStatus.lifecycle
 export const DEFAULT_EXPIRY_GRACE_PERIOD_DAYS = 30;
 export const DEFAULT_REFILL_WARNING_THRESHOLD_DAYS = 7;
+/** Default TTL for the Projects modal SQLite cache (hours). */
+export const DEFAULT_PROJECTS_CACHE_TTL_HOURS = 48;
 export const DEFAULT_ENABLE_WORKSPACE_STATUS_LABELS = true;
 export const DEFAULT_ENABLE_WORKSPACE_HOVER_DETAILS = true;
 

@@ -20,7 +20,7 @@
 import { cPanelBg, cPanelFg, cPanelBorder, cPrimary, cPrimaryLight, lDropdownRadius } from './shared-state';
 import { getSettingsOverrides, saveSettingsOverrides, clearSettingsOverrides, type SettingsOverrides } from './settings-store';
 import { getWorkspaceLifecycleConfig } from './workspace-lifecycle-config';
-import { DEFAULT_EXPIRY_GRACE_PERIOD_DAYS, DEFAULT_REFILL_WARNING_THRESHOLD_DAYS } from './constants';
+import { DEFAULT_EXPIRY_GRACE_PERIOD_DAYS, DEFAULT_REFILL_WARNING_THRESHOLD_DAYS, DEFAULT_PROJECTS_CACHE_TTL_HOURS } from './constants';
 import { PRO_ZERO_CACHE_TTL_DEFAULT_MIN } from './pro-zero/pro-zero-constants';
 import { getProZeroCacheTtlMinutes } from './pro-zero/pro-zero-cache-ttl';
 import { showToast } from './toast';
@@ -39,6 +39,8 @@ interface ModalState {
   refillInput: string;
   /** pro_0 IndexedDB cache TTL (minutes). Empty string = use default. */
   proZeroTtlInput: string;
+  /** Projects modal SQLite cache TTL (hours). Empty string = use default. */
+  projectsCacheTtlInput: string;
 }
 
 interface ModalHandlerStore {
@@ -124,6 +126,16 @@ function buildHtml(state: ModalState): string {
           effective: getProZeroCacheTtlMinutes(),
           jsonValue: undefined,
           defaultValue: PRO_ZERO_CACHE_TTL_DEFAULT_MIN,
+        })
+    +   buildField({
+          label: 'Projects Cache TTL (hours)',
+          help: 'How long the Projects modal keeps each workspace’s project list in SQLite before refetching. Refresh button always bypasses this.',
+          valueEl: inputHtml('projectsCacheTtl', state.projectsCacheTtlInput, submittingDisabled),
+          effective: typeof getSettingsOverrides().projectsCacheTtlHours === 'number'
+            ? (getSettingsOverrides().projectsCacheTtlHours as number)
+            : DEFAULT_PROJECTS_CACHE_TTL_HOURS,
+          jsonValue: undefined,
+          defaultValue: DEFAULT_PROJECTS_CACHE_TTL_HOURS,
         })
     +   errorHtml
     + '</div>'
@@ -219,15 +231,19 @@ export function showSettingsModal(): void {
     refillInput: typeof current.refillWarningThresholdDays === 'number' ? String(current.refillWarningThresholdDays) : '',
     proZeroTtlInput: typeof current.proZeroCreditBalanceCacheTtlMinutes === 'number'
       ? String(current.proZeroCreditBalanceCacheTtlMinutes) : '',
+    projectsCacheTtlInput: typeof current.projectsCacheTtlHours === 'number'
+      ? String(current.projectsCacheTtlHours) : '',
   };
 
   function snapshotInputs(): void {
     const g = el.querySelector<HTMLInputElement>('[data-marco-el="grace"]');
     const r = el.querySelector<HTMLInputElement>('[data-marco-el="refill"]');
     const p = el.querySelector<HTMLInputElement>('[data-marco-el="proZeroTtl"]');
+    const pc = el.querySelector<HTMLInputElement>('[data-marco-el="projectsCacheTtl"]');
     if (g) state.graceInput = g.value;
     if (r) state.refillInput = r.value;
     if (p) state.proZeroTtlInput = p.value;
+    if (pc) state.projectsCacheTtlInput = pc.value;
   }
 
   function rerender(): void {
@@ -257,6 +273,7 @@ export function showSettingsModal(): void {
         expiryGracePeriodDays: parseInput(state.graceInput, 'Expiry Grace Period'),
         refillWarningThresholdDays: parseInput(state.refillInput, 'Refill Warning Threshold'),
         proZeroCreditBalanceCacheTtlMinutes: parseInput(state.proZeroTtlInput, 'Pro_0 Cache TTL'),
+        projectsCacheTtlHours: parseInput(state.projectsCacheTtlInput, 'Projects Cache TTL'),
       };
     } catch (err: unknown) {
       state = { ...state, error: err instanceof Error ? err.message : String(err) };
