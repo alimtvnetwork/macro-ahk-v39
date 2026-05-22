@@ -52,6 +52,10 @@ const FILE_WHITELIST = new Map([
     ["src/components/options/ErrorSwallowAuditView.tsx", "User-triggered audit fetch with manual ok check"],
     ["src/components/options/ScriptBundleDetailView.tsx", "User-triggered update fetch with manual ok check"],
 
+    // Script info handler: all fetches have manual .ok checks or are inside try/catch
+    // with explicit allow-swallow comments (HEAD probe for optional metadata).
+    ["src/background/handlers/script-info-handler.ts", "All fetches have .ok checks or try/catch allow-swallow comments"],
+
     // Documentation / generated files.
     ["src/lib/generate-llm-guide.ts", "Documentation generation helper, not runtime"],
     ["src/content-scripts/network-reporter.ts", "Content-script network intercept, not agent-driven"],
