@@ -19,7 +19,10 @@ import {
   DEFAULT_REMIX_NEXT_SUFFIX_SEPARATOR,
   DEFAULT_REMIX_NEXT_MAX_COLLISION_INCREMENTS,
   DEFAULT_REMIX_OPEN_IN_CURRENT_TAB,
+  DEFAULT_REMIX_NEXT_V_CASING,
 } from './constants';
+
+export type RemixVCasing = 'preserve' | 'upper' | 'lower';
 
 export interface RemixConfig {
   defaultIncludeHistory: boolean;
@@ -27,6 +30,7 @@ export interface RemixConfig {
   nextSuffixSeparator: string;
   maxCollisionIncrements: number;
   openInCurrentTab: boolean;
+  nextVCasing: RemixVCasing;
 }
 
 interface RemixConfigInput {
@@ -35,12 +39,17 @@ interface RemixConfigInput {
   nextSuffixSeparator?: string;
   maxCollisionIncrements?: number;
   openInCurrentTab?: boolean;
+  nextVCasing?: RemixVCasing;
 }
 
 function readRaw(): Partial<RemixConfigInput> {
   const cfg = (window.__MARCO_CONFIG__ || {}) as Record<string, unknown>;
   const remix = cfg.remix as Partial<RemixConfigInput> | undefined;
   return remix || {};
+}
+
+function isVCasing(v: RemixVCasing | undefined): v is RemixVCasing {
+  return v === 'preserve' || v === 'upper' || v === 'lower';
 }
 
 /** Resolved remix config with named-constant defaults applied. */
@@ -62,6 +71,9 @@ export function getRemixConfig(): RemixConfig {
     openInCurrentTab: typeof raw.openInCurrentTab === 'boolean'
       ? raw.openInCurrentTab
       : DEFAULT_REMIX_OPEN_IN_CURRENT_TAB,
+    nextVCasing: isVCasing(raw.nextVCasing)
+      ? raw.nextVCasing
+      : DEFAULT_REMIX_NEXT_V_CASING,
   };
 }
 

@@ -49,6 +49,7 @@ export async function actionRemixNext(ctx: RemixActionContext): Promise<void> {
     const { name, collisionsResolved } = resolveNextName(ctx.currentProjectName, existing, {
       nextSuffixSeparator: cfg.nextSuffixSeparator,
       maxCollisionIncrements: cfg.maxCollisionIncrements,
+      nextVCasing: cfg.nextVCasing,
     });
     log('[RemixNext] resolved "' + ctx.currentProjectName + '" → "' + name + '"'
       + (collisionsResolved > 0 ? ' (+' + collisionsResolved + ' collision skips)' : ''), 'info');

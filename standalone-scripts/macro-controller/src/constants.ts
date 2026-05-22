@@ -161,3 +161,5 @@ export const DEFAULT_REMIX_INCLUDE_CUSTOM_KNOWLEDGE = false;
 export const DEFAULT_REMIX_NEXT_SUFFIX_SEPARATOR = '-';
 export const DEFAULT_REMIX_NEXT_MAX_COLLISION_INCREMENTS = 50;
 export const DEFAULT_REMIX_OPEN_IN_CURRENT_TAB = false;
+/** 'preserve' (default) keeps the V/v casing from input; 'upper' forces V; 'lower' forces v. */
+export const DEFAULT_REMIX_NEXT_V_CASING: 'preserve' | 'upper' | 'lower' = 'preserve';
