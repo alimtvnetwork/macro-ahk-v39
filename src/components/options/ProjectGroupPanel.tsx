@@ -189,6 +189,7 @@ function GroupDetailPanel({ group, onBack, onRefresh }: GroupDetailPanelProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [removeMember, setRemoveMember] = useState<ProjectGroupMember | null>(null);
   const [cascading, setCascading] = useState(false);
+  const [allProjects, setAllProjects] = useState<StoredProject[]>([]);
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
@@ -210,10 +211,32 @@ function GroupDetailPanel({ group, onBack, onRefresh }: GroupDetailPanelProps) {
   // during initial mount — switching groups stranded stale member lists.
   useEffect(() => { loadMembers(); }, [loadMembers]);
 
+  // Load full project roster from chrome.storage.local for the picker dropdown.
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await sendMessage<{ projects: StoredProject[] }>({ type: "GET_ALL_PROJECTS" as never } as never);
+        setAllProjects(res.projects ?? []);
+      } catch (err) {
+        logError("ProjectGroupPanel.loadProjects", "Failed to fetch project list for picker", err);
+      }
+    })();
+  }, []);
+
+  const memberIdSet = useMemo(() => new Set(members.map(m => m.ProjectIdUuid)), [members]);
+  const projectsById = useMemo(() => {
+    const map = new Map<string, StoredProject>();
+    for (const p of allProjects) map.set(p.id, p);
+    return map;
+  }, [allProjects]);
+  const availableProjects = useMemo(
+    () => allProjects.filter(p => !memberIdSet.has(p.id)),
+    [allProjects, memberIdSet],
+  );
+
   const handleAddMember = useCallback(async () => {
-    const pid = parseInt(addProjectId, 10);
-    if (isNaN(pid) || pid <= 0) {
-      toast.error("Enter a valid project ID");
+    if (!addProjectId) {
+      toast.error("Select a project");
       return;
     }
     setAdding(true);
@@ -221,9 +244,10 @@ function GroupDetailPanel({ group, onBack, onRefresh }: GroupDetailPanelProps) {
       await sendMessage({
         type: "LIBRARY_ADD_GROUP_MEMBER" as never,
         groupId: group.Id,
-        projectId: pid,
+        projectId: addProjectId,
       } as never);
-      toast.success(`Project #${pid} added to group`);
+      const name = projectsById.get(addProjectId)?.name ?? addProjectId;
+      toast.success(`"${name}" added to group`);
       setAddProjectId("");
       loadMembers();
     } catch (err) {
@@ -231,22 +255,23 @@ function GroupDetailPanel({ group, onBack, onRefresh }: GroupDetailPanelProps) {
     } finally {
       setAdding(false);
     }
-  }, [addProjectId, group.Id, loadMembers]);
+  }, [addProjectId, group.Id, loadMembers, projectsById]);
 
   const handleRemoveMember = useCallback(async (member: ProjectGroupMember) => {
     try {
       await sendMessage({
         type: "LIBRARY_REMOVE_GROUP_MEMBER" as never,
         groupId: group.Id,
-        projectId: member.ProjectId,
+        projectId: member.ProjectIdUuid,
       } as never);
-      toast.success(`Project #${member.ProjectId} removed`);
+      const name = projectsById.get(member.ProjectIdUuid)?.name ?? member.ProjectIdUuid;
+      toast.success(`"${name}" removed`);
       setRemoveMember(null);
       loadMembers();
     } catch (err) {
       toast.error("Remove failed: " + (err instanceof Error ? err.message : String(err)));
     }
-  }, [group.Id, loadMembers]);
+  }, [group.Id, loadMembers, projectsById]);
 
   const handleDeleteGroup = useCallback(async () => {
     try {
