@@ -28,6 +28,7 @@ import { getV5Statements } from "./migration-v5-sql";
 import { getV6Statements } from "./migration-v6-sql";
 import { getV7Statements } from "./migration-v7-sql";
 import { getV8Statements } from "./migration-v8-sql";
+import { getV9Statements } from "./migration-v9-sql";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -54,7 +55,7 @@ export interface MigrationResult {
 /* ------------------------------------------------------------------ */
 
 const SCHEMA_VERSION_KEY = "marco_schema_version";
-export const CURRENT_SCHEMA_VERSION = 8;
+export const CURRENT_SCHEMA_VERSION = 9;
 
 /* ------------------------------------------------------------------ */
 /*  Migration Registry                                                 */
@@ -102,6 +103,12 @@ const MIGRATIONS: Migration[] = [
         description: "Add AssetVersion table for version history tracking",
         up: applyV8Up,
         down: applyV8Down,
+    },
+    {
+        version: 9,
+        description: "Rebuild ProjectGroupMember with ProjectIdUuid TEXT (Cross-Project Sync Phase 3)",
+        up: applyV9Up,
+        down: applyV9Down,
     },
 ];
 
@@ -225,6 +232,22 @@ function applyV8Up(logsDb: SqlJsDatabase, _errorsDb: SqlJsDatabase): void {
 
 function applyV8Down(_logsDb: SqlJsDatabase, _errorsDb: SqlJsDatabase): void {
     // No-op — DROP TABLE is destructive
+}
+
+/* ------------------------------------------------------------------ */
+/*  Migration v9 — ProjectGroupMember ProjectIdUuid                    */
+/* ------------------------------------------------------------------ */
+
+function applyV9Up(logsDb: SqlJsDatabase, _errorsDb: SqlJsDatabase): void {
+    // DROP + CREATE are not duplicates — must execute exactly once.
+    for (const stmt of getV9Statements()) {
+        logsDb.run(stmt);
+    }
+    console.log("[migration] v9: Rebuilt ProjectGroupMember with ProjectIdUuid TEXT");
+}
+
+function applyV9Down(_logsDb: SqlJsDatabase, _errorsDb: SqlJsDatabase): void {
+    // No-op — old INTEGER column had no resolvable FK; no data to restore.
 }
 
 /* ------------------------------------------------------------------ */

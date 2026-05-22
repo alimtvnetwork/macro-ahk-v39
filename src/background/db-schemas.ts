@@ -508,12 +508,12 @@ CREATE TABLE IF NOT EXISTS ProjectGroup (
 
 export const PROJECT_GROUP_MEMBER_SCHEMA = `
 CREATE TABLE IF NOT EXISTS ProjectGroupMember (
-    Id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    GroupId   INTEGER NOT NULL REFERENCES ProjectGroup(Id) ON DELETE CASCADE,
-    ProjectId INTEGER NOT NULL,
-    UNIQUE(GroupId, ProjectId)
+    Id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    GroupId       INTEGER NOT NULL REFERENCES ProjectGroup(Id) ON DELETE CASCADE,
+    ProjectIdUuid TEXT NOT NULL,
+    UNIQUE(GroupId, ProjectIdUuid)
 );
-CREATE INDEX IF NOT EXISTS IdxGroupMemberProject ON ProjectGroupMember(ProjectId);
+CREATE INDEX IF NOT EXISTS IdxGroupMemberProject ON ProjectGroupMember(ProjectIdUuid);
 `;
 
 /* ------------------------------------------------------------------ */
