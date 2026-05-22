@@ -162,8 +162,8 @@ The installers (`install.ps1`, `install.sh`) conform to the [Generic Installer B
 
 | Flag | Description | Example |
 |------|-------------|---------|
-| `-Version` | Pin a specific release (`vX.Y.Z[-pre]`) or `latest` | `-Version v3.5.0` |
-| `-InstallDir` | Custom install directory | `-InstallDir D:\marco-extension\v3.5.0` |
+| `-Version` | Pin a specific release (`vX.Y.Z[-pre]`) or `latest` | `-Version v3.6.0` |
+| `-InstallDir` | Custom install directory | `-InstallDir D:\marco-extension\v3.6.1` |
 | `-Repo` | Override GitHub `owner/repo` | `-Repo alimtvnetwork/macro-ahk-v36` |
 | `-Help` | Print usage and exit 0 | `-Help` |
 
@@ -171,10 +171,10 @@ The installers (`install.ps1`, `install.sh`) conform to the [Generic Installer B
 
 | Flag | Short | Description | Example |
 |------|-------|-------------|---------|
-| `--version <ver>` | `-v` | Force a specific version (`vX.Y.Z[-pre]`) or `latest`. Anything else exits 3. | `--version v3.5.0` |
-| `--dir <path>` | `-d` | Target directory (default: `~/marco-extension`) | `--dir ~/marco-extension/v3.5.0` |
+| `--version <ver>` | `-v` | Force a specific version (`vX.Y.Z[-pre]`) or `latest`. Anything else exits 3. | `--version v3.6.0` |
+| `--dir <path>` | `-d` | Target directory (default: `~/marco-extension`) | `--dir ~/marco-extension/v3.6.0` |
 | `--repo <o/r>` | `-r` | Override GitHub `owner/repo` | `--repo alimtvnetwork/macro-ahk-v36` |
-| `--dry-run` | — | Resolve the install plan, print it, exit 0 — **nothing is downloaded or extracted**. Useful for CI smoke tests and debugging. | `--dry-run --version v3.5.0` |
+| `--dry-run` | — | Resolve the install plan, print it, exit 0 — **nothing is downloaded or extracted**. Useful for CI smoke tests and debugging. | `--dry-run --version v3.6.0` |
 | `--no-sibling-discovery` | — | Disable §4 sibling-repo probing for this run (overrides `install.config.sh`). Strict mode would skip it anyway. | `--no-sibling-discovery` |
 | `--enable-sibling-discovery` | — | Force-enable sibling probing for this run. **Still blocked by strict mode** (spec §4 rule 6). | `--enable-sibling-discovery` |
 | `--help` | `-h` | Print full usage with the spec link, then exit 0 | `--help` |
