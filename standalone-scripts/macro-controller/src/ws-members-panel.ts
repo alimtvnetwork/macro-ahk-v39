@@ -289,6 +289,8 @@ function headerHtml(wsName: string, state: PanelState): string {
     + '<div style="display:flex;gap:4px;flex-shrink:0;">'
     +   '<button type="button" data-marco-action="refresh" title="Refresh"'
     +     ' style="background:rgba(0,122,204,0.25);color:#bae6fd;border:1px solid ' + cPrimary + ';border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;line-height:1;">↻</button>'
+    +   '<button type="button" data-marco-action="export-csv" title="Export loaded members as CSV"'
+    +     ' style="background:rgba(16,185,129,0.22);color:#bbf7d0;border:1px solid #10b981;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;line-height:1;">⬇ CSV</button>
     +   '<button type="button" data-marco-action="close" title="Close (Esc)"'
     +     ' style="background:rgba(100,116,139,0.35);color:#e2e8f0;border:1px solid ' + cPanelBorder + ';border-radius:3px;padding:2px 7px;font-size:11px;cursor:pointer;line-height:1;">×</button>'
     + '</div>'
