@@ -63,6 +63,13 @@ export async function actionRemixNext(ctx: RemixActionContext): Promise<void> {
       includeCustomKnowledge: cfg.defaultIncludeCustomKnowledge,
     });
     showToast('✅ Remixed → "' + name + '"', 'success');
+    recordRemix({
+      timestamp: Date.now(),
+      source: ctx.currentProjectName,
+      destination: name,
+      workspaceId: ctx.workspaceId,
+      mode: 'next',
+    });
     if (result.redirectUrl) {
       openRemixRedirect(result.redirectUrl);
     }
