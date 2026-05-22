@@ -12,7 +12,7 @@ import { getByXPath } from '../xpath-utils';
 import { pasteIntoEditor, showPasteToast } from './prompt-utils';
 import type { TaskNextDeps } from './task-next-ui';
 import type { EditablePrompt, PromptContext } from './prompt-loader';
-import { getPromptsConfig, sendToExtension, clearLoadedPrompts } from './prompt-loader';
+import { getPromptsConfig, sendToExtension, clearLoadedPrompts, invalidatePromptCache, loadPromptsFromJson, rerenderPromptsDropdown } from './prompt-loader';
 
 /** Adapter: getByXPath returns Node|null, pasteIntoEditor needs Element|null */
 function getByXPathAsElement(xpath: string): Element | null {
@@ -329,7 +329,11 @@ function _buildPromptModalFooter(
         showPasteToast('✓ Prompt saved: ' + name, false);
         log('Prompt saved: ' + name, 'success');
         clearLoadedPrompts();
+        invalidatePromptCache();
         overlay.remove();
+        // CRUD fix: reload from DB and re-render the dropdown so the new/edited
+        // prompt shows up immediately without requiring a manual ↻ Load click.
+        loadPromptsFromJson().then(function() { rerenderPromptsDropdown(); });
       } else {
         const errMsg = (resp && resp.errorMessage as string) || 'Save failed — extension may not be connected';
         showPasteToast('❌ ' + errMsg, true);
