@@ -66,7 +66,6 @@ function verifyStepLibrary() {
 
 function runNoBareFetchLint() {
     console.log("🔍 [prebuild-clean-and-verify] Running no-bare-fetch lint guard…");
-    const { execSync } = require("node:child_process");
     try {
         execSync("node scripts/lint/no-bare-fetch.mjs", { cwd: ROOT, stdio: "inherit" });
     } catch (err) {
