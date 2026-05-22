@@ -10,7 +10,7 @@ import { CreditSource } from './types';
 import { calcTotalCredits, calcAvailableCredits } from './credit-api';
 import { loopCreditState, state } from './shared-state';
 import { getEffectiveStatus, shouldApplyCanceledOverride, applyCanceledCreditOverride } from './workspace-status';
-import { getWorkspaceLifecycleConfig, getWorkspaceLifecycleConfigFor } from './workspace-lifecycle-config';
+import { getWorkspaceLifecycleConfigFor } from './workspace-lifecycle-config';
 import { getSettingsOverrides } from './settings-store';
 import { enrichProZeroWorkspaces } from './pro-zero/pro-zero-enrichment';
 

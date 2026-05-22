@@ -55,7 +55,7 @@ function buildShell(ctx: PromptContext, categories: string[]): { item: HTMLEleme
   return { item, sub };
 }
 
-function wireToggle(row: HTMLElement, arrow: HTMLElement, sub: HTMLElement, dropdown: HTMLElement, item: HTMLElement, count: number): void {
+function wireToggle(row: HTMLElement, arrow: HTMLElement, sub: HTMLElement, dropdown: HTMLElement, _item: HTMLElement, count: number): void {
   const show = function(): void {
     row.style.background = cBtnMenuHover;
     arrow.textContent = '▾';
