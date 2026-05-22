@@ -48,7 +48,7 @@ function readRaw(): Partial<RemixConfigInput> {
   return remix || {};
 }
 
-function isVCasing(v: unknown): v is RemixVCasing {
+function isVCasing(v: RemixVCasing | undefined): v is RemixVCasing {
   return v === 'preserve' || v === 'upper' || v === 'lower';
 }
 
