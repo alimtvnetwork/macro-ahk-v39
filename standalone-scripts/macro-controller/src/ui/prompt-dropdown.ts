@@ -99,18 +99,11 @@ export function renderPromptsDropdown(ctx: PromptContext, taskNextDeps: TaskNext
 // Dropdown header with Load button
 // ============================================
 
-/** Build the dropdown header row with hint text and manual Load button. */
+/** Build the dropdown header row with only the manual Load button (hint text removed). */
 function buildDropdownHeader(ctx: PromptContext, taskNextDeps: TaskNextDeps): HTMLElement {
   const header = document.createElement('div');
-  header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:4px 8px;font-size:9px;color:' + cPrimaryLight + ';border-bottom:1px solid #7c3aed;';
-
-  const hint = document.createElement('span');
-  hint.textContent = '📋 Click to paste · 📋 icon to copy';
-  header.appendChild(hint);
-
-  const loadBtn = buildLoadButton(ctx, taskNextDeps);
-  header.appendChild(loadBtn);
-
+  header.style.cssText = 'display:flex;align-items:center;justify-content:flex-end;padding:4px 8px;border-bottom:1px solid #7c3aed;';
+  header.appendChild(buildLoadButton(ctx, taskNextDeps));
   return header;
 }
 
