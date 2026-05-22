@@ -9,7 +9,7 @@ import { log } from '../logging';
 import { logError } from '../error-utils';
 import type { PromptEntry as LoaderPromptEntry } from '../types';
 
-import { cPanelBg, cPanelFg, cPanelFgDim, cPrimary, cPrimaryLight, cBtnMenuHover, lDropdownRadius, lDropdownShadow } from '../shared-state';
+import { cPanelFg, cPanelFgDim, cPrimary, cPrimaryLight, cBtnMenuHover, lDropdownRadius } from '../shared-state';
 import { getByXPath } from '../xpath-utils';
 import { pasteIntoEditor, showPasteToast } from './prompt-utils';
 import { runTaskNextLoop, openTaskNextSettingsModal, type TaskNextDeps } from './task-next-ui';
