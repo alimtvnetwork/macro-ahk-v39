@@ -242,7 +242,7 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v36/main/sc
   | bash -s -- --dry-run
 
 # Pin a specific version into a custom directory:
-./install.sh --version v3.5.0 --dir ~/marco-extension/v3.5.0
+./install.sh --version v3.6.0 --dir ~/marco-extension/v3.6.0
 
 # Force-enable sibling-repo discovery for this one run:
 ./install.sh --enable-sibling-discovery
@@ -254,7 +254,7 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v36/main/sc
 ### Manual Install
 
 1. Download `marco-extension-v{VERSION}.zip` from [Releases](https://github.com/alimtvnetwork/macro-ahk-v36/releases)
-2. Extract to a folder (e.g., `D:\marco-extension\v3.5.0`)
+2. Extract to a folder (e.g., `D:\marco-extension\v3.6.0`)
 3. Open `chrome://extensions` (or `edge://extensions`)
 4. Enable **Developer mode** (toggle in top-right)
 5. Click **Load unpacked** and select the extracted folder
