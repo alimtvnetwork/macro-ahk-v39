@@ -51,11 +51,11 @@ function buildShell(ctx: PromptContext, categories: string[]): { item: HTMLEleme
   sub.style.cssText = 'display:none;position:static;margin:0 6px 6px 6px;background:rgba(0,0,0,0.18);border:1px solid ' + cPrimary + ';border-radius:' + lDropdownRadius + ';max-height:180px;overflow-y:auto;';
   item.appendChild(row);
   item.appendChild(sub);
-  wireToggle(row, arrow, sub, ctx.promptsDropdown, item, categories.length);
+  wireToggle(row, arrow, sub, ctx.promptsDropdown, categories.length);
   return { item, sub };
 }
 
-function wireToggle(row: HTMLElement, arrow: HTMLElement, sub: HTMLElement, dropdown: HTMLElement, _item: HTMLElement, count: number): void {
+function wireToggle(row: HTMLElement, arrow: HTMLElement, sub: HTMLElement, dropdown: HTMLElement, count: number): void {
   const show = function(): void {
     row.style.background = cBtnMenuHover;
     arrow.textContent = '▾';
