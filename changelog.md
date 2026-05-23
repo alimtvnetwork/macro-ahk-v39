@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.1
 
 ---
 
+## [v3.7.0] — 2026-05-23 Workspace Hover Card UX Fix
+
+### Fixed
+- Workspace hover tooltip in the Macro Controller now positions to the **right** of the workspace row (flips left when space is tight) so it no longer covers the workspace list or action icons.
+- Added a 220 ms grace period plus card-level `mouseenter`/`mouseleave` handling so users can move the cursor onto the tooltip and click **Priority rules & details** (and other inline controls) without the panel disappearing.
+- Anchored positioning to the full workspace row instead of just the name span, eliminating the dead-zone gap that prevented reaching the card.
+
+---
+
 ## [v3.6.0] — 2025-05-22 Minor Version Bump and Fixes
 
 ### Added
