@@ -16,10 +16,15 @@
  */
 
 import type { MessageRequest, OkResponse } from "../../shared/messages";
-import { parse } from "acorn";
 import { logBgWarnError, logCaughtError, BgLogTag } from "../bg-logger";
 import type { InjectableScript, InjectionResult, InjectScriptsResponse, SkipReason } from "../../shared/injection-types";
 import type { StoredProject, ScriptEntry } from "../../shared/project-types";
+import {
+    detectSyntaxError,
+    requestHasInlineSyntaxError,
+    collectInlineSyntaxFailures,
+    type InjectionRequestScript,
+} from "./injection-syntax-preflight";
 import { handleLogEntry, handleLogError } from "./logging-handler";
 import {
     getTabInjections,
@@ -106,126 +111,7 @@ function buildRequestFingerprint(
         .join("|");
 }
 
-type InjectionRequestScript = ScriptEntry | InjectableScript | Record<string, string | number | boolean | null | undefined>;
-type InlineSyntaxCheckScript = {
-    id: string;
-    name?: string;
-    code: string;
-};
-
-function getInlineSyntaxCheckScript(
-    value: InjectionRequestScript,
-): InlineSyntaxCheckScript | null {
-    if (typeof value !== "object" || value === null) {
-        return null;
-    }
-
-    const candidate = value as Partial<InjectableScript> & { id?: string; code?: string; name?: string };
-    if (typeof candidate.id !== "string" || typeof candidate.code !== "string") {
-        return null;
-    }
-
-    return {
-        id: candidate.id,
-        name: typeof candidate.name === "string" ? candidate.name : candidate.id,
-        code: candidate.code,
-    };
-}
-
-// eslint-disable-next-line max-lines-per-function
-function requestHasInlineSyntaxError(
-    scripts: InjectionRequestScript[],
-): boolean {
-    let inlineCandidateCount = 0;
-    let firstFailureId: string | null = null;
-    let firstFailureMessage: string | null = null;
-
-    const triggered = scripts.some((script, index) => {
-        const inlineScript = getInlineSyntaxCheckScript(script);
-        if (inlineScript === null) {
-            return false;
-        }
-
-        inlineCandidateCount += 1;
-        const syntaxError = detectSyntaxError(inlineScript.code);
-        if (syntaxError === null) {
-            console.debug(
-                "[injection:syntax-preflight] script #%d id=%s name=%s parsed cleanly (codeLen=%d)",
-                index,
-                inlineScript.id,
-                inlineScript.name ?? inlineScript.id,
-                inlineScript.code.length,
-            );
-            return false;
-        }
-
-        firstFailureId = inlineScript.id;
-        firstFailureMessage = syntaxError;
-        console.warn(
-            "[injection:syntax-preflight] FAIL — script #%d id=%s name=%s codeLen=%d → %s",
-            index,
-            inlineScript.id,
-            inlineScript.name ?? inlineScript.id,
-            inlineScript.code.length,
-            syntaxError,
-        );
-        return true;
-    });
-
-    console.log(
-        "[injection:syntax-preflight] requestHasInlineSyntaxError → %s (inline candidates=%d/%d, total scripts=%d, firstFailure=%s%s)",
-        triggered,
-        inlineCandidateCount,
-        scripts.length,
-        scripts.length,
-        firstFailureId ?? "none",
-        firstFailureMessage !== null ? ` "${firstFailureMessage}"` : "",
-    );
-
-    return triggered;
-}
-
-function collectInlineSyntaxFailures(
-    scripts: InjectionRequestScript[],
-): InjectionResult[] {
-    const failures: InjectionResult[] = [];
-
-    for (const script of scripts) {
-        const inlineScript = getInlineSyntaxCheckScript(script);
-        if (inlineScript === null) {
-            continue;
-        }
-
-        const syntaxError = detectSyntaxError(inlineScript.code);
-        if (syntaxError === null) {
-            continue;
-        }
-
-        const scriptName = inlineScript.name ?? inlineScript.id;
-        console.warn(
-            "[injection:syntax-preflight] collectInlineSyntaxFailures recorded id=%s name=%s message=%s",
-            inlineScript.id,
-            scriptName,
-            syntaxError,
-        );
-        failures.push({
-            scriptId: inlineScript.id,
-            scriptName,
-            isSuccess: false,
-            errorMessage: `Script "${scriptName}" has a syntax error: ${syntaxError}`,
-            durationMs: 0,
-        });
-    }
-
-    console.log(
-        "[injection:syntax-preflight] collectInlineSyntaxFailures → %d failure(s) of %d total script(s): [%s]",
-        failures.length,
-        scripts.length,
-        failures.map((f) => f.scriptId).join(", ") || "none",
-    );
-
-    return failures;
-}
+// Syntax preflight helpers moved to ./injection-syntax-preflight (PERF-R2b step 1).
 
 /* ------------------------------------------------------------------ */
 /*  INJECT_SCRIPTS                                                     */
@@ -755,31 +641,7 @@ async function injectAllScripts(
     return results;
 }
 
-/**
- * Pre-flight syntax validation. Returns the SyntaxError message if user code
- * is unparsable, otherwise null. We must do this *before* handing the script
- * to chrome.userScripts.execute() / chrome.scripting.executeScript() because
- * those APIs swallow parse failures silently and report success — see
- * spec/22-app-issues for the regression that broke the bad-syntax e2e test.
- */
-function detectSyntaxError(code: string): string | null {
-    try {
-        parse(`(function(){\n${code}\n});`, {
-            ecmaVersion: "latest",
-            sourceType: "script",
-            allowReturnOutsideFunction: false,
-        });
-        return null;
-    } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.debug(
-            "[injection:syntax-preflight] detectSyntaxError caught parse error (codeLen=%d): %s",
-            code.length,
-            message,
-        );
-        return message;
-    }
-}
+// detectSyntaxError moved to ./injection-syntax-preflight (PERF-R2b step 1).
 
 /**
  * Splits a list of prepared scripts into the ones that parse cleanly and a
