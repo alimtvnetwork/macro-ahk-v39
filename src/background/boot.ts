@@ -90,6 +90,19 @@ export async function boot(): Promise<void> {
         setBootStep(step);
         await rehydrateState();
         setPersistenceMode(manager.getPersistenceMode());
+        // Hydrate the per-origin auto-attach dismissal set so the
+        // auto-injector's C9 gate is hot from the first navigation.
+        // See: mem://features/auto-attach-policy (C9).
+        try {
+            const { preloadDismissedOrigins } = await import("./dismissed-origins");
+            await preloadDismissedOrigins();
+        } catch (err) {
+            logCaughtError(
+                BgLogTag.MARCO,
+                "[boot] preloadDismissedOrigins failed; C9 gate falls back to in-memory",
+                err,
+            );
+        }
         console.log("[Marco] ✓ State rehydrated");
 
         step = "start-session";
