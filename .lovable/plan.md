@@ -9,7 +9,7 @@ No active plan. Author the next plan here when starting a new workstream.
 All remaining items are **blocked on user input or deferred**:
 
 - **P0 — Task 1.2** — E2E Chrome verification (manual smoke pass on installer build). *Blocked: manual Chrome testing avoided per user policy.*
-- **P0 — Dashboard "scripts not available" Phase 2b** — auto-attach scripts to project by URL condition. *Blocked on Q20: needs user-confirmed source for per-script URL matches (seed-manifest `TargetUrls` vs project `targetUrls`). See `.lovable/question-and-ambiguity/20-dashboard-scripts-not-available-and-auto-attach.md`.*
+- **P0 — Dashboard "scripts not available" Phase 2b** — ✅ shipped 2026-05-24 (v3.9.2). Root cause was `AutoInject: false` on macro-controller/lovable-owner-switch/lovable-user-add seeds; changed to `true` so they pass C4 and auto-attach to projects by default.
 - **P1 — Release installer hardening v0.2** — SLSA + minisign signing. *Blocked on `MINISIGN_SECRET_KEY` GitHub secret.*
 - **P2 — P Store spec** — deferred (discuss-later mode).
 - **Deferred (do NOT auto-recommend)** — React component tests, E2E React UI verification, Prompt Click E2E (52/53), Cross-Project Sync & Shared Library (depends on P Store).
