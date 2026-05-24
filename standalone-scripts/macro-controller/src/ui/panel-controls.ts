@@ -313,7 +313,7 @@ interface PromptsDropdownResult {
  
 function buildPromptsDropdown(_deps: PanelBuilderDeps, btnStyle: string): PromptsDropdownResult {
   const promptsContainer = document.createElement('div');
-  promptsContainer.style.cssText = 'position:relative;display:inline-block;';
+  promptsContainer.style.cssText = 'position:relative;display:inline-block;min-width:0;';
   const promptsBtn = document.createElement('button');
   promptsBtn.textContent = '📋 Prompts';
   promptsBtn.title = 'Select a prompt to paste or copy';
