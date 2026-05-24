@@ -144,6 +144,8 @@ function isRestrictedUrl(url: string): boolean {
     if (url.startsWith("chrome://")) return true;
     if (url.startsWith("chrome-search://")) return true;
     if (url.startsWith("chrome-extension://")) return true;
+    if (url.startsWith("chrome-untrusted://")) return true;
+    if (url.startsWith("moz-extension://")) return true;
     if (url.startsWith("edge://")) return true;
     if (url.startsWith("brave://")) return true;
     if (url.startsWith("opera://")) return true;
