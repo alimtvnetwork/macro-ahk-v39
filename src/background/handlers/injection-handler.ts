@@ -25,6 +25,14 @@ import {
     collectInlineSyntaxFailures,
     type InjectionRequestScript,
 } from "./injection-syntax-preflight";
+import {
+    buildSuccessResult,
+    buildErrorResult,
+    resolveInjectionPath,
+    buildSkipMessage,
+    extractMacroVersion,
+    buildSyntaxFailureResult,
+} from "./injection-result-builder";
 import { handleLogEntry, handleLogError } from "./logging-handler";
 import {
     getTabInjections,
@@ -665,13 +673,12 @@ function partitionBySyntax(
         }
         const errorMessage = `Script "${script.injectable.name ?? script.injectable.id}" has a syntax error: ${syntaxError}`;
         logBgWarnError(BgLogTag.INJECTION, `3/4 SYNTAX — ${errorMessage}`);
-        syntaxFailures.push({
-            scriptId: script.injectable.id,
-            scriptName: script.injectable.name,
-            isSuccess: false,
-            durationMs: Date.now() - startTime,
+        syntaxFailures.push(buildSyntaxFailureResult(
+            script.injectable.id,
+            script.injectable.name,
             errorMessage,
-        });
+            startTime,
+        ));
         logInjectionFailure(script.injectable, projectId, new SyntaxError(syntaxError)).catch((logErr) => {
             logCaughtError(BgLogTag.INJECTION, `logInjectionFailure self-failed for "${script.injectable.name ?? script.injectable.id}" (syntax stage)`, logErr);
         });
@@ -753,12 +760,7 @@ async function injectSingleScript(
     }
 }
 
-/** Extracts the VERSION constant from macro-looping script code. */
-function extractMacroVersion(code: string): string | null {
-    // Match patterns like: VERSION = '2.94.0' or VERSION="1.72.0"
-    const match = code.match(/VERSION\s*=\s*['"](\d+\.\d+\.\d+)['"]/);
-    return match?.[1] ?? null;
-}
+// extractMacroVersion moved to ./injection-result-builder (PERF-R2b step 3).
 
 /** Logs a successful script injection to the logs DB. */
 // eslint-disable-next-line max-lines-per-function
@@ -880,48 +882,7 @@ async function executeInTab(tabId: number, code: string): Promise<{ path: string
     return { path: resolveInjectionPath(result), domTarget: result.domTarget ?? "unknown" };
 }
 
-/** Builds a successful injection result. */
-function buildSuccessResult(
-    scriptId: string,
-    startTime: number,
-    injectionPath?: string,
-    domTarget?: string,
-): InjectionResult {
-    return {
-        scriptId,
-        isSuccess: true,
-        durationMs: Date.now() - startTime,
-        injectionPath,
-        domTarget,
-    };
-}
-
-/** Maps CspInjectionResult world to a human-readable injection path label. */
-function resolveInjectionPath(result: import("../csp-fallback").CspInjectionResult): string {
-    if (result.world === "USER_SCRIPT") return "userScripts";
-    if (result.isFallback && result.world === "ISOLATED") return "isolated-blob";
-    return "main-blob";
-}
-
-/** Builds an error injection result. */
-function buildErrorResult(
-    scriptId: string,
-    startTime: number,
-    error: unknown,
-): InjectionResult {
-    const errorMessage = error instanceof Error
-        ? error.message
-        : String(error);
-
-    logBgWarnError(BgLogTag.INJECTION, `Script ${scriptId} failed: ${errorMessage}`);
-
-    return {
-        scriptId,
-        isSuccess: false,
-        errorMessage,
-        durationMs: Date.now() - startTime,
-    };
-}
+// buildSuccessResult / resolveInjectionPath / buildErrorResult moved to ./injection-result-builder (PERF-R2b step 3).
 
 /** Records the injection in the state manager. */
 function recordInjection(tabId: number, scripts: InjectableScript[], injectionPath?: string, domTarget?: string, pipelineDurationMs?: number, budgetMs?: number): void {
@@ -940,19 +901,7 @@ function recordInjection(tabId: number, scripts: InjectableScript[], injectionPa
     });
 }
 
-/** Builds a human-readable skip message for a given reason. */
-function buildSkipMessage(reason: SkipReason, scriptName: string): string {
-    switch (reason) {
-        case "disabled":
-            return `Script "${scriptName}" is disabled — enable it in the Scripts panel to inject.`;
-        case "missing":
-            return `Script "${scriptName}" not found in storage — it may have been deleted or not yet seeded.`;
-        case "resolver_mismatch":
-            return `Script "${scriptName}" could not be resolved — the format doesn't match any known script type.`;
-        default:
-            return `Script "${scriptName}" was skipped (unknown reason).`;
-    }
-}
+// buildSkipMessage moved to ./injection-result-builder (PERF-R2b step 3).
 
 
 
