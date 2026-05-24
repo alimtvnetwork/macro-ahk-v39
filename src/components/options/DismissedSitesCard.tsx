@@ -30,7 +30,7 @@ export function DismissedSitesCard() {
             const list = await listPersistedDismissedOrigins();
             setOrigins(list);
         } catch (err) {
-            logError("DismissedSitesCard.refresh failed", err);
+            logError("DismissedSitesCard", "refresh failed", err);
             toast.error("Failed to load dismissed sites");
         } finally {
             setLoading(false);
