@@ -103,6 +103,18 @@ export async function boot(): Promise<void> {
                 err,
             );
         }
+        try {
+            const { preloadSeenOrigins } = await import("./seen-origins");
+            await preloadSeenOrigins();
+            const { registerFirstAttachToastBridge } = await import("./first-attach-toast");
+            registerFirstAttachToastBridge();
+        } catch (err) {
+            logCaughtError(
+                BgLogTag.MARCO,
+                "[boot] first-attach toast bridge init failed",
+                err,
+            );
+        }
         console.log("[Marco] ✓ State rehydrated");
 
         step = "start-session";

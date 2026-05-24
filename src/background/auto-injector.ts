@@ -298,6 +298,15 @@ async function processPageNavigation(
     await injectResolvedScripts(tabId, autoInjectScripts);
     recordInjections(tabId, bindings, matches);
     logInjection(tabId, url, autoInjectScripts.length);
+
+    // First-attach toast (C-UI): show once per origin asking the user
+    // whether to keep auto-attaching here. No-op if seen or dismissed.
+    try {
+        const { maybeShowFirstAttachToast } = await import("./first-attach-toast");
+        await maybeShowFirstAttachToast(tabId, url);
+    } catch (err) {
+        logCaughtError(BgLogTag.MARCO, "first-attach toast inject failed", err);
+    }
 }
 
 /* ------------------------------------------------------------------ */
