@@ -189,7 +189,7 @@ export function buildButtonRow(deps: PanelBuilderDeps): ButtonRowResult {
 
 function buildStartStopButton(deps: PanelBuilderDeps, btnStyle: string): { wrap: HTMLElement; btn: HTMLElement } {
   const startStopWrap = document.createElement('div');
-  startStopWrap.style.cssText = 'display:inline-flex;align-items:center;position:relative;';
+  startStopWrap.style.cssText = 'display:inline-flex;align-items:center;position:relative;min-width:0;';
 
   const startStopBtn = document.createElement('button');
   startStopBtn.id = IDS.START_BTN;
