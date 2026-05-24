@@ -28,25 +28,30 @@ import {
 } from "../state-manager";
 import { wrapWithIsolation } from "./injection-wrapper";
 import { injectWithCspFallback } from "../csp-fallback";
-import { transitionHealth } from "../health-handler";
 import { seedTokensIntoTab } from "./token-seeder";
 import { resolveInjectionRequestScripts } from "./injection-request-resolver";
-import { resolveInjectionOrder, type ProjectNode } from "../dependency-resolver";
 import { readAllProjects } from "./project-helpers";
-import { buildProjectNamespaceScript } from "../project-namespace-builder";
-import { buildSettingsNamespaceScript } from "../settings-namespace-builder";
-import { handleGetSettings } from "./settings-handler";
-import { getFilesByProject } from "./file-storage-handler";
-import { generateLlmGuide } from "../../lib/generate-llm-guide";
-import { toCodeName, slugify } from "../../lib/slug-utils";
-import { STORAGE_KEY_ALL_CONFIGS, EXTENSION_VERSION } from "../../shared/constants";
-import { readNamespaceCaches } from "../namespace-cache";
-import { hashSettingsKey, getSettingsNsCache, setSettingsNsCache } from "../settings-ns-cache";
+import { EXTENSION_VERSION } from "../../shared/constants";
 import { recordInjectionTiming } from "../injection-timing-history";
 import { ensureBuiltinScriptsExist } from "../builtin-script-guard";
 import { mirrorDiagnosticToTab, mirrorPipelineLogsToTab } from "../injection-diagnostics";
 import { cacheGet, cacheSet, cacheDelete } from "../injection-cache";
 import type { CacheCategory } from "../injection-cache";
+import {
+    isInjectionToastEnabled,
+    showInjectionToastInTab,
+    showInjectionFailureToastInTab,
+    showInjectionLoadingToast,
+} from "./injection-toast";
+import {
+    bootstrapNamespaceRoot,
+    injectSettingsNamespace,
+    injectProjectNamespaces,
+} from "./injection-namespace-bootstrap";
+import {
+    prependDependencyScripts,
+    getScriptIdentity,
+} from "./injection-dependency-builder";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
