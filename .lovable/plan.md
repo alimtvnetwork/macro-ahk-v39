@@ -1,10 +1,13 @@
 # Plan
 
-The previous workstream — **Prompt Section Enhancements (Macro Controller UI)** — shipped on 2026-05-22 (all 15 steps complete; `bunx tsc --noEmit` clean). See `.lovable/memory/workflow/13-next-commands.md` "Recently Completed" for the entry.
+**Active workstream:** **v3.10.0 — Refill Priority Filter + Button Overflow Fix + GitHub Open**.
+Detailed 10-step plan: `.lovable/plans/v3.10.0-refill-priority-and-github-open.md`.
+Specs:
+- `spec/22-app-issues/refill-priority-filter/01-overview.md`
+- `spec/22-app-issues/workspace-github-open/01-overview.md` (+ `02-api-sample.md`)
 
-No active plan. Author the next plan here when starting a new workstream.
+Status: planning complete (this turn). Implementation starts on next `next`.
 
-## Open backlog (from `.lovable/memory/workflow/13-next-commands.md`)
 
 All remaining items are **blocked on user input or deferred**:
 
