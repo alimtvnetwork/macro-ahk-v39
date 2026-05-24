@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useEditorTheme, EDITOR_THEME_OPTIONS, type EditorThemeName } from "@/hooks/use-editor-theme";
 import { PromptVariablesCard } from "./PromptVariablesCard";
+import { DismissedSitesCard } from "./DismissedSitesCard";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
