@@ -117,14 +117,22 @@ export function buildButtonRow(deps: PanelBuilderDeps): ButtonRowResult {
   // (menu/error toggle) when the panel is at its default 494px width inside
   // a narrow Lovable sidebar. Flex-wrap already keeps the buttons readable
   // at any width, so the min-width was the sole cause of the clipping bug.
-  btnRow.style.cssText = 'display:flex;gap:8px;row-gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;padding:8px 10px 10px;width:100%;margin:0 auto;box-sizing:border-box;';
+  // v3.9.3: Bumped gap from 8px → 10px AND added per-button `margin:2px 3px`
+  // so each control keeps visible breathing room even when the panel is
+  // restored from a minimized state into a narrow container — where flex
+  // `gap` has been observed to collapse visually (buttons rendered flush
+  // against each other). The margin is independent of `gap` and survives
+  // any minimize → expand cycle.
+  btnRow.style.cssText = 'display:flex;gap:10px;row-gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;padding:8px 10px 10px;width:100%;margin:0 auto;box-sizing:border-box;';
 
   // v2.239.0: Added `flex:0 0 auto;white-space:nowrap` so the buttons keep their
   // natural intrinsic width inside the flex-wrap row. Without this, when the panel
   // auto-sizes during minimize → expand (or briefly during keepPanelInViewport
   // clamping inside a narrow Lovable sidebar), the flex children would shrink
   // below their content width and the labels rendered tiny/cramped.
-  const btnStyle = 'padding:6px 14px;border:none;border-radius:8px;font-weight:600;font-size:' + tFontSm + ';cursor:pointer;transition:all ' + trNormal + ';line-height:1;height:34px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;flex:0 0 auto;white-space:nowrap;';
+  // v3.9.3: Added `margin:2px 3px` as a defensive gap so adjacent buttons
+  // never visually touch even if the parent's flex `gap` is overridden.
+  const btnStyle = 'padding:6px 14px;border:none;border-radius:8px;font-weight:600;font-size:' + tFontSm + ';cursor:pointer;transition:all ' + trNormal + ';line-height:1;height:34px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;flex:0 0 auto;white-space:nowrap;margin:2px 3px;';
 
   // Check button
   const checkResult = createCheckButton({ btnStyle, updateAuthBadge });
