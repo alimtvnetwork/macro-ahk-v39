@@ -1,5 +1,27 @@
 # Macro Controller — Changelog
 
+## v3.11.1 (2026-05-25)
+
+### Fixed
+- **Issue 114 — `pro_0` Credit Balance Calculation**: `pro_0` plans now display correct credit totals and availability. Legacy `calcTotalCredits` / `calcAvailableCredits` aggregators that double-counted `daily_limit` for `pro_0` are bypassed in favor of the server-authoritative `/credit-balance` fields.
+  - `Total` = `total_granted` (was summing `*_limit` fields).
+  - `Available` = `total_remaining` (was subtracting `*_used` independently).
+  - `TotalUsed` = `total_billing_period_used`.
+  - `Billing`, `Daily`, `Topup`, `Bonus`, `Rollover` sub-buckets derived from `grant_type_balances[].remaining`.
+
+### Added
+- Pure calculator module `pro-zero-credit-calculator.ts` with `calculateProZeroCreditSummary()` — no I/O, no globals.
+- 35 unit tests across 4 groups (calculator, wiring, renderers, E2E fixtures).
+- 6 anonymized E2E JSON fixtures under `tests/e2e/credit-balance/fixtures/`.
+- Node E2E harness `run-credit-balance-e2e.test.ts` with invariant checks.
+- Defensive `assertNotLegacyCalcForProZero()` guard in `calcTotalCredits` / `calcAvailableCredits` — throws in dev/test, CODE-RED logs in prod.
+
+### Tests
+- Group A (12): calculator mappings for Total, Available, Used, Daily, Billing, Topup, Bonus, Rollover, Ledger, Source, ExpiringSoon.
+- Group B (8): wiring invariants — `buildSummary` delegation, `applySummaryToRow` verbatim copy, legacy-guard throw/log, non-pro_0 regression.
+- Group C (6): renderer integration — credit bar, hover card title, compact/non-compact status bar, Copy-JSON payload.
+- Group D (9): E2E fixture validation with sanitized IDs/emails.
+
 ## v3.9.0 (2026-05-24)
 
 ### Fixed
