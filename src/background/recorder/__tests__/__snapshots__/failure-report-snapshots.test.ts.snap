@@ -335,3 +335,351 @@ LastEvaluation:
   "Verbose": false,
 }
 `;
+
+exports[`FailureReport snapshots — UrlTabClick matches the canonical JSON for reason=UrlTabClickTimeout 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 3,
+  "Message": "UrlTabClickTimeout: simulated UrlTabClickTimeout",
+  "Phase": "Replay",
+  "Reason": "Timeout",
+  "ReasonDetail": "Reason=UrlTabClickTimeout | Mode=OpenOrFocus | UrlMatch=Glob | Pattern=https://app.example.com/orders/* | TimeoutMs=5000 | DurationMs=5001 | ObservedUrl=https://app.example.com/orders/42 | Selector=a.open-orders | SelectorKind=Css | Detail=simulated UrlTabClickTimeout",
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/url-tab-click.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 901,
+  "StepKind": "UrlTabClick",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — UrlTabClick matches the canonical JSON for reason=TabNotFound 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 3,
+  "Message": "TabNotFound: simulated TabNotFound",
+  "Phase": "Replay",
+  "Reason": "Unknown",
+  "ReasonDetail": "Reason=TabNotFound | Mode=OpenOrFocus | UrlMatch=Glob | Pattern=https://app.example.com/orders/* | TimeoutMs=5000 | DurationMs=5001 | ObservedUrl=https://app.example.com/orders/42 | Selector=a.open-orders | SelectorKind=Css | Detail=simulated TabNotFound",
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/url-tab-click.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 901,
+  "StepKind": "UrlTabClick",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — UrlTabClick matches the canonical JSON for reason=InvalidUrlPattern 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 3,
+  "Message": "InvalidUrlPattern: simulated InvalidUrlPattern",
+  "Phase": "Replay",
+  "Reason": "Unknown",
+  "ReasonDetail": "Reason=InvalidUrlPattern | Mode=OpenOrFocus | UrlMatch=Glob | Pattern=https://app.example.com/orders/* | TimeoutMs=5000 | DurationMs=5001 | ObservedUrl=https://app.example.com/orders/42 | Selector=a.open-orders | SelectorKind=Css | Detail=simulated InvalidUrlPattern",
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/url-tab-click.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 901,
+  "StepKind": "UrlTabClick",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — UrlTabClick matches the canonical JSON for reason=SelectorNotFound 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 3,
+  "Message": "SelectorNotFound: simulated SelectorNotFound",
+  "Phase": "Replay",
+  "Reason": "Unknown",
+  "ReasonDetail": "Reason=SelectorNotFound | Mode=OpenOrFocus | UrlMatch=Glob | Pattern=https://app.example.com/orders/* | TimeoutMs=5000 | DurationMs=5001 | ObservedUrl=https://app.example.com/orders/42 | Selector=a.open-orders | SelectorKind=Css | Detail=simulated SelectorNotFound",
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/url-tab-click.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 901,
+  "StepKind": "UrlTabClick",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — UrlTabClick matches the canonical JSON for reason=UrlPatternMismatch 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 3,
+  "Message": "UrlPatternMismatch: simulated UrlPatternMismatch",
+  "Phase": "Replay",
+  "Reason": "Unknown",
+  "ReasonDetail": "Reason=UrlPatternMismatch | Mode=OpenOrFocus | UrlMatch=Glob | Pattern=https://app.example.com/orders/* | TimeoutMs=5000 | DurationMs=5001 | ObservedUrl=https://app.example.com/orders/42 | Selector=a.open-orders | SelectorKind=Css | Detail=simulated UrlPatternMismatch",
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/url-tab-click.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 901,
+  "StepKind": "UrlTabClick",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — UrlTabClick matches the canonical JSON when optional fields are omitted 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 0,
+  "Message": "TabNotFound: no matching tab",
+  "Phase": "Replay",
+  "Reason": "Unknown",
+  "ReasonDetail": "Reason=TabNotFound | Mode=FocusExisting | UrlMatch=Exact | Pattern=https://x.test/ | TimeoutMs=1000 | DurationMs=1000 | Detail=no matching tab",
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/url-tab-click.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 1,
+  "StepKind": "UrlTabClick",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — Condition wait matches the canonical JSON for a Gate ConditionTimeout 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 2,
+  "Message": "ConditionTimeout: Condition not met within 2000ms",
+  "Phase": "Replay",
+  "Reason": "Timeout",
+  "ReasonDetail": 
+"Reason=ConditionTimeout
+Source=Gate
+Polls=41
+DurationMs=2050
+Detail=Condition not met within 2000ms
+LastEvaluation:
+  [0] XPath '//button[@id='submit']' Visible=false (no match)
+  [1] Css '.loading' Visible=true
+ConditionSerialized:
+{
+  "All": [
+    {
+      "Selector": "//button[@id='submit']",
+      "Matcher": {
+        "Kind": "Visible"
+      }
+    },
+    {
+      "Not": {
+        "Selector": ".loading",
+        "Matcher": {
+          "Kind": "Visible"
+        }
+      }
+    }
+  ]
+}"
+,
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/condition-evaluator.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 501,
+  "StepKind": "Click",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — Condition wait matches the canonical JSON for a dedicated ConditionStep failure 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 7,
+  "Message": "ConditionTimeout: predicate stayed false for 1500ms",
+  "Phase": "Replay",
+  "Reason": "Timeout",
+  "ReasonDetail": 
+"Reason=ConditionTimeout
+Source=ConditionStep
+Polls=30
+DurationMs=1500
+Detail=predicate stayed false for 1500ms
+LastEvaluation:
+  [0] Css '#status' TextEquals=false (got 'pending')
+ConditionSerialized:
+{
+  "Selector": "#status",
+  "Matcher": {
+    "Kind": "TextEquals",
+    "Value": "done"
+  }
+}"
+,
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/condition-step.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 502,
+  "StepKind": "Condition",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — XPath/CSS predicate matches the canonical JSON for an XPath InvalidSelector 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 1,
+  "Message": "InvalidSelector: Unexpected end of expression",
+  "Phase": "Replay",
+  "Reason": "XPathSyntaxError",
+  "ReasonDetail": 
+"Reason=InvalidSelector
+Selector=//button[@id=
+Kind=XPath
+Detail=Unexpected end of expression
+LastEvaluation:
+  [0] XPath '//button[@id=' Exists=false (Unexpected end of expression)"
+,
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/condition-evaluator.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 701,
+  "StepKind": "Click",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — XPath/CSS predicate matches the canonical JSON for a CSS InvalidSelector 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 1,
+  "Message": "InvalidSelector: Expected identifier after '.'",
+  "Phase": "Replay",
+  "Reason": "CssSyntaxError",
+  "ReasonDetail": 
+"Reason=InvalidSelector
+Selector=div..broken
+Kind=Css
+Detail=Expected identifier after '.'
+LastEvaluation:
+  [0] Css 'div..broken' Exists=false (Expected identifier after '.')"
+,
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/condition-evaluator.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 702,
+  "StepKind": "Click",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — XPath/CSS predicate matches the canonical JSON for a ZeroMatches predicate failure 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 4,
+  "Message": "ZeroMatches: 0 elements matched",
+  "Phase": "Replay",
+  "Reason": "ZeroMatches",
+  "ReasonDetail": 
+"Reason=ZeroMatches
+Selector=#never-rendered
+Kind=Css
+Detail=0 elements matched
+LastEvaluation:
+  [0] Css '#never-rendered' Exists=false (0 elements matched)"
+,
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/condition-evaluator.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 703,
+  "StepKind": "Wait",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;
+
+exports[`FailureReport snapshots — XPath/CSS predicate matches the canonical JSON for a predicate ConditionTimeout 1`] = `
+{
+  "CapturedHtml": null,
+  "DataRow": null,
+  "DomContext": null,
+  "FormSnapshot": null,
+  "Index": 5,
+  "Message": "ConditionTimeout: predicate never became true",
+  "Phase": "Replay",
+  "Reason": "Timeout",
+  "ReasonDetail": 
+"Reason=ConditionTimeout
+Selector=//*[@data-state='ready']
+Kind=XPath
+Detail=predicate never became true
+LastEvaluation:
+  [0] XPath '//*[@data-state='ready']' Exists=false (predicate never became true)"
+,
+  "ResolvedXPath": null,
+  "Selectors": [],
+  "SourceFile": "src/background/recorder/condition-evaluator.ts",
+  "StackTrace": "<stripped-for-snapshot>",
+  "StepId": 704,
+  "StepKind": "Wait",
+  "Timestamp": "2026-04-26T10:00:00.000Z",
+  "Variables": [],
+  "Verbose": false,
+}
+`;

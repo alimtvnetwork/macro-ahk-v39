@@ -75,7 +75,7 @@ describe('renderPlanTaskSubmenu — toast surface', () => {
     const ctx = makeCtx();
     const container = document.createElement('div');
     document.body.appendChild(container);
-    // @ts-expect-error — ctx narrowed for test
+    // @ts-expect-error ctx narrowed for test
     renderPlanTaskSubmenu(container, ctx);
 
     const header = container.querySelector('div') as HTMLElement;
@@ -90,7 +90,7 @@ describe('renderPlanTaskSubmenu — toast surface', () => {
     mockOutcome = 'clipboard';
     const ctx = makeCtx();
     const container = document.createElement('div');
-    // @ts-expect-error
+    // @ts-expect-error ctx narrowed for test
     renderPlanTaskSubmenu(container, ctx);
     (container.querySelector('div') as HTMLElement).click();
     const preset = container.querySelector('[data-plan-task-sub] > div') as HTMLElement;
@@ -102,7 +102,7 @@ describe('renderPlanTaskSubmenu — toast surface', () => {
     mockOutcome = 'failed';
     const ctx = makeCtx();
     const container = document.createElement('div');
-    // @ts-expect-error
+    // @ts-expect-error ctx narrowed for test
     renderPlanTaskSubmenu(container, ctx);
     (container.querySelector('div') as HTMLElement).click();
     (container.querySelector('[data-plan-task-sub] > div') as HTMLElement).click();
@@ -116,7 +116,7 @@ describe('renderPlanTaskSubmenu — RC-3 no auto-collapse', () => {
   it('sub stays open after mouseleave + 500ms (no setTimeout collapse)', async () => {
     const ctx = makeCtx();
     const container = document.createElement('div');
-    // @ts-expect-error
+    // @ts-expect-error ctx narrowed for test
     renderPlanTaskSubmenu(container, ctx);
     const item = container.firstChild as HTMLElement;
     const sub = item.querySelector('[data-plan-task-sub]') as HTMLElement;
@@ -136,7 +136,7 @@ describe('renderPlanTaskSubmenu — RC-4 custom parse radix', () => {
   it('treats "08" as 8 (decimal), not 0 (octal)', () => {
     const ctx = makeCtx();
     const container = document.createElement('div');
-    // @ts-expect-error
+    // @ts-expect-error ctx narrowed for test
     renderPlanTaskSubmenu(container, ctx);
     (container.querySelector('div') as HTMLElement).click(); // open sub
 
@@ -152,7 +152,7 @@ describe('renderPlanTaskSubmenu — RC-4 custom parse radix', () => {
   it('rejects 0 with warning toast', () => {
     const ctx = makeCtx();
     const container = document.createElement('div');
-    // @ts-expect-error
+    // @ts-expect-error ctx narrowed for test
     renderPlanTaskSubmenu(container, ctx);
     (container.querySelector('div') as HTMLElement).click();
     const input = container.querySelector('input[type="number"]') as HTMLInputElement;
@@ -167,7 +167,7 @@ describe('renderPlanTaskSubmenu — RC-5 dropdown closes after paste', () => {
   it('dropdown remains open until injectPlanPrompt returns', () => {
     const ctx = makeCtx();
     const container = document.createElement('div');
-    // @ts-expect-error
+    // @ts-expect-error ctx narrowed for test
     renderPlanTaskSubmenu(container, ctx);
     (container.querySelector('div') as HTMLElement).click();
     expect(ctx.promptsDropdown.style.display).toBe('block');
