@@ -105,13 +105,37 @@ export function renderPromptsDropdown(ctx: PromptContext, taskNextDeps: TaskNext
 // Dropdown header with Load button
 // ============================================
 
-/** Build the dropdown header row with only the manual Load button (hint text removed). */
+/** Build the dropdown header row: Tasks toggle (left) + Load button (right). */
 function buildDropdownHeader(ctx: PromptContext, taskNextDeps: TaskNextDeps): HTMLElement {
   const header = document.createElement('div');
-  header.style.cssText = 'display:flex;align-items:center;justify-content:flex-end;padding:4px 8px;border-bottom:1px solid #7c3aed;';
+  header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 8px;border-bottom:1px solid #7c3aed;';
+  header.appendChild(buildTasksToggleButton());
   header.appendChild(buildLoadButton(ctx, taskNextDeps));
   return header;
 }
+
+/** Build the "🎯 Tasks ▾" toggle that shows/hides the Plan Task + Task Next submenus group. */
+function buildTasksToggleButton(): HTMLElement {
+  const btn = document.createElement('span');
+  btn.setAttribute('data-tasks-toggle', '1');
+  btn.textContent = '🎯 Tasks ▸';
+  btn.title = 'Plan Task + Task Next controls';
+  btn.style.cssText = 'cursor:pointer;padding:3px 8px;border-radius:4px;font-size:9px;font-weight:600;color:' + cPrimaryLight + ';background:rgba(124,58,237,0.18);border:1px solid rgba(124,58,237,0.35);user-select:none;';
+  btn.onmouseover = function() { btn.style.background = 'rgba(124,58,237,0.32)'; };
+  btn.onmouseout = function() { btn.style.background = 'rgba(124,58,237,0.18)'; };
+  btn.onclick = function(e: Event) {
+    e.stopPropagation();
+    const dropdown = btn.closest('[data-prompts-dropdown]') as HTMLElement | null
+      ?? (btn.parentElement?.parentElement as HTMLElement | null);
+    const group = dropdown?.querySelector('[data-tasks-group]') as HTMLElement | null;
+    if (!group) return;
+    const open = group.style.display !== 'none';
+    group.style.display = open ? 'none' : 'block';
+    btn.textContent = open ? '🎯 Tasks ▸' : '🎯 Tasks ▾';
+  };
+  return btn;
+}
+
 
 /** Build the manual "Load" button for refreshing prompts from DB. */
 function buildLoadButton(ctx: PromptContext, taskNextDeps: TaskNextDeps): HTMLElement {
@@ -168,16 +192,26 @@ function _renderFresh(
   _persistSnapshot(promptsDropdown, entries, dataHash, categoryFilter);
 }
 
-/** Append header, Task Next + Plan Task + Filter inline menus. */
+/** Append header, Task Next + Plan Task (collapsed by default) + Filter inline menus. */
 function _appendHeaderAndSubmenu(
   container: HTMLElement,
   entries: LoaderPromptEntry[],
   ctx: PromptContext,
   taskNextDeps: TaskNextDeps,
 ): void {
+  // Mark dropdown so the Tasks toggle can find the group from any descendant click.
+  if (!container.hasAttribute('data-prompts-dropdown')) container.setAttribute('data-prompts-dropdown', '1');
   container.appendChild(buildDropdownHeader(ctx, taskNextDeps));
-  renderTaskNextSubmenu(container, ctx, taskNextDeps);
-  renderPlanTaskSubmenu(container, ctx);
+
+  // Collapsible group hosting Task Next + Plan Task. Hidden by default so the prompts list
+  // is the primary content; user opens it via the 🎯 Tasks toggle in the header.
+  const tasksGroup = document.createElement('div');
+  tasksGroup.setAttribute('data-tasks-group', '1');
+  tasksGroup.style.cssText = 'display:none;border-bottom:1px solid rgba(124,58,237,0.4);background:rgba(124,58,237,0.06);';
+  renderTaskNextSubmenu(tasksGroup, ctx, taskNextDeps);
+  renderPlanTaskSubmenu(tasksGroup, ctx);
+  container.appendChild(tasksGroup);
+
   const categories = collectUniqueCategories(entries);
   renderFilterMenu(container, categories, ctx, taskNextDeps, renderPromptsDropdown);
 }
