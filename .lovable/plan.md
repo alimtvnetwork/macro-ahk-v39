@@ -1,6 +1,6 @@
 # Plan
 
-**Active workstream:** Release Page CI/CD Hardening Plan — Step 3/8.
+**Active workstream:** Release Page CI/CD Hardening Plan — Step 6/8.
 
 **Recently shipped:** **Issue 116 — Credit Totals Modal** (2026-05-25, v3.14.1).
 **Recently shipped:** **Issue 113 — Workspace tooltip + Members popup** (2026-05-25).
@@ -40,12 +40,12 @@ Spec: `spec/22-app-issues/114-pro-zero-credit-balance-calculation.md`
 Spec: `plan.md` ("Release Page CI/CD Hardening Plan — 8 Steps")
 - [x] Step 1 — Fix release checkout/ref resolution in `setup` job (added `git checkout` of resolved ref after version step).
 - [x] Step 2 — Fix release-notes changelog range (verified: release.yml already excludes current tag with `grep -v -x "${VER}"`; nearest lower tag via `--sort=-version:refname`).
-- [ ] Step 3 — Add required release-asset verification before publish.
-- [ ] Step 4 — Make Release page install/download instructions complete.
-- [ ] Step 5 — Add release-audit workflow for existing tags.
+- [x] Step 3 — Add required release-asset verification before publish. (Implemented in `release.yml` lines 733–788; gates all required assets before `softprops/action-gh-release`.)
+- [x] Step 4 — Make Release page install/download instructions complete. (Implemented in `release.yml` RELEASE_NOTES.md generation: pinned + latest one-liners, manual Chrome install steps, checksums, SLSA attestation.)
+- [x] Step 5 — Add release-audit workflow for existing tags. (Implemented as `.github/workflows/audit-releases.yml`; scheduled weekly + manual dispatch.)
 - [ ] Step 6 — Update release documentation and RCA references.
 - [ ] Step 7 — Validate without publishing a real release.
-- [ ] Step 8 — Final major version bump to `v3.0.2` (macro controller) / align extension version, plus changelog/readme updates.
+- [ ] Step 8 — Final version bump + changelog/readme updates.
 
 ### Blocked on user input / secrets
 - **P1 — Release installer hardening v0.2 (SLSA + minisign signing)** — *Still blocked on `MINISIGN_SECRET_KEY` GitHub secret.* Independent of the CI/CD hardening plan above.
