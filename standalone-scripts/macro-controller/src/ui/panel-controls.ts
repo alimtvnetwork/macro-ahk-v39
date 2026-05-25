@@ -202,6 +202,7 @@ function buildStartStopButton(deps: PanelBuilderDeps, btnStyle: string): { wrap:
     if (state.running) {
       deps.stopLoop();
     } else {
+      markUserGesture('panel-controls/start-stop-btn');
       deps.startLoop(state.direction);
     }
   };
@@ -215,7 +216,10 @@ function buildStartStopButton(deps: PanelBuilderDeps, btnStyle: string): { wrap:
   startStopWrap.appendChild(startStopBtn);
   startStopWrap.appendChild(countdownBadge);
 
-  const cdCtx = createCountdownCtx(startStopBtn, countdownBadge, function(d: string) { deps.startLoop(d); }, deps.stopLoop);
+  // Countdown auto-restart IS a programmatic resume, but it represents the user's prior gesture
+  // (they pressed Start, then a transient credit pause kicked in). Re-mark the gesture so the
+  // resume is honored without forcing the user to click again mid-loop.
+  const cdCtx = createCountdownCtx(startStopBtn, countdownBadge, function(d: string) { markUserGesture('panel-controls/countdown-resume'); deps.startLoop(d); }, deps.stopLoop);
   nsWrite('_internal.updateStartStopBtn', function(running: boolean) { updateStartStopBtn(cdCtx, running); });
   updateStartStopBtn(cdCtx, !!state.running);
 
