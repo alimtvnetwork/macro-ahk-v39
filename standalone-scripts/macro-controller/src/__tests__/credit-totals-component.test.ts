@@ -140,12 +140,14 @@ describe('showCreditTotalsModal — wired footer', () => {
   });
 
   it('CSV button click invokes the download path (URL.createObjectURL)', () => {
-    const createSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock');
-    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const createFn = vi.fn().mockReturnValue('blob:mock');
+    const revokeFn = vi.fn();
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createFn });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeFn });
     showCreditTotalsModal();
     const btn = document.querySelector('[data-credit-totals-csv]') as HTMLElement;
     btn.click();
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(revokeSpy).toHaveBeenCalledWith('blob:mock');
+    expect(createFn).toHaveBeenCalledTimes(1);
+    expect(revokeFn).toHaveBeenCalledWith('blob:mock');
   });
 });
