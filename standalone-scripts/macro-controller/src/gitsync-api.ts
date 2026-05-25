@@ -35,7 +35,7 @@ interface GitsyncApiResponse {
   enabled?: boolean;
 }
 
-function pickRepoUrl(body: GitsyncApiResponse): string | null {
+export function pickRepoUrl(body: GitsyncApiResponse): string | null {
   if (body.config?.repo_url) return body.config.repo_url;
   if (body.config?.owner_name && body.config?.repo_name) {
     return 'https://github.com/' + body.config.owner_name + '/' + body.config.repo_name;
