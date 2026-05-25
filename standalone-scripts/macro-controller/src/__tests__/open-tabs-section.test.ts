@@ -30,7 +30,7 @@ vi.mock('./prompt-loader', () => ({
   sendToExtension: vi.fn(),
 }));
 
-import { sendToExtension } from './prompt-loader';
+import { sendToExtension } from '../ui/prompt-loader';
 import { createOpenTabsSection } from '../ui/section-open-tabs';
 
 describe('open-tabs-section', () => {
