@@ -185,6 +185,9 @@ interface MarcoSDK {
     /** Set by message-relay content script when active */
     __marcoRelayActive?: boolean;
 
+    /** Injection launch source set by the extension before user script execution */
+    __MARCO_LAUNCH_SOURCE__?: 'manual' | 'passive';
+
     // MacroController class — proper name, not a __* global
     MacroController: MacroControllerFacade;
 
