@@ -118,6 +118,9 @@ function sanitize(raw: unknown): SettingsOverrides {
   if (typeof r.enableWorkspaceHoverDetails === 'boolean') {
     out.enableWorkspaceHoverDetails = r.enableWorkspaceHoverDetails;
   }
+  if (isFiniteNonNegative(r.hoverCardHideGracePeriodMs)) {
+    out.hoverCardHideGracePeriodMs = Math.floor(r.hoverCardHideGracePeriodMs);
+  }
   const perWs = sanitizePerWorkspace(r.perWorkspace);
   if (perWs) {
     out.perWorkspace = perWs;
