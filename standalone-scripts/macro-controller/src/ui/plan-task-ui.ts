@@ -79,11 +79,11 @@ function buildShell(ctx: PromptContext): { item: HTMLElement; sub: HTMLElement }
   sub.style.cssText = 'display:none;position:static;margin:0 6px 6px 6px;background:rgba(0,0,0,0.18);border:1px solid ' + cPrimary + ';border-radius:' + lDropdownRadius + ';';
   item.appendChild(row);
   item.appendChild(sub);
-  wireShellToggle(row, arrow, sub, ctx.promptsDropdown, item);
+  wireShellToggle(row, arrow, sub, ctx.promptsDropdown);
   return { item, sub };
 }
 
-function wireShellToggle(row: HTMLElement, arrow: HTMLElement, sub: HTMLElement, dropdown: HTMLElement, item: HTMLElement): void {
+function wireShellToggle(row: HTMLElement, arrow: HTMLElement, sub: HTMLElement, dropdown: HTMLElement): void {
   const show = function(): void {
     row.style.background = cBtnMenuHover;
     arrow.textContent = '▾';
