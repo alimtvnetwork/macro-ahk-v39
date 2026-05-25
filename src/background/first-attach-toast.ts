@@ -149,8 +149,8 @@ function bridgePagePayload(): void {
         if (o.type !== "MARCO_FIRST_ATTACH_ACTION") return;
         try {
             chrome.runtime.sendMessage(o);
-        } catch {
-            /* SW asleep — single attempt, fail-fast */
+        } catch { // allow-swallow: SW asleep / port closed — single-attempt fail-fast per no-retry policy; user can retry from the toast
+            /* intentionally empty */
         }
     });
 }

@@ -45,6 +45,7 @@ globalThis.document = { getElementById: () => null, createElement: () => ({ styl
 
 // Stub settings-store to avoid the chrome.storage dependency chain.
 const SETTINGS_PATH = resolve(srcRoot, 'settings-store.ts');
+// allow-swallow: settings-store probe is best-effort; absence is a valid env (Node verification script, no chrome.storage)
 await import(SETTINGS_PATH).catch(() => null);
 
 // Now import the SUT.

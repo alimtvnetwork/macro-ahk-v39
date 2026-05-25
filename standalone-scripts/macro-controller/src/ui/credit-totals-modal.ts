@@ -517,7 +517,8 @@ export function showCreditTotalsModal(): void {
   document.body.appendChild(panel);
   installA11yHandlers(panel);
   // Focus the panel so ESC works immediately.
-  try { panel.focus(); } catch { /* ignore */ }
+  // allow-swallow: panel may not be focusable in headless test contexts; ESC still works via document-level listener
+  try { panel.focus(); } catch { /* intentionally empty */ }
 }
 
 /** ESC-to-close + focus trap. Idempotent; cleaned up by removeCreditTotalsModal. */

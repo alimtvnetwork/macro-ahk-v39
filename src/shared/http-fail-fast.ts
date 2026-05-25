@@ -49,7 +49,8 @@ const emitHttpFailFastEvent = (err: { status: number; method: string; url: strin
             at: new Date().toISOString(),
         };
         window.dispatchEvent(new CustomEvent(HTTP_FAIL_FAST_EVENT, { detail }));
-    } catch { /* allow-swallow: event dispatch is best-effort UI surfacing */ }
+    // allow-swallow: event dispatch is best-effort UI surfacing; no listener is a valid state
+    } catch { /* intentionally empty */ }
 };
 
 export interface HttpCallContext {

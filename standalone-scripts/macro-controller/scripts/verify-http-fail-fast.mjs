@@ -117,7 +117,8 @@ for (const { status, url, method, reasonNeedle } of SHAPE_CASES) {
     }
     try {
         await httpFailFast(mkResponse(418, "teapot"), { method: "GET", url: "/tea" });
-    } catch { /* expected */ }
+        // allow-swallow: httpFailFast is expected to throw on non-2xx — this verifier asserts the side-effect (event dispatch), not the throw
+    } catch { /* intentionally empty */ }
     delete globalThis.window;
 
     const heffEvents = events.filter((e) => e.type === HTTP_FAIL_FAST_EVENT);

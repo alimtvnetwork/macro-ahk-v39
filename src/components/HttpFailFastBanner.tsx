@@ -38,7 +38,8 @@ export function HttpFailFastBanner() {
             await navigator.clipboard.writeText(detail.report);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-        } catch { /* allow-swallow: clipboard denied; user can select text manually */ }
+        // allow-swallow: clipboard denied; user can select text manually
+        } catch { /* intentionally empty */ }
     }, [detail]);
 
     if (detail === null) return null;
