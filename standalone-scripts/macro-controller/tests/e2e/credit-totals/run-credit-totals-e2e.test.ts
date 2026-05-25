@@ -42,12 +42,18 @@ function ws(p: Partial<WorkspaceCredit>): WorkspaceCredit {
   };
 }
 
+const NAME_ALPHA = 'ws-001 Acme';
+const NAME_BETA = 'ws-002 Beta';
+const NAME_GAMMA = 'ws-003 Gamma';
+const NAME_DELTA = 'ws-004 Delta';
+const NAME_EPSILON = 'ws-005 Epsilon';
+
 const SNAPSHOT: ReadonlyArray<WorkspaceCredit> = [
-  ws({ id: 'ws-001', fullName: 'ws-001 Acme',     plan: 'pro_3', totalCreditsUsed: 200, available: 800, totalCredits: 1000, numProjects: 4 }),
-  ws({ id: 'ws-002', fullName: 'ws-002 Beta',     plan: 'pro_0', totalCreditsUsed: 40,  available: 60,  totalCredits: 100,  numProjects: 2, hasFree: true }),
-  ws({ id: 'ws-003', fullName: 'ws-003 Gamma',    plan: 'pro_3', totalCreditsUsed: 495, available: 5,   totalCredits: 500,  numProjects: 9 }),
-  ws({ id: 'ws-004', fullName: 'ws-004 Delta',    plan: 'pro_0', totalCreditsUsed: 100, available: 0,   totalCredits: 100,  numProjects: 0 }),
-  ws({ id: 'ws-005', fullName: 'ws-005 Epsilon',  plan: 'pro_3', totalCreditsUsed: 720, available: 280, totalCredits: 1000, numProjects: 6 }),
+  ws({ id: 'ws-001', fullName: NAME_ALPHA,   plan: 'pro_3', totalCreditsUsed: 200, available: 800, totalCredits: 1000, numProjects: 4 }),
+  ws({ id: 'ws-002', fullName: NAME_BETA,    plan: 'pro_0', totalCreditsUsed: 40,  available: 60,  totalCredits: 100,  numProjects: 2, hasFree: true }),
+  ws({ id: 'ws-003', fullName: NAME_GAMMA,   plan: 'pro_3', totalCreditsUsed: 495, available: 5,   totalCredits: 500,  numProjects: 9 }),
+  ws({ id: 'ws-004', fullName: NAME_DELTA,   plan: 'pro_0', totalCreditsUsed: 100, available: 0,   totalCredits: 100,  numProjects: 0 }),
+  ws({ id: 'ws-005', fullName: NAME_EPSILON, plan: 'pro_3', totalCreditsUsed: 720, available: 280, totalCredits: 1000, numProjects: 6 }),
 ];
 
 function dialog(): HTMLElement | null {
@@ -73,7 +79,7 @@ afterAll(() => {
   removeCreditTotalsModal();
 });
 
-describe('Credit Totals E2E — full user journey', () => {
+describe('Credit Totals E2E — open & filter', () => {
   it('Step 1 — opening the modal mounts dialog with all 5 workspaces', () => {
     showCreditTotalsModal();
     expect(dialog()).not.toBeNull();
@@ -84,51 +90,42 @@ describe('Credit Totals E2E — full user journey', () => {
   it('Step 2 — toggling Low + Free filters narrows visible rows', () => {
     const d = dialog()!;
     d.querySelector<HTMLElement>('[data-chip="low"]')!.click();
-    // Low (0<rem<100): ws-002(60), ws-003(5)
-    expect(rowNames().sort()).toEqual(['ws-002 Beta', 'ws-003 Gamma']);
+    expect(rowNames().sort()).toEqual([NAME_BETA, NAME_GAMMA]);
 
     d.querySelector<HTMLElement>('[data-chip="free"]')!.click();
-    // Low OR Free: ws-002 (both), ws-003 (low)
-    expect(rowNames().sort()).toEqual(['ws-002 Beta', 'ws-003 Gamma']);
+    expect(rowNames().sort()).toEqual([NAME_BETA, NAME_GAMMA]);
 
-    // Clear chips → back to 5
     d.querySelector<HTMLElement>('[data-chip="low"]')!.click();
     d.querySelector<HTMLElement>('[data-chip="free"]')!.click();
     expect(visibleRowCount()).toBe(5);
   });
+});
 
+describe('Credit Totals E2E — sort & reorder', () => {
   it('Step 3 — sorting Used cycles desc → asc → none', () => {
     const usedHeader = dialog()!.querySelector<HTMLElement>('[data-sort-key="used"]')!;
-    usedHeader.click(); // desc: 720, 495, 200, 100, 40
-    expect(rowNames()).toEqual([
-      'ws-005 Epsilon', 'ws-003 Gamma', 'ws-001 Acme', 'ws-004 Delta', 'ws-002 Beta',
-    ]);
-    usedHeader.click(); // asc
-    expect(rowNames()).toEqual([
-      'ws-002 Beta', 'ws-004 Delta', 'ws-001 Acme', 'ws-003 Gamma', 'ws-005 Epsilon',
-    ]);
-    usedHeader.click(); // none → manual order
-    expect(rowNames()).toEqual([
-      'ws-001 Acme', 'ws-002 Beta', 'ws-003 Gamma', 'ws-004 Delta', 'ws-005 Epsilon',
-    ]);
+    usedHeader.click();
+    expect(rowNames()).toEqual([NAME_EPSILON, NAME_GAMMA, NAME_ALPHA, NAME_DELTA, NAME_BETA]);
+    usedHeader.click();
+    expect(rowNames()).toEqual([NAME_BETA, NAME_DELTA, NAME_ALPHA, NAME_GAMMA, NAME_EPSILON]);
+    usedHeader.click();
+    expect(rowNames()).toEqual([NAME_ALPHA, NAME_BETA, NAME_GAMMA, NAME_DELTA, NAME_EPSILON]);
   });
 
   it('Step 4 — drag-drop reorders rows in manual mode', () => {
     const rows = dialog()!.querySelectorAll<HTMLElement>('[data-credit-totals-row]');
-    const from = rows[0]; // ws-001
-    const to = rows[3];   // ws-004
     const dt = {
       effectAllowed: '', dropEffect: '', _data: '',
       setData(_t: string, v: string) { this._data = v; },
       getData(_t: string) { return this._data; },
     };
-    from.dispatchEvent(Object.assign(new Event('dragstart', { bubbles: true }), { dataTransfer: dt }));
-    to.dispatchEvent(Object.assign(new Event('drop', { bubbles: true }), { dataTransfer: dt, preventDefault: () => {} }));
-    expect(rowNames()).toEqual([
-      'ws-002 Beta', 'ws-003 Gamma', 'ws-004 Delta', 'ws-001 Acme', 'ws-005 Epsilon',
-    ]);
+    rows[0].dispatchEvent(Object.assign(new Event('dragstart', { bubbles: true }), { dataTransfer: dt }));
+    rows[3].dispatchEvent(Object.assign(new Event('drop', { bubbles: true }), { dataTransfer: dt, preventDefault: () => {} }));
+    expect(rowNames()).toEqual([NAME_BETA, NAME_GAMMA, NAME_DELTA, NAME_ALPHA, NAME_EPSILON]);
   });
+});
 
+describe('Credit Totals E2E — export & close', () => {
   it('Step 5 — CSV export fires the Blob download path', () => {
     const createMock = URL.createObjectURL as unknown as ReturnType<typeof vi.fn>;
     const before = createMock.mock.calls.length;
