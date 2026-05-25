@@ -170,16 +170,18 @@ export function renderChatboxPromptsDropdown(dropdown: HTMLElement, deps: SavePr
 
 function buildDropdownHeader(dropdown: HTMLElement, onToggleEdit: () => void): HTMLElement {
   const header = document.createElement('div');
-  header.style.cssText = 'padding:6px 12px;font-size:10px;color:#a78bfa;border-bottom:1px solid rgba(124,58,237,0.3);font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:4px;';
+  header.style.cssText = 'padding:6px 10px;font-size:10px;color:#a78bfa;border-bottom:1px solid rgba(124,58,237,0.3);font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:6px;white-space:nowrap;';
 
   const headerLeft = document.createElement('span');
-  headerLeft.innerHTML = '<span>📋</span> <span>Click to paste into editor</span>';
+  headerLeft.style.cssText = 'overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;';
+  headerLeft.innerHTML = '<span>📋</span> <span>Click to paste</span>';
+  headerLeft.title = 'Click any prompt to paste it into the editor';
   header.appendChild(headerLeft);
 
   const editToggle = document.createElement('button');
-  editToggle.textContent = '✏️ Edit';
+  editToggle.textContent = '✏️';
   editToggle.title = 'Toggle edit mode (Ctrl+E)';
-  editToggle.style.cssText = 'padding:2px 8px;border-radius:6px;font-size:9px;cursor:pointer;border:1px solid rgba(124,58,237,0.3);background:rgba(0,0,0,0.2);color:#a78bfa;';
+  editToggle.style.cssText = 'flex:0 0 auto;padding:2px 6px;border-radius:6px;font-size:10px;line-height:1;cursor:pointer;border:1px solid rgba(124,58,237,0.3);background:rgba(0,0,0,0.2);color:#a78bfa;';
   editToggle.onclick = function (event) {
     event.stopPropagation();
     onToggleEdit();
