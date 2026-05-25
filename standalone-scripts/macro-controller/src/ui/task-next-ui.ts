@@ -255,9 +255,9 @@ function doNextTask(ctx: TaskNextLoopCtx, index: number): void {
     return;
   }
 
-  const injected = pasteIntoEditor(ctx.prompt.text, ctx.promptsCfg, ctx.deps.getByXPath);
+  const outcome = pasteIntoEditor(ctx.prompt.text, ctx.promptsCfg, ctx.deps.getByXPath);
 
-  if (!injected) {
+  if (outcome === 'failed') {
     logError('Task Next', 'Failed to inject prompt at task ' + (index + 1));
     showPasteToast('❌ Task Next: Injection failed at ' + (index + 1) + '/' + ctx.count, true);
     taskNextState.running = false;
