@@ -43,6 +43,14 @@ Spec: `spec/22-app-issues/114-pro-zero-credit-balance-calculation.md`
 
 ## Completed workstreams (recent)
 
+### Issue 113 — Workspace tooltip + Members popup + Settings removal (2026-05-25)
+- Native `title=` tooltips stripped from `ws-list-renderer.ts` (3 call sites); single shared `<div>` hover card via `ws-hover-card.ts`.
+- Compact layout: workspace name + plan pill; credits bar; refill + expiry rows; collapsible priority rules `<details>`.
+- Color-coded credit health (`--success` / `--warning` / `--destructive`) and lifecycle tone mapping.
+- Settings (gear) button + `settings-modal.ts` imports removed from panel header; dead UI eliminated.
+- Members panel promoted from inline list to popup (reuse Rename chrome): header, member rows with avatar/name/email/role/`⋯` menu, Add/Remove/Promote mutations with cache invalidation.
+- 10 steps complete. See `spec/22-app-issues/113-workspace-tooltip-and-members-popup.md`.
+
 ### v3.12.0 — Workspace Label Refinement (2026-05-25)
 - Unified workspace badge system: all `expired*` variants collapse to muted gray `Cancel`; `about-to-expire` → `Expire Nd` (amber) / `Expired Nd` (red); `about-to-refill` → `Refill Nd` / `Refill today` (sky).
 - Single `classifyFromStatus` + `resolveBadgeStyle` shared by row list and hover card; duplicate pill maps removed.

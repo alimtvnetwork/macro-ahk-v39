@@ -17,7 +17,7 @@
 
 
 
-**Status**: Draft (spec)
+**Status**: ✅ Complete (2026-05-25)
 **Area**: `standalone-scripts/macro-controller/src/`
 **Related files** (audit pass):
 - `ws-hover-card.ts` (457 lines) — primary hover tooltip; suspected first of the duplicate pair
