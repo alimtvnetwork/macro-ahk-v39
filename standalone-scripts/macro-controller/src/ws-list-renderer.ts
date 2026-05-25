@@ -531,6 +531,47 @@ function buildWsRow(
 /**
  * Render the workspace list with filtering, credit bars, and event delegation.
  */
+function computeMaxTotalCredits(workspaces: WorkspaceCredit[]): number {
+  let maxTotalCredits = 1;
+  for (const ws of workspaces) {
+    const mtc = Math.round(ws.totalCredits || calcTotalCredits(ws.freeGranted, ws.dailyLimit, ws.limit, ws.topupLimit, ws.rolloverLimit, ws.plan));
+    if (mtc > maxTotalCredits) maxTotalCredits = mtc;
+  }
+  return maxTotalCredits;
+}
+
+function filterAndSortWorkspaces(
+  workspaces: WorkspaceCredit[],
+  filter: string,
+): Array<{ ws: WorkspaceCredit; wsIndex: number }> {
+  const fs = readFilterState(filter);
+  const survivors: Array<{ ws: WorkspaceCredit; wsIndex: number }> = [];
+  for (const [wsIndex, ws] of workspaces.entries()) {
+    if (!passesFilters(ws, fs)) continue;
+    survivors.push({ ws, wsIndex });
+  }
+
+  if (fs.expiredWithCredits) {
+    survivors.sort(function (a, b) {
+      return _expiredRecoveryScore(b.ws) - _expiredRecoveryScore(a.ws);
+    });
+  } else if (viewState().getRefillPriority()) {
+    const sorted = sortByRefillPriority(survivors, REFILL_PRIORITY_WINDOW_DAYS);
+    survivors.length = 0;
+    for (const r of sorted) survivors.push(r);
+  }
+
+  return survivors;
+}
+
+function updateWsCountLabel(count: number, total: number, filter: string): void {
+  const countLabel = document.getElementById('loop-ws-count-label');
+  if (!countLabel) return;
+  countLabel.textContent = (filter || getLoopWsFreeOnly() || getLoopWsExpiredWithCredits() || getLoopWsRefillSoon() || count !== total)
+    ? 'Workspaces (' + count + '/' + total + ')'
+    : 'Workspaces (' + total + ')';
+}
+
 export function renderLoopWorkspaceList(
   workspaces: WorkspaceCredit[],
   currentName: string,
@@ -541,42 +582,10 @@ export function renderLoopWorkspaceList(
 
   let count = 0;
   let currentIdx = -1;
-  let maxTotalCredits = 0;
-
-  for (const ws of workspaces) {
-    const mtc = Math.round(ws.totalCredits || calcTotalCredits(ws.freeGranted, ws.dailyLimit, ws.limit, ws.topupLimit, ws.rolloverLimit, ws.plan));
-    if (mtc > maxTotalCredits) maxTotalCredits = mtc;
-  }
+  const maxTotalCredits = computeMaxTotalCredits(workspaces);
+  const survivors = filterAndSortWorkspaces(workspaces, filter);
 
   const frag = document.createDocumentFragment();
-  const fs = readFilterState(filter);
-
-  // Collect surviving rows first so we can optionally re-order them.
-  // (We keep the original wsIndex so checkbox state / nav indices stay stable.)
-  const survivors: Array<{ ws: WorkspaceCredit; wsIndex: number }> = [];
-  for (const [wsIndex, ws] of workspaces.entries()) {
-    if (!passesFilters(ws, fs)) continue;
-    survivors.push({ ws, wsIndex });
-  }
-
-  // v2.195.0: When the "expired with credits" filter is active, rank rows by
-  // recovery score = credits × days-expired (multiplicative). This surfaces
-  // workspaces that are BOTH high-credit AND long-expired at the top, which
-  // matches the cleanup intent ("biggest waste, longest sitting"). Single
-  // dimensions (high credits but just expired, or long expired but few
-  // credits) naturally fall below combined high-value targets.
-  if (fs.expiredWithCredits) {
-    survivors.sort(function (a, b) {
-      return _expiredRecoveryScore(b.ws) - _expiredRecoveryScore(a.ws);
-    });
-  } else if (viewState().getRefillPriority()) {
-    // v3.10.0: Refill-priority sort. score = max(0, K - daysToRefill) * available.
-    // Workspaces with no refill date or beyond the window score 0 and sink.
-    const sorted = sortByRefillPriority(survivors, REFILL_PRIORITY_WINDOW_DAYS);
-    survivors.length = 0;
-    for (const r of sorted) survivors.push(r);
-  }
-
   for (const { ws, wsIndex } of survivors) {
     const isCurrent = isCurrentWorkspace(ws, currentName);
     if (isCurrent) currentIdx = count;
@@ -594,14 +603,7 @@ export function renderLoopWorkspaceList(
   listEl.innerHTML = '';
   listEl.appendChild(frag);
 
-  const countLabel = document.getElementById('loop-ws-count-label');
-  if (countLabel) {
-    const total = workspaces.length;
-    countLabel.textContent = (filter || getLoopWsFreeOnly() || getLoopWsExpiredWithCredits() || getLoopWsRefillSoon() || count !== total)
-      ? 'Workspaces (' + count + '/' + total + ')'
-      : 'Workspaces (' + total + ')';
-  }
-
+  updateWsCountLabel(count, workspaces.length, filter);
   attachWsListEventDelegation(listEl, currentIdx, filter);
   attachHoverCardForList(listEl);
 }
