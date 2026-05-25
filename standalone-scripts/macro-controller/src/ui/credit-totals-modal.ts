@@ -102,7 +102,7 @@ export function buildCard(heading: string, rows: ReadonlyArray<{ label: string; 
     label.textContent = r.label;
     const value = document.createElement('span');
     const color = toneColor(r.tone);
-    const isNumeric = /^[\d,.\s\/—–-]+$/.test(r.value);
+    const isNumeric = /^[\d,.\s/—–-]+$/.test(r.value);
     const size = isNumeric ? '16px' : '12px';
     value.style.cssText = 'color:' + color + ';font-weight:700;font-variant-numeric:tabular-nums;font-size:' + size + ';letter-spacing:0.2px;';
     value.textContent = r.value;
