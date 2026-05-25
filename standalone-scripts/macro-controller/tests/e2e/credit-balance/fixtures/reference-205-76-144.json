@@ -1,0 +1,39 @@
+{
+  "name": "reference-205-76-144",
+  "description": "Verbatim reference payload from spec §1.1 — sanitized IDs",
+  "workspace": {
+    "id": "ws-001",
+    "name": "A0030-sample",
+    "owner_id": "owner-uid-001",
+    "owner_email": "owner@sample.com",
+    "plan": "pro_0",
+    "plan_type": "monthly"
+  },
+  "input": {
+    "ledger_enabled": false,
+    "total_remaining": 76,
+    "total_granted": 205,
+    "daily_remaining": 5,
+    "daily_limit": 5,
+    "total_billing_period_used": 144,
+    "expiring_grants": [
+      { "grant_type": "billing", "credits": 71, "expires_at": "2026-07-07T08:00:00Z" }
+    ],
+    "grant_type_balances": [
+      { "grant_type": "daily",   "granted": 5,   "remaining": 5 },
+      { "grant_type": "billing", "granted": 200, "remaining": 71 }
+    ]
+  },
+  "expected": {
+    "Total": 205,
+    "AvailableCredits": 76,
+    "TotalUsed": 144,
+    "DailyRemaining": 5,
+    "DailyLimit": 5,
+    "BillingRemaining": 71,
+    "TopupRemaining": 0,
+    "BonusRemaining": 0,
+    "RolloverRemaining": 0,
+    "LedgerEnabled": false
+  }
+}

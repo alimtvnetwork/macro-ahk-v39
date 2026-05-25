@@ -1,0 +1,27 @@
+{
+  "name": "bonus-and-billing",
+  "description": "Both bonus and billing buckets non-zero; sum ≤ Available",
+  "workspace": { "id": "ws-004", "plan": "pro_0", "owner_email": "owner@sample.com" },
+  "input": {
+    "ledger_enabled": false,
+    "total_remaining": 120,
+    "total_granted": 300,
+    "daily_remaining": 4,
+    "daily_limit": 5,
+    "total_billing_period_used": 180,
+    "expiring_grants": [],
+    "grant_type_balances": [
+      { "grant_type": "bonus",   "granted": 50,  "remaining": 30 },
+      { "grant_type": "billing", "granted": 250, "remaining": 86 }
+    ]
+  },
+  "expected": {
+    "Total": 300,
+    "AvailableCredits": 120,
+    "TotalUsed": 180,
+    "BonusRemaining": 30,
+    "BillingRemaining": 86,
+    "TopupRemaining": 0,
+    "RolloverRemaining": 0
+  }
+}

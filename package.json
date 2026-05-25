@@ -40,6 +40,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:watch": "vitest",
+    "test:credits-e2e": "vitest run standalone-scripts/macro-controller/tests/e2e/credit-balance/run-credit-balance-e2e.test.ts",
     "lint:macro": "node scripts/lint-const-reassign.mjs",
     "build:macro-less": "node scripts/compile-less.mjs standalone-scripts/macro-controller/less/index.less standalone-scripts/macro-controller/dist/macro-looping.css",
     "build:macro-templates": "node scripts/compile-templates.mjs standalone-scripts/macro-controller/templates standalone-scripts/macro-controller/dist/templates.json",

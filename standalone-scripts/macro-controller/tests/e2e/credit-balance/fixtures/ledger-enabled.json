@@ -1,0 +1,24 @@
+{
+  "name": "ledger-enabled",
+  "description": "ledger_enabled=true, all other fields valid",
+  "workspace": { "id": "ws-005", "plan": "pro_0", "owner_email": "owner@sample.com" },
+  "input": {
+    "ledger_enabled": true,
+    "total_remaining": 95,
+    "total_granted": 200,
+    "daily_remaining": 5,
+    "daily_limit": 5,
+    "total_billing_period_used": 105,
+    "expiring_grants": [],
+    "grant_type_balances": [
+      { "grant_type": "billing", "granted": 200, "remaining": 95 }
+    ]
+  },
+  "expected": {
+    "Total": 200,
+    "AvailableCredits": 95,
+    "TotalUsed": 105,
+    "BillingRemaining": 95,
+    "LedgerEnabled": true
+  }
+}

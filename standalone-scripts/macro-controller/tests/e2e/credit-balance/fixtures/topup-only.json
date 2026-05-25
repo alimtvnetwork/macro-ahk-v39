@@ -1,0 +1,26 @@
+{
+  "name": "topup-only",
+  "description": "Workspace with only a topup grant — billing/bonus/rollover absent",
+  "workspace": { "id": "ws-003", "plan": "pro_0", "owner_email": "owner@sample.com" },
+  "input": {
+    "ledger_enabled": false,
+    "total_remaining": 50,
+    "total_granted": 100,
+    "daily_remaining": 3,
+    "daily_limit": 5,
+    "total_billing_period_used": 50,
+    "expiring_grants": [],
+    "grant_type_balances": [
+      { "grant_type": "topup", "granted": 100, "remaining": 50 }
+    ]
+  },
+  "expected": {
+    "Total": 100,
+    "AvailableCredits": 50,
+    "TotalUsed": 50,
+    "TopupRemaining": 50,
+    "BillingRemaining": 0,
+    "BonusRemaining": 0,
+    "RolloverRemaining": 0
+  }
+}

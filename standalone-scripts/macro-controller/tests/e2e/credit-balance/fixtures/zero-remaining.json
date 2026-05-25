@@ -1,0 +1,28 @@
+{
+  "name": "zero-remaining",
+  "description": "All *_remaining = 0; billing period fully consumed",
+  "workspace": { "id": "ws-002", "plan": "pro_0", "owner_email": "owner@sample.com" },
+  "input": {
+    "ledger_enabled": false,
+    "total_remaining": 0,
+    "total_granted": 200,
+    "daily_remaining": 0,
+    "daily_limit": 5,
+    "total_billing_period_used": 200,
+    "expiring_grants": [],
+    "grant_type_balances": [
+      { "grant_type": "daily",   "granted": 5,   "remaining": 0 },
+      { "grant_type": "billing", "granted": 200, "remaining": 0 }
+    ]
+  },
+  "expected": {
+    "Total": 200,
+    "AvailableCredits": 0,
+    "TotalUsed": 200,
+    "DailyRemaining": 0,
+    "BillingRemaining": 0,
+    "TopupRemaining": 0,
+    "BonusRemaining": 0,
+    "RolloverRemaining": 0
+  }
+}

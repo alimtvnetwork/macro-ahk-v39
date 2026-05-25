@@ -1,0 +1,28 @@
+{
+  "name": "expiring-soon",
+  "description": "One grant expires in 7d (included), another in 60d (excluded). nowMs fixed to 2026-05-25T00:00:00Z.",
+  "nowIso": "2026-05-25T00:00:00Z",
+  "workspace": { "id": "ws-006", "plan": "pro_0", "owner_email": "owner@sample.com" },
+  "input": {
+    "ledger_enabled": false,
+    "total_remaining": 150,
+    "total_granted": 250,
+    "daily_remaining": 5,
+    "daily_limit": 5,
+    "total_billing_period_used": 100,
+    "expiring_grants": [
+      { "grant_type": "billing", "credits": 40, "expires_at": "2026-06-01T00:00:00Z" },
+      { "grant_type": "billing", "credits": 60, "expires_at": "2026-07-24T00:00:00Z" }
+    ],
+    "grant_type_balances": [
+      { "grant_type": "billing", "granted": 250, "remaining": 100 }
+    ]
+  },
+  "expected": {
+    "Total": 250,
+    "AvailableCredits": 150,
+    "TotalUsed": 100,
+    "BillingRemaining": 100,
+    "ExpiringSoonCredits": 40
+  }
+}
