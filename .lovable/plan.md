@@ -27,7 +27,7 @@ Specs:
 - **Cross-Project Sync & Shared Library** — *Depends on P Store.*
 
 ### In-memory audit not yet on active backlog
-- **Idle loop perf audit (2026-04-25)** — 8 issues documented in `mem://performance/idle-loop-audit-2026-04-25`. PERF-1 (hot-reload loop running in prod) is flagged critical. Full RCA in `spec/32-app-performance/`.
+- **Idle loop perf audit (2026-04-25)** — ✅ All actionable items fixed (PERF-1..13). PERF-14/15 are Low/no-action. See `mem://performance/idle-loop-audit-2026-04-25`.
 
 ---
 
