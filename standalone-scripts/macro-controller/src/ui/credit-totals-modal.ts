@@ -99,7 +99,7 @@ function ensureRowStyles(): void {
 }
 
 /** Sort key + direction for the breakdown table (Step 9). */
-export type SortKey = 'name' | 'plan' | 'used' | 'rem' | 'total';
+export type SortKey = 'name' | 'plan' | 'projects' | 'used' | 'rem' | 'total';
 export type SortDir = 'asc' | 'desc' | 'none';
 export interface SortState { key: SortKey; dir: SortDir; }
 
