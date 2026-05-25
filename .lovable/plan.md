@@ -1,6 +1,6 @@
 # Plan
 
-**Active workstream:** Release Page CI/CD Hardening Plan — All 8 steps complete ✅.
+**Active workstream:** Issue 117 — Macro toolbar minimize/expand button squish RCA — 5 steps queued.
 
 **Recently shipped:** **Issue 116 — Credit Totals Modal** (2026-05-25, v3.14.1).
 **Recently shipped:** **Issue 113 — Workspace tooltip + Members popup** (2026-05-25).
@@ -36,7 +36,7 @@ Spec: `spec/22-app-issues/114-pro-zero-credit-balance-calculation.md`
 - [x] Step 4 — E2E harness + 6 fixtures
 - [x] Step 5 — v3.11.1 bump, changelog, README, memory
 
-### Active — Release Page CI/CD Hardening Plan (8 steps)
+### Completed — Release Page CI/CD Hardening Plan (8 steps) ✅
 Spec: `plan.md` ("Release Page CI/CD Hardening Plan — 8 Steps")
 - [x] Step 1 — Fix release checkout/ref resolution in `setup` job (added `git checkout` of resolved ref after version step).
 - [x] Step 2 — Fix release-notes changelog range (verified: release.yml already excludes current tag with `grep -v -x "${VER}"`; nearest lower tag via `--sort=-version:refname`).
@@ -46,6 +46,16 @@ Spec: `plan.md` ("Release Page CI/CD Hardening Plan — 8 Steps")
 - [x] Step 6 — Update release documentation and RCA references. (Linked release-procedure.md from readme.md CI/CD section; created `scripts/release-publish.mjs`; updated Issue 95 RCA done-checklist.)
 - [x] Step 7 — Validate without publishing a real release. (All workflow YAMLs pass YAML syntax validation; `scripts/release-publish.mjs` dry-run + syntax check passed.)
 - [x] Step 8 — Final version bump + changelog/readme updates. (Bumped to v3.14.2 via `bump-version.mjs`; updated root + macro-controller changelogs; updated readme.md pinned version references.)
+
+### Active — Issue 117: Macro toolbar minimize/expand button squish RCA (5 steps)
+Trigger: User reports a long-term bug where the Macro Controller toolbar buttons become squished together after minimizing the toolbar and expanding it again. Screenshot shows the top action row/buttons losing expected spacing after restore.
+Scope: Root-cause analysis first, then targeted fix. Do not broaden into unrelated panel redesign.
+
+1. [ ] Step 1 — Reproduce and map the minimize→expand lifecycle. Inspect `standalone-scripts/macro-controller/src/ui/panel-header.ts`, `panel-controls.ts`, redock/viewport logic, and the action-button row creation path. Document the exact DOM/classes/styles before minimize, during minimized state, and after expand.
+2. [ ] Step 2 — Identify the real root cause. Determine whether spacing collapses because of inline style mutation, flex/grid min-width behavior, parent width measurement during restore, redock timing, duplicate style application, or stale persisted panel dimensions. Add a concise RCA note with evidence.
+3. [ ] Step 3 — Implement the smallest durable layout fix. Preserve the current dark UI and existing controls while making the action-button row spacing stable across minimize→expand, narrow container restore, and redock. Avoid cosmetic redesign.
+4. [ ] Step 4 — Add regression coverage. Add or update tests that simulate minimize→expand/restore and assert stable button spacing/layout contracts so this bug cannot return silently.
+5. [ ] Step 5 — Finalize release metadata. Bump the minor version, update the root and macro-controller changelogs, and pin the new version in the root `readme.md`.
 
 ### Blocked on user input / secrets
 - **P1 — Release installer hardening v0.2 (SLSA + minisign signing)** — *Still blocked on `MINISIGN_SECRET_KEY` GitHub secret.* Independent of the CI/CD hardening plan above.
