@@ -24,13 +24,13 @@ The scripts are hosted in the repo at `scripts/install.ps1` and `scripts/install
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v36/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v37/main/scripts/install.ps1 | iex
 ```
 
 ### macOS / Linux (Bash)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v36/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v37/main/scripts/install.sh | bash
 ```
 
 ---
@@ -43,7 +43,7 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v36/main/sc
 |-----------|------|---------|-------------|
 | `-Version` | string | `""` (latest) | Install a specific version (e.g. `v2.116.1`) |
 | `-InstallDir` | string | `$HOME\marco-extension` | Target extraction directory |
-| `-Repo` | string | `alimtvnetwork/macro-ahk-v36` | GitHub `owner/repo` |
+| `-Repo` | string | `alimtvnetwork/macro-ahk-v37` | GitHub `owner/repo` |
 
 ### Execution Flow
 
@@ -102,7 +102,7 @@ irm ... | iex
 
 ```
  Marco Extension installer
- github.com/alimtvnetwork/macro-ahk-v36
+ github.com/alimtvnetwork/macro-ahk-v37
 
  Fetching latest release...
  Downloading marco-extension-v2.116.1.zip (v2.116.1)...
@@ -151,7 +151,7 @@ irm ... | iex
 |------|---------|-------------|
 | `--version <ver>` | latest | Install a specific version |
 | `--dir <path>` | `$HOME/marco-extension` | Target extraction directory |
-| `--repo <o/r>` | `alimtvnetwork/macro-ahk-v36` | GitHub `owner/repo` |
+| `--repo <o/r>` | `alimtvnetwork/macro-ahk-v37` | GitHub `owner/repo` |
 | `--help` | — | Print usage |
 
 ### Usage

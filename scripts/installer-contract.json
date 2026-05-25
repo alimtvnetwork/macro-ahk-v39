@@ -4,7 +4,7 @@
   "description": "Single source of truth for install.sh and install.ps1. Both installers parse this file at startup so flags, exit codes, env-var names, default endpoints and spec-step IDs cannot drift between Bash and PowerShell. Conforms to spec/14-update/01-generic-installer-behavior.md. See scripts/check-installer-contract.mjs for drift detection.",
 
   "repo": {
-    "default": "alimtvnetwork/macro-ahk-v36",
+    "default": "alimtvnetwork/macro-ahk-v37",
     "rationale": "Both installers MUST default to the same canonical repo. Drift between install.sh and install.ps1 here was the bug that motivated this contract."
   },
 

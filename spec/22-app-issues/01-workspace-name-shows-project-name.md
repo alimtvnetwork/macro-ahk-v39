@@ -10,7 +10,7 @@
 
 ### What happened
 
-The MacroLoop controller's status bar (yellow highlighted text) intermittently displayed the **project name** (e.g., "macro-ahk-v36") instead of the **workspace name** (e.g., "P07 D2V7 Orinmax's Lovable v5").
+The MacroLoop controller's status bar (yellow highlighted text) intermittently displayed the **project name** (e.g., "macro-ahk-v37") instead of the **workspace name** (e.g., "P07 D2V7 Orinmax's Lovable v5").
 
 ### Where it happened
 
@@ -20,14 +20,14 @@ The MacroLoop controller's status bar (yellow highlighted text) intermittently d
 
 ### Symptoms and impact
 
-- The yellow-highlighted name in the status bar showed "macro-ahk-v36" (the project name) instead of the actual workspace name.
+- The yellow-highlighted name in the status bar showed "macro-ahk-v37" (the project name) instead of the actual workspace name.
 - This was intermittent: sometimes the API-based detection would correct it, sometimes it would not (depending on timing).
 - Caused confusion about which workspace the project was actually in.
 - "Focus Current" could fail because it tried to match the project name against the workspace list.
 
 ### How it was discovered
 
-User reported that the highlighted section sometimes shows the project name instead of the workspace name. Screenshot showed "macro-ahk-v36" highlighted in yellow in the MacroLoop controller status bar.
+User reported that the highlighted section sometimes shows the project name instead of the workspace name. Screenshot showed "macro-ahk-v37" highlighted in yellow in the MacroLoop controller status bar.
 
 ---
 
@@ -70,7 +70,7 @@ The spec (`spec.md`) did not include any rule requiring DOM-discovered names to 
 
 ### Why the fix resolves the root cause
 
-The project name "macro-ahk-v36" does not appear in the workspace list (workspaces have names like "P07 D2V7 Orinmax's Lovable v5"). By validating against the list, the observer will reject "macro-ahk-v36" and leave `state.workspaceName` empty until the API correctly identifies the workspace.
+The project name "macro-ahk-v37" does not appear in the workspace list (workspaces have names like "P07 D2V7 Orinmax's Lovable v5"). By validating against the list, the observer will reject "macro-ahk-v37" and leave `state.workspaceName` empty until the API correctly identifies the workspace.
 
 ### Config changes or defaults affected
 

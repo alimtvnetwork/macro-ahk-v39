@@ -7,10 +7,10 @@ A generic CI/CD helper is specified at `spec/12-cicd-pipeline-workflows/01-repo-
 
 Key contract:
 - Auto-detects `NEW_REPO_NAME` from `git remote get-url origin` (basename, `.git` stripped).
-- Auto-derives `OLD_REPO_NAME` by decrementing trailing `-v<N>` (e.g. `macro-ahk-v36` → `macro-ahk-v36`).
+- Auto-derives `OLD_REPO_NAME` by decrementing trailing `-v<N>` (e.g. `macro-ahk-v37` → `macro-ahk-v37`).
 - Operator may override with `--from <name>` and `--to <name>`.
 - **URL-safe**: matches inside URLs (`http://`, `https://`, `git@`, `ssh://`, or within ~200 bytes of `github.com/`/`gitlab.com/`/`bitbucket.org/`/`dev.azure.com/`) are skipped in v1. (Future: `--allow-urls` flag.)
-- **Whole-token match only** (avoids `macro-ahk-v210` matching `macro-ahk-v36`).
+- **Whole-token match only** (avoids `macro-ahk-v210` matching `macro-ahk-v37`).
 - **Dry-run by default**; `--apply` required to write.
 - Files discovered via `git ls-files -z` (respects `.gitignore`); excludes `.git/`, `.release/`, `skipped/`, `node_modules/`, `dist/`, `build/`, lockfiles, and binary files.
 - Audit log written to `.repo-rename/<UTC>.log` on apply.
