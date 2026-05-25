@@ -98,36 +98,115 @@ function ensureRowStyles(): void {
   document.head.appendChild(s);
 }
 
+/** Sort key + direction for the breakdown table (Step 9). */
+export type SortKey = 'name' | 'plan' | 'used' | 'rem' | 'total';
+export type SortDir = 'asc' | 'desc' | 'none';
+export interface SortState { key: SortKey; dir: SortDir; }
+
+const NUMERIC_KEYS: ReadonlySet<SortKey> = new Set(['used', 'rem', 'total']);
+
+/** Pure: returns a new array sorted by the given state. `none` returns input order. */
+export function sortWorkspaces(
+  workspaces: ReadonlyArray<WorkspaceCredit>,
+  state: SortState,
+): ReadonlyArray<WorkspaceCredit> {
+  if (state.dir === 'none') return workspaces;
+  const mult = state.dir === 'asc' ? 1 : -1;
+  const arr = workspaces.slice();
+  arr.sort((a, b) => {
+    const av = pickSortValue(a, state.key);
+    const bv = pickSortValue(b, state.key);
+    if (typeof av === 'number' && typeof bv === 'number') {
+      return (av - bv) * mult;
+    }
+    return String(av).localeCompare(String(bv), 'en', { sensitivity: 'base' }) * mult;
+  });
+  return arr;
+}
+
+function pickSortValue(ws: WorkspaceCredit, key: SortKey): number | string {
+  if (key === 'name') return (ws.fullName || ws.name || ws.id || '').toString();
+  if (key === 'plan') return (ws.plan || '').toString();
+  if (key === 'used') return Number(ws.totalCreditsUsed) || 0;
+  if (key === 'rem') return Number(ws.available) || 0;
+  return Number(ws.totalCredits) || 0;
+}
+
+/** Next sort dir in the cycle: none → desc (numeric) / asc (text) → asc/desc → none. */
+export function nextSortDir(key: SortKey, current: SortState): SortState {
+  const isNumeric = NUMERIC_KEYS.has(key);
+  if (current.key !== key) {
+    return { key, dir: isNumeric ? 'desc' : 'asc' };
+  }
+  if (current.dir === 'none') return { key, dir: isNumeric ? 'desc' : 'asc' };
+  if (current.dir === (isNumeric ? 'desc' : 'asc')) return { key, dir: isNumeric ? 'asc' : 'desc' };
+  return { key, dir: 'none' };
+}
+
+const COLUMNS: ReadonlyArray<{ key: SortKey; label: string; align: 'left' | 'right' }> = [
+  { key: 'name', label: 'Workspace', align: 'left' },
+  { key: 'plan', label: 'Plan', align: 'left' },
+  { key: 'used', label: 'Used', align: 'right' },
+  { key: 'rem', label: 'Rem', align: 'right' },
+  { key: 'total', label: 'Total', align: 'right' },
+];
+
 /** Build the per-workspace breakdown table. */
 export function buildBreakdownTable(workspaces: ReadonlyArray<WorkspaceCredit>): HTMLElement {
   ensureRowStyles();
   const wrap = document.createElement('div');
+  wrap.setAttribute('data-credit-totals-table', '1');
   wrap.style.cssText = 'background:rgba(0,0,0,0.30);border:1px solid rgba(124,58,237,0.30);border-radius:6px;overflow:hidden;';
 
+  let sortState: SortState = { key: 'rem', dir: 'none' };
+
   const header = document.createElement('div');
+  header.setAttribute('data-credit-totals-header', '1');
   header.style.cssText = 'display:grid;grid-template-columns:1.6fr 0.7fr 0.7fr 0.7fr 0.7fr;gap:6px;padding:5px 8px;font-size:9px;color:' + cPrimaryLighter + ';text-transform:uppercase;letter-spacing:0.5px;font-weight:700;background:rgba(124,58,237,0.10);border-bottom:1px solid rgba(124,58,237,0.20);';
-  for (const h of ['Workspace', 'Plan', 'Used', 'Rem', 'Total']) {
-    const cell = document.createElement('span');
-    cell.textContent = h;
-    if (h !== 'Workspace' && h !== 'Plan') cell.style.textAlign = 'right';
-    header.appendChild(cell);
-  }
-  wrap.appendChild(header);
 
   const body = document.createElement('div');
   body.style.cssText = 'max-height:260px;overflow-y:auto;';
   body.setAttribute('data-credit-totals-rows', '1');
 
-  if (workspaces.length === 0) {
-    const empty = document.createElement('div');
-    empty.style.cssText = 'padding:14px 10px;text-align:center;color:' + cPanelFgDim + ';font-size:11px;font-style:italic;';
-    empty.textContent = 'No workspaces cached. Open the workspace panel to sync.';
-    body.appendChild(empty);
-  } else {
-    workspaces.forEach((ws, idx) => {
+  function renderHeader(): void {
+    while (header.firstChild) header.removeChild(header.firstChild);
+    for (const col of COLUMNS) {
+      const cell = document.createElement('span');
+      cell.setAttribute('data-sort-key', col.key);
+      cell.style.cursor = 'pointer';
+      cell.style.userSelect = 'none';
+      cell.style.textAlign = col.align;
+      const isActive = sortState.key === col.key && sortState.dir !== 'none';
+      const arrow = isActive ? (sortState.dir === 'asc' ? ' ▲' : ' ▼') : '';
+      cell.textContent = col.label + arrow;
+      if (isActive) cell.style.color = '#ffffff';
+      cell.onclick = function (): void {
+        sortState = nextSortDir(col.key, sortState);
+        renderHeader();
+        renderBody();
+      };
+      header.appendChild(cell);
+    }
+  }
+
+  function renderBody(): void {
+    while (body.firstChild) body.removeChild(body.firstChild);
+    if (workspaces.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'padding:14px 10px;text-align:center;color:' + cPanelFgDim + ';font-size:11px;font-style:italic;';
+      empty.textContent = 'No workspaces cached. Open the workspace panel to sync.';
+      body.appendChild(empty);
+      return;
+    }
+    const sorted = sortWorkspaces(workspaces, sortState);
+    sorted.forEach((ws, idx) => {
       body.appendChild(buildRow(ws, idx));
     });
   }
+
+  renderHeader();
+  renderBody();
+  wrap.appendChild(header);
   wrap.appendChild(body);
   return wrap;
 }
