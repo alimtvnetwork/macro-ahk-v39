@@ -18,6 +18,7 @@ import { aggregateCreditTotals, type CreditTotals } from '../credit-totals';
 import type { WorkspaceCredit } from '../types';
 
 const DIALOG_ID = 'marco-credit-totals-modal';
+const ATTR_ARIA_LABEL = 'aria-label';
 
 /** Format a number with thousands separators (en-US, no decimals). */
 export function formatCount(n: number): string {
@@ -176,7 +177,7 @@ export function showCreditTotalsModal(): void {
     + 'box-shadow:0 8px 32px rgba(0,0,0,.6);font-family:monospace;overflow:hidden;';
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-modal', 'true');
-  panel.setAttribute('aria-label', 'Credit Totals');
+  panel.setAttribute(ATTR_ARIA_LABEL, 'Credit Totals');
   panel.tabIndex = -1;
 
   panel.appendChild(buildTitleBar());
@@ -245,7 +246,7 @@ function buildTitleBar(): HTMLElement {
   closeBtn.style.cssText = 'cursor:pointer;color:#94a3b8;font-size:14px;padding:0 4px;';
   closeBtn.textContent = '✕';
   closeBtn.setAttribute('role', 'button');
-  closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.setAttribute(ATTR_ARIA_LABEL, 'Close');
   closeBtn.onclick = function (): void { removeCreditTotalsModal(); };
   bar.appendChild(title);
   bar.appendChild(closeBtn);
@@ -261,12 +262,12 @@ function buildFooter(totals: CreditTotals): HTMLElement {
   right.style.cssText = 'display:flex;gap:6px;';
   const refresh = document.createElement('button');
   refresh.textContent = '↻ Refresh';
-  refresh.setAttribute('aria-label', 'Refresh credit snapshot');
+  refresh.setAttribute(ATTR_ARIA_LABEL, 'Refresh credit snapshot');
   refresh.style.cssText = 'background:transparent;border:1px solid ' + cPrimary + ';color:' + cPrimaryLighter + ';padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;';
   refresh.onclick = function (): void { showCreditTotalsModal(); };
   const close = document.createElement('button');
   close.textContent = 'Close';
-  close.setAttribute('aria-label', 'Close dialog');
+  close.setAttribute(ATTR_ARIA_LABEL, 'Close dialog');
   close.style.cssText = 'background:rgba(124,58,237,0.20);border:1px solid ' + cPrimary + ';color:' + cPrimaryLighter + ';padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;';
   close.onclick = function (): void { removeCreditTotalsModal(); };
   right.appendChild(refresh);
