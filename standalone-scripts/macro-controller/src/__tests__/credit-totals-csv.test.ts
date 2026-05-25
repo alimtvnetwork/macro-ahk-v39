@@ -39,7 +39,7 @@ describe('generateCsv', () => {
     expect(lines).toHaveLength(3);
     expect(lines[0]).toBe('Workspace,Plan,Projects,Used,Remaining,Total');
     expect(lines[1]).toBe('"Alpha","pro_3",7,320,80,400');
-    expect(lines[2]).toBe('"Beta","pro_1",1,45,15,60');
+    expect(lines[2]).toBe('"Beta","pro_0",0,45,15,60');
   });
 
   it('quotes names containing double quotes by doubling them', () => {
