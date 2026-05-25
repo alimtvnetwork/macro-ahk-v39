@@ -69,8 +69,7 @@ describe('page-workspace-responder', () => {
 
   async function loadModule() {
     vi.resetModules();
-    const mod = await import('../page-workspace-responder');
-    return mod;
+    return import('../page-workspace-responder');
   }
 
   it('registers a message listener on first call', async () => {

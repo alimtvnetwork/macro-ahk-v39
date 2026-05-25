@@ -35,12 +35,8 @@ function loadFixtures(): Fixture[] {
 
 const FIXTURES = loadFixtures();
 
-describe('Group D — credit-balance E2E (6 fixtures)', () => {
-    it('loads all 6 fixtures from disk', () => {
-        expect(FIXTURES).toHaveLength(6);
-    });
-
-    for (const fx of FIXTURES) {
+function runFixtureTests(fixtures: Fixture[]): void {
+    for (const fx of fixtures) {
         it('E2E: ' + fx.name + ' — ' + fx.description, () => {
             const nowMs = fx.nowIso ? Date.parse(fx.nowIso) : 0;
             const actual = calculateProZeroCreditSummary(fx.input, nowMs);
@@ -49,6 +45,14 @@ describe('Group D — credit-balance E2E (6 fixtures)', () => {
             }
         });
     }
+}
+
+describe('Group D — credit-balance E2E (6 fixtures)', () => {
+    it('loads all 6 fixtures from disk', () => {
+        expect(FIXTURES).toHaveLength(6);
+    });
+
+    runFixtureTests(FIXTURES);
 
     it('bonus-and-billing: BonusRemaining + BillingRemaining ≤ AvailableCredits', () => {
         const fx = FIXTURES.find((f) => f.name === 'bonus-and-billing');

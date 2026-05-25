@@ -32,7 +32,6 @@ export function assertNotLegacyCalcForProZero(plan: string | undefined, fnName: 
     + 'use calculateProZeroCreditSummary(balance) and read enriched WorkspaceCredit fields instead.';
   const isProd = typeof process !== 'undefined' && process?.env?.NODE_ENV === 'production';
   if (!isProd) throw new Error(msg);
-  // eslint-disable-next-line no-console
   console.error(msg);
 }
 
