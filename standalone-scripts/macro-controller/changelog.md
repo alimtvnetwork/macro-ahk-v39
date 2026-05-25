@@ -1,5 +1,12 @@
 # Macro Controller — Changelog
 
+## v3.14.2 (2026-05-25)
+
+### Internal
+- Version bump: 3.14.1 → 3.14.2 (synced with extension release).
+
+---
+
 ## v3.14.1 (2026-05-25)
 
 ### Added
