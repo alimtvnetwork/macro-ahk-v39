@@ -40,16 +40,14 @@ const SEL_WS_NAME = '.loop-ws-name';
 type WsLookup = (wsId: string) => WorkspaceCredit | null;
 
 /* ------------------------------------------------------------------ */
-/* Pill colors mirror ws-list-renderer.STATUS_PILL_STYLES              */
+/* Pill rendering — Issue 115 (v3.12.0)                                */
+/*                                                                     */
+/* Delegates to the same classifier + tone resolver used by the row    */
+/* renderer (`ws-list-renderer.ts`). Single source of truth.           */
 /* ------------------------------------------------------------------ */
 
-const PILL_STYLES: Record<string, { bg: string; fg: string; border: string }> = {
-  'fully-expired':    { bg: 'rgba(127,29,29,0.85)', fg: '#fee2e2', border: '#dc2626' },
-  'expired-canceled': { bg: 'rgba(153,27,27,0.65)', fg: '#fecaca', border: '#ef4444' },
-  'expired':          { bg: 'rgba(127,29,29,0.55)', fg: '#fca5a5', border: 'transparent' },
-  'about-to-expire':  { bg: 'rgba(180,83,9,0.55)',  fg: '#fde68a', border: '#f59e0b' },
-  'about-to-refill':  { bg: 'rgba(2,132,199,0.45)', fg: '#bae6fd', border: '#38bdf8' },
-};
+import { classifyFromStatus } from './workspace-display-status';
+import { resolveBadgeStyle } from './workspace-badge-styles';
 
 /* ------------------------------------------------------------------ */
 /* HTML helpers                                                        */
@@ -78,15 +76,15 @@ function sectionHeaderHtml(text: string): string {
     + escHtml(text) + '</div>';
 }
 
-function pillHtml(status: WorkspaceStatus): string {
-  if (status.kind === 'normal') return '';
-  const s = PILL_STYLES[status.kind];
-  if (!s) return '';
+function pillHtml(status: WorkspaceStatus, ws?: WorkspaceCredit): string {
+  const display = classifyFromStatus(status, ws || ({} as WorkspaceCredit));
+  if (display.kind === 'normal' || !display.label) return '';
+  const s = resolveBadgeStyle(display.tone);
   return '<span style="font-size:9px;color:' + s.fg
     + ';background:' + s.bg
     + ';border:1px solid ' + s.border
-    + ';padding:1px 6px;border-radius:3px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase;margin-left:6px;vertical-align:middle;">'
-    + escHtml(status.label) + '</span>';
+    + ';padding:1px 6px;border-radius:3px;font-weight:700;letter-spacing:0.3px;text-transform:none;margin-left:6px;vertical-align:middle;">'
+    + escHtml(display.label) + '</span>';
 }
 
 /* ------------------------------------------------------------------ */
