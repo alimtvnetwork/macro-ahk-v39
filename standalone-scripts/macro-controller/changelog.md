@@ -1,5 +1,14 @@
 # Macro Controller — Changelog
 
+## v3.13.0 (2026-05-25)
+
+### Fixed
+- **Chatbox prompts dropdown header** — `📋 Click to paste into editor` + `✏️ Edit` no longer wraps/clips inside the 180px-wide dropdown. Header text shortened to `Click to paste` (full label moved to `title=` tooltip), Edit button collapsed to icon-only with `flex:0 0 auto` so it never wraps.
+- **Floating Task Next submenu vertical overflow** (`save-prompt-task-next.ts`): the 13-row flyout (`Next 1..40 tasks` + Custom + Settings) now caps at `max-height:80vh` with internal scroll, and `positionSubmenu()` clamps `top` upward when the menu would extend past the viewport bottom. Horizontal clamp also respects an 8px viewport pad.
+
+### Internal
+- Version bump: 3.12.0 → 3.13.0 (pinned across manifest.json, src/shared/constants.ts, standalone-scripts/macro-controller/src/shared-state.ts, standalone-scripts/macro-controller/src/instruction.ts).
+
 ## v3.12.0 (2026-05-25)
 
 ### Changed

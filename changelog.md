@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.1
 
 ---
 
+## [v3.13.0] — 2026-05-25
+
+### Fixed
+- Chatbox prompts dropdown header no longer wraps when the dropdown is narrow (`Click to paste into editor` shortened to `Click to paste`; `✏️ Edit` collapsed to icon).
+- Floating Task Next submenu now clamps vertically inside the viewport (`max-height:80vh` + scroll, top adjusted when overflow).
+
+### Internal
+- Version pinned to 3.13.0 across `manifest.json`, `src/shared/constants.ts`, and the macro-controller standalone (`shared-state.ts`, `instruction.ts`).
+
+---
+
 ## [v3.12.0] — 2026-05-25
 
 ### Changed
