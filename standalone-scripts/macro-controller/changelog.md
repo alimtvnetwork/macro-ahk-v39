@@ -1,6 +1,25 @@
 # Macro Controller — Changelog
 
+## v3.12.0 (2026-05-25)
+
+### Changed
+- **Workspace status badges — unified label system** (Issue 115):
+  - `expired-canceled`, `fully-expired`, plain `expired` all collapse to a single muted gray **`Cancel`** badge (light yellow text on slate-500). The legacy red `Expired` pill is gone for canceled rows.
+  - `about-to-expire` (past_due) → **`Expire {N}d`** (amber). When the past_due event already lapsed (`daysSince ≥ 1`) → **`Expired {N}d`** (red).
+  - `about-to-refill` → **`Refill {N}d`** / **`Refill today`** (sky/info). Inline `R Nd` chip auto-suppressed to prevent double-badging.
+- `ws-list-renderer.ts` + `ws-hover-card.ts` now share a single classifier (`classifyFromStatus`) and tone resolver (`resolveBadgeStyle`). The duplicate `STATUS_PILL_STYLES` / `PILL_STYLES` maps are removed.
+
+### Added
+- `workspace-display-status.ts` — pure classifier that maps `WorkspaceStatus` → `WorkspaceDisplayStatus` (kind + label + tone + tooltip).
+- `workspace-badge-styles.ts` — single-source tone→CSS resolver. `muted` tone guaranteed never to contain red palette fragments.
+- **Refill-soon filter chip** in the workspace filter menu (`loop-ws-refill-soon-filter`). Shows only workspaces currently classified as `about-to-refill`.
+- 28 new tests (13 classifier + 6 tone resolver + 5 composition + 4 chip).
+
+### Internal
+- Version bump: 3.11.1 → 3.12.0.
+
 ## v3.11.1 (2026-05-25)
+
 
 ### Fixed
 - **Issue 114 — `pro_0` Credit Balance Calculation**: `pro_0` plans now display correct credit totals and availability. Legacy `calcTotalCredits` / `calcAvailableCredits` aggregators that double-counted `daily_limit` for `pro_0` are bypassed in favor of the server-authoritative `/credit-balance` fields.
