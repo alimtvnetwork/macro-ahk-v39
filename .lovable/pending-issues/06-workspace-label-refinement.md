@@ -1,7 +1,7 @@
 # Issue 115 — Workspace Label Refinement (Cancel / Refill In / Expired For)
 
-**Status:** Spec ready, awaiting `next` to begin implementation.
-**Target version:** v3.12.0 (minor bump).
+**Status:** ✅ COMPLETE — shipped in v3.12.0 (2026-05-25).
+**Target version:** v3.12.1 (minor bump).
 **Reference screenshots:** user-uploads image-10 (EXPIRED + EXPIRED (CANCELED)), image-11 (ABOUT TO REFILL), image-12 (ABOUT TO EXPIRE + EXPIRED).
 
 ---
@@ -125,9 +125,9 @@ Bump `v3.11.1 → v3.12.0` across `manifest.json`, `src/shared/constants.ts`, ev
 
 ## Remaining Tasks (project-wide)
 
-- [ ] **Issue 115** — Workspace label refinement (this spec; 10 steps, 15 tests, → v3.12.0).
+- [x] **Issue 115** — Workspace label refinement ✅ Shipped v3.12.1.
 - [ ] **P1 — Release installer hardening v0.2** — Blocked on `MINISIGN_SECRET_KEY`.
 - [ ] **P2 — P Store / Cross-Project Sync / Prompt Click E2E** — Deferred.
 - [ ] **PERF-14 / PERF-15** — Low severity, deferred.
 
-Say `next` to begin Step 1.
+All 10 steps complete. See changelog.md and `mem://features/macro-controller/workspace-badge-display`.
