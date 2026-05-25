@@ -74,8 +74,11 @@ export async function fetchGitsyncConfig(
       },
       credentials: 'include',
     });
-    if (resp.status === 404) {
-      log('[GitsyncApi] 404 ws=' + wsId + ' pid=' + pid + ' → not_linked', 'info');
+    if (resp.status === 404 || resp.status === 401 || resp.status === 403) {
+      // 404 = no gitsync row; 401/403 = caller lacks access to this project's
+      // gitsync config. From the user's perspective all three are "no repo we
+      // can open" → cache as not_linked so repeated right-clicks stay offline.
+      log('[GitsyncApi] HTTP ' + resp.status + ' ws=' + wsId + ' pid=' + pid + ' → not_linked', 'info');
       return { status: 'not_linked' };
     }
     if (!resp.ok) {
