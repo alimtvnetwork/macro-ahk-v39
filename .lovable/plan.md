@@ -1,24 +1,21 @@
 # Plan
 
-**Active workstream:** Issue 114 — pro_0 Credit Balance Calculation (v3.11.1)
+**Active workstream:** None — Issue 114 complete. Awaiting next instruction.
 
-**Recently shipped:** **v3.10.0 — Refill Priority Filter + Button Overflow Fix + GitHub Open** (2026-05-24).
-Detailed plan: `.lovable/plans/v3.10.0-refill-priority-and-github-open.md`.
-Specs:
-- `spec/22-app-issues/refill-priority-filter/01-overview.md`
-- `spec/22-app-issues/workspace-github-open/01-overview.md` (+ `02-api-sample.md`)
+**Recently shipped:** **v3.11.1 — pro_0 Credit Balance Calculation Fix** (2026-05-25).
+Spec: `spec/22-app-issues/114-pro-zero-credit-balance-calculation.md`.
 
 ---
 
 ## Remaining tasks (blocked or deferred)
 
-### Active — Issue 114 (5 steps, target v3.11.0)
+### Completed — Issue 114 (5 steps, v3.11.1) ✅
 Spec: `spec/22-app-issues/114-pro-zero-credit-balance-calculation.md`
-- [ ] Step 1 — Pure calculator module + 12 unit tests
-- [ ] Step 2 — Wire calculator into pro-zero-credit-summary.ts + retire legacy branch for pro_0
-- [ ] Step 3 — Renderers consume enriched fields (status bar, hover card, Copy-JSON)
-- [ ] Step 4 — E2E harness + 6 fixtures
-- [ ] Step 5 — v3.11.0 bump, changelog, README, memory
+- [x] Step 1 — Pure calculator module + 12 unit tests
+- [x] Step 2 — Wire calculator into pro-zero-credit-summary.ts + retire legacy branch for pro_0
+- [x] Step 3 — Renderers consume enriched fields (status bar, hover card, Copy-JSON)
+- [x] Step 4 — E2E harness + 6 fixtures
+- [x] Step 5 — v3.11.1 bump, changelog, README, memory
 
 ### Blocked on user input / secrets
 - **P1 — Release installer hardening v0.2** — SLSA + minisign signing. *Blocked on `MINISIGN_SECRET_KEY` GitHub secret.*
