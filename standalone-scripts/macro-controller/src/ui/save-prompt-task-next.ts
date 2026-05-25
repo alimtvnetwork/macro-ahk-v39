@@ -26,7 +26,7 @@ export function buildTaskNextSubmenu(
   taskNextItem.appendChild(arrow);
 
   const submenu = document.createElement('div');
-  submenu.style.cssText = 'display:none;position:fixed;min-width:180px;background:#1e1e2e;border:1px solid #7c3aed;border-radius:8px;z-index:100010;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+  submenu.style.cssText = 'display:none;position:fixed;min-width:180px;max-height:80vh;overflow-y:auto;background:#1e1e2e;border:1px solid #7c3aed;border-radius:8px;z-index:100010;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
   document.body.appendChild(submenu);
 
   submenu.onmouseover = function () { submenu.style.display = 'block'; };
@@ -34,9 +34,22 @@ export function buildTaskNextSubmenu(
 
   const positionSubmenu = function(): void {
     const rect = taskNextItem.getBoundingClientRect();
-    const isOverflowing = rect.right + 180 > window.innerWidth;
-    submenu.style.left = isOverflowing ? (rect.left - 180) + 'px' : rect.right + 'px';
+    const SUB_W = 180;
+    const PAD = 8;
+    const isOverflowingRight = rect.right + SUB_W > window.innerWidth;
+    submenu.style.left = isOverflowingRight ? Math.max(PAD, rect.left - SUB_W) + 'px' : rect.right + 'px';
+    // Clamp vertically: measure after display, fall back to rect.top
     submenu.style.top = rect.top + 'px';
+    submenu.style.maxHeight = (window.innerHeight - rect.top - PAD) + 'px';
+    window.requestAnimationFrame(function () {
+      const subRect = submenu.getBoundingClientRect();
+      const overflowsBottom = subRect.bottom > window.innerHeight - PAD;
+      if (overflowsBottom) {
+        const newTop = Math.max(PAD, window.innerHeight - subRect.height - PAD);
+        submenu.style.top = newTop + 'px';
+        submenu.style.maxHeight = (window.innerHeight - newTop - PAD) + 'px';
+      }
+    });
   };
 
   taskNextItem.onmouseover = function () {
