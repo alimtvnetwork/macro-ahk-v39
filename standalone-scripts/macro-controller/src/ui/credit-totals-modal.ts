@@ -15,6 +15,7 @@
 
 import { cPanelBg, cPrimary, cPrimaryBgA, cPrimaryLighter, cPanelFgDim, loopCreditState } from '../shared-state';
 import { aggregateCreditTotals, type CreditTotals } from '../credit-totals';
+import { logError } from '../error-utils';
 import type { WorkspaceCredit } from '../types';
 
 const DIALOG_ID = 'marco-credit-totals-modal';
@@ -416,7 +417,7 @@ function buildRow(ws: WorkspaceCredit, index: number = 0): HTMLElement {
   row.title = 'Double-click to open workspace projects';
   row.ondblclick = function (): void {
     try { window.open('https://lovable.dev/projects', '_blank', 'noopener'); }
-    catch (err) { /* ignore */ }
+    catch (err) { logError('creditTotalsModal.openProjects', 'window.open failed for https://lovable.dev/projects', err); }
   };
 
   const name = document.createElement('span');
