@@ -15,6 +15,7 @@
 
 import { cPanelBg, cPrimary, cPrimaryBgA, cPrimaryLighter, cPanelFgDim, loopCreditState } from '../shared-state';
 import { aggregateCreditTotals, type CreditTotals } from '../credit-totals';
+import { logError } from '../error-utils';
 import type { WorkspaceCredit } from '../types';
 
 const DIALOG_ID = 'marco-credit-totals-modal';
