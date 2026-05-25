@@ -106,7 +106,7 @@
 ### Remaining items
 
 1. [x] Step 1 — Fix release checkout/ref resolution. ✅ Added `git checkout ${{ steps.version.outputs.ref }}` step to setup job after version resolution so lint/test run on the correct code for workflow_dispatch/release recovery.
-2. [x] Step 2 — Fix release-notes changelog range. ✅ Already implemented in release.yml (`grep -v -x "${VER}"` excludes current tag).
+2. [x] Step 2 — Fix release-notes changelog range. ✅ Already implemented in release.yml (`grep -v -x "${VER}"` excludes current tag; nearest lower tag via `--sort=-version:refname`).
 3. [ ] Step 3 — Add required release-asset verification before publish.
 4. [ ] Step 4 — Make Release page install/download instructions complete.
 5. [ ] Step 5 — Add release-audit workflow for existing tags.
