@@ -57,15 +57,25 @@ if (!project || !(project in PROJECTS)) {
 //   -1073741571 (0xC00000FD — Windows STATUS_STACK_OVERFLOW)
 // Reason: default V8 heap (~4 GB) + small stack (~984 KB) are insufficient for the
 // shared type graph these projects pull in via lovable-common/sdk barrel re-exports.
-// Fix: bump V8 heap + stack for the tsc child only; vite/node children are unaffected.
-const TSC_NODE_OPTIONS = "--max-old-space-size=8192 --stack-size=8000";
+// Fix: pass V8 flags directly to the node child (NODE_OPTIONS disallows --stack-size).
+// --max-old-space-size goes via NODE_OPTIONS (allowed); --stack-size goes as a direct
+// node CLI flag inserted before the tsc script path.
+const TSC_NODE_OPTIONS_EXTRA = "--max-old-space-size=8192";
+const TSC_NODE_DIRECT_FLAGS = ["--stack-size=8000"];
 
 for (const [cmd, args] of PROJECTS[project]) {
     const finalArgs = cmd === "vite" && mode === "development" ? [...args, "--mode", "development"] : args;
     console.log(`[build-step] ${project}: ${cmd} ${finalArgs.join(" ")}`);
     const localBinary = LOCAL_NODE_BINARIES[cmd];
-    const resolvedCommand = localBinary ? process.execPath : process.execPath;
-    const resolvedArgs = localBinary ? [localBinary, ...finalArgs] : finalArgs;
+    const resolvedCommand = process.execPath;
+    let resolvedArgs;
+    if (localBinary) {
+        resolvedArgs = cmd === "tsc"
+            ? [...TSC_NODE_DIRECT_FLAGS, localBinary, ...finalArgs]
+            : [localBinary, ...finalArgs];
+    } else {
+        resolvedArgs = finalArgs;
+    }
     const requiredPath = localBinary ? join(process.cwd(), localBinary) : null;
     if (requiredPath && !existsSync(requiredPath)) {
         console.error(`[FAIL] ${project}: missing local executable at ${requiredPath}`);
@@ -75,7 +85,7 @@ for (const [cmd, args] of PROJECTS[project]) {
     const childEnv = { ...process.env };
     if (cmd === "tsc") {
         const existing = childEnv.NODE_OPTIONS ? childEnv.NODE_OPTIONS + " " : "";
-        childEnv.NODE_OPTIONS = existing + TSC_NODE_OPTIONS;
+        childEnv.NODE_OPTIONS = existing + TSC_NODE_OPTIONS_EXTRA;
     }
     const result = spawnSync(resolvedCommand, resolvedArgs, { stdio: "inherit", shell: false, env: childEnv });
     if (result.error) {
