@@ -401,6 +401,29 @@ export function setupResizeListeners(ctx: PanelLayoutCtx) {
   });
 }
 
+// Issue 117 (v3.15.0): Stash & restore the original inline `display` per body
+// element on minimize/expand. Previously `toggleMinimize` did
+// `el.style.display = 'none'` then `el.style.display = ''`, which REMOVES the
+// inline display property — reverting the element to its UA default (`block`
+// for <div>). The button row's `display:flex` (written via cssText in
+// panel-controls.ts) was wiped on every expand, killing gap/flex-wrap/
+// justify-content/align-items and making buttons render flush ("squished").
+// See: spec/22-app-issues/117-toolbar-button-squish/02-step2-rca-evidence.md
+const PREV_DISPLAY_ATTR = 'data-macro-prev-display';
+
+function _hideBodyElement(el: HTMLElement): void {
+  if (!el.hasAttribute(PREV_DISPLAY_ATTR)) {
+    el.setAttribute(PREV_DISPLAY_ATTR, el.style.display || '');
+  }
+  el.style.display = 'none';
+}
+
+function _showBodyElement(el: HTMLElement): void {
+  const prev = el.getAttribute(PREV_DISPLAY_ATTR);
+  el.style.display = prev !== null ? prev : '';
+  el.removeAttribute(PREV_DISPLAY_ATTR);
+}
+
 export function toggleMinimize(ctx: PanelLayoutCtx) {
   const isExpanded = ctx.panelState === 'expanded';
   if (isExpanded) {
@@ -412,7 +435,7 @@ export function toggleMinimize(ctx: PanelLayoutCtx) {
     ctx.expandedOverflowY = ctx.ui.style.overflowY;
 
     for (const el of ctx.bodyElements) {
-      el.style.display = 'none';
+      _hideBodyElement(el);
     }
 
     ctx.ui.style.height = 'auto';
@@ -426,7 +449,7 @@ export function toggleMinimize(ctx: PanelLayoutCtx) {
     log('Expanding MacroLoop panel', 'info');
 
     for (const el of ctx.bodyElements) {
-      el.style.display = '';
+      _showBodyElement(el);
     }
 
     ctx.ui.style.height = ctx.expandedHeight;
@@ -446,7 +469,7 @@ export function restorePanel(ctx: PanelLayoutCtx) {
   ctx.ui.style.display = '';
 
   for (const el of ctx.bodyElements) {
-    el.style.display = '';
+    _showBodyElement(el);
   }
 
   ctx.ui.style.height = ctx.expandedHeight;
@@ -457,3 +480,11 @@ export function restorePanel(ctx: PanelLayoutCtx) {
   if (ctx.panelToggleSpan) { ctx.panelToggleSpan.textContent = '[ - ]'; }
   ctx.panelState = 'expanded';
 }
+
+// Issue 117 (v3.15.0): exported so panel-builder._restoreMinimizedPanel uses
+// the same stash-aware hide path. Keeps the dataset bookkeeping consistent
+// across initial-load minimize and runtime toggle.
+export function hideBodyElementForMinimize(el: HTMLElement): void {
+  _hideBodyElement(el);
+}
+
