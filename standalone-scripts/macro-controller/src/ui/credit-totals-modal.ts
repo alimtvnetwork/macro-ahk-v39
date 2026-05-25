@@ -127,7 +127,7 @@ export function sortWorkspaces(
 function pickSortValue(ws: WorkspaceCredit, key: SortKey): number | string {
   if (key === 'name') return (ws.fullName || ws.name || ws.id || '').toString();
   if (key === 'plan') return (ws.plan || '').toString();
-  if (key === 'projects') return Number(ws.numProjects) || 1;
+  if (key === 'projects') return Number(ws.numProjects) || 0;
   if (key === 'used') return Number(ws.totalCreditsUsed) || 0;
   if (key === 'rem') return Number(ws.available) || 0;
   return Number(ws.totalCredits) || 0;
