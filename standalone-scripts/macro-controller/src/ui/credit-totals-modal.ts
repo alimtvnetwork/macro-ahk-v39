@@ -103,7 +103,7 @@ export type SortKey = 'name' | 'plan' | 'projects' | 'used' | 'rem' | 'total';
 export type SortDir = 'asc' | 'desc' | 'none';
 export interface SortState { key: SortKey; dir: SortDir; }
 
-const NUMERIC_KEYS: ReadonlySet<SortKey> = new Set(['used', 'rem', 'total']);
+const NUMERIC_KEYS: ReadonlySet<SortKey> = new Set(['projects', 'used', 'rem', 'total']);
 
 /** Pure: returns a new array sorted by the given state. `none` returns input order. */
 export function sortWorkspaces(
