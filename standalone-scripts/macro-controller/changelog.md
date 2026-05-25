@@ -1,5 +1,14 @@
 # Macro Controller — Changelog
 
+## v3.15.1 (2026-05-25)
+
+### Internal
+- Version bump: 3.15.0 → 3.15.1 — synced with extension release v3.15.1 (root `readme.md` pinned to new tag). No functional changes.
+
+---
+
+
+
 ## v3.15.0 (2026-05-25)
 
 ### Fixed
