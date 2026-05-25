@@ -94,11 +94,22 @@ function isProjectPageUrl(url: string): boolean {
 /*  Auto-Inject Filter                                                 */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Script IDs that must NEVER auto-inject, regardless of project URL rules
+ * or the script's own `autoInject` flag. The macro-controller mounts a
+ * visible floating panel; auto-injecting it on every page load surprises
+ * the user. It is manual-only by product decision (v3.18.0). See
+ * changelog v3.18.0 — "Disable macro-controller auto-injection".
+ */
+const NEVER_AUTO_INJECT_SCRIPT_IDS: ReadonlySet<string> = new Set([
+    "default-macro-looping",
+]);
+
 /** Reads the script store and returns a Set of script IDs that have autoInject === false. */
 async function getManualOnlyScriptIds(): Promise<Set<string>> {
     const result = await chrome.storage.local.get(STORAGE_KEY_ALL_SCRIPTS);
     const scripts: StoredScript[] = result[STORAGE_KEY_ALL_SCRIPTS] ?? [];
-    const manualOnly = new Set<string>();
+    const manualOnly = new Set<string>(NEVER_AUTO_INJECT_SCRIPT_IDS);
 
     for (const script of scripts) {
         if (script.autoInject === false) {

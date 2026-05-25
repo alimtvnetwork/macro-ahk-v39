@@ -60,11 +60,10 @@ export function usePopupActions() {
 
   /** Run all enabled scripts into the active tab. */
   // eslint-disable-next-line max-lines-per-function, sonarjs/cognitive-complexity
-  const handleRun = useCallback(async (options?: { forceReload?: boolean }) => {
-    const isForce = options?.forceReload === true;
+  const handleRun = useCallback(async (_options?: { forceReload?: boolean }) => {
     setRunLoading(true);
     setLastRunResults([]);
-    console.log("[popup:handleRun] Starting injection flow...%s", isForce ? " (FORCE RUN)" : "");
+    console.log("[popup:handleRun] Starting injection flow... (manual run — always forces re-injection)");
     try {
       const platform = getPlatform();
       const tabId = await platform.tabs.getActiveTabId();
@@ -89,13 +88,16 @@ export function usePopupActions() {
         return;
       }
 
-      console.log("[popup:handleRun] Sending INJECT_SCRIPTS for tab %d with %d scripts...%s", tabId, scripts.length, isForce ? " forceReload=true" : "");
+      // v3.18.0 — manual Run ALWAYS forces re-injection. Background's
+      // "already injected" cache only exists to dedupe passive/auto-injects;
+      // a user pressing Run must always execute, even after closing the panel.
+      console.log("[popup:handleRun] Sending INJECT_SCRIPTS for tab %d with %d scripts (manual → forceReload=true)", tabId, scripts.length);
       const rawResult = await sendMessage<InjectScriptsResponse>({
         type: "INJECT_SCRIPTS",
         tabId,
         scripts,
         launchSource: "manual",
-        ...(isForce ? { forceReload: true } : {}),
+        forceReload: true,
       });
       // Normalize tolerates older backgrounds that omit
       // `inlineSyntaxErrorDetected` — without this, downstream
