@@ -106,7 +106,7 @@ interface ChromeRuntimeLike {
 
 /** Safe accessor for chrome.runtime that avoids `as any` casts. */
 function getChromeRuntime(): ChromeRuntimeLike | undefined {
-  const win = globalThis as { chrome?: { runtime?: ChromeRuntimeLike } };
+  const win = globalThis as unknown as { chrome?: { runtime?: ChromeRuntimeLike } };
   return win.chrome?.runtime;
 }
 

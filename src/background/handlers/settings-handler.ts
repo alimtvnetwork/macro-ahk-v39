@@ -106,7 +106,7 @@ export async function handleSaveSettings(
 export async function getChatBoxXPath(): Promise<string> {
     // Check active project first
     try {
-        const projResult = await chrome.storage.local.get(["marco_active_project", "marco_all_projects"]);
+        const projResult = await (chrome.storage.local.get as (k: unknown) => Promise<Record<string, unknown>>)(["marco_active_project", "marco_all_projects"]);
         const activeId = projResult.marco_active_project as string | undefined;
         const projects = (projResult.marco_all_projects ?? []) as Array<{ id: string; settings?: { chatBoxXPath?: string } }>;
         if (activeId) {
