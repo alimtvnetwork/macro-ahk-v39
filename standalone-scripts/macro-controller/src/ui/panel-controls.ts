@@ -339,59 +339,7 @@ function buildPromptsDropdown(_deps: PanelBuilderDeps, btnStyle: string): Prompt
     log('Prompts pre-loaded on injection', 'success');
   });
 
-  promptsBtn.onclick = function(e: Event) {
-    e.stopPropagation();
-    const isOpen = promptsDropdown.style.display !== 'none';
-    promptsDropdown.style.display = isOpen ? 'none' : 'block';
-    if (!isOpen) {
-      positionPromptsDropdown(promptsBtn, promptsDropdown);
-      loadTaskNextSettings(taskNextDeps);
-      if (isPromptsCached()) {
-        // Prompts already in memory — render instantly, no loading indicator
-        renderPromptsDropdown(promptCtx, taskNextDeps);
-      } else {
-        // Cold load — show shimmer skeleton
-        promptsDropdown.innerHTML = '';
-        promptsDropdown.appendChild(createPromptsListSkeleton());
-        loadPromptsFromJson().then(function(_loaded: PromptEntry[] | null) {
-          renderPromptsDropdown(promptCtx, taskNextDeps);
-        }).catch(function(e: unknown) {
-          logError('loadPrompts', 'Failed to load prompts from JSON', e);
-          showToast('❌ Failed to load prompts from JSON', 'error');
-          // Show error state if load completely fails
-          promptsDropdown.innerHTML = '';
-          const errEl = document.createElement('div');
-          errEl.style.cssText = 'padding:16px 12px;text-align:center;color:#ef4444;font-size:11px;';
-          errEl.textContent = '❌ Failed to load prompts. Click to retry.';
-          errEl.style.cursor = 'pointer';
-          errEl.onclick = function(ev: Event) {
-            ev.stopPropagation();
-            promptsDropdown.innerHTML = '';
-            promptsDropdown.appendChild(createPromptsListSkeleton());
-            loadPromptsFromJson().then(function() { renderPromptsDropdown(promptCtx, taskNextDeps); });
-          };
-          promptsDropdown.appendChild(errEl);
-        });
-      }
-    }
-  };
-  document.addEventListener('click', function(ev: Event) {
-    const target = ev.target as Node | null;
-    const insideDropdown = target !== null && promptsDropdown.contains(target);
-    const onButton = target !== null && promptsBtn.contains(target);
-    if (insideDropdown || onButton) { return; }
-    promptsDropdown.style.display = 'none';
-    const sub = document.querySelector('[data-task-next-sub]') as HTMLElement | null;
-    if (sub) { sub.style.display = 'none'; }
-  });
-  // Reposition on viewport changes while open
-  const onReflow = function(): void {
-    if (promptsDropdown.style.display !== 'none') {
-      positionPromptsDropdown(promptsBtn, promptsDropdown);
-    }
-  };
-  window.addEventListener('resize', onReflow);
-  window.addEventListener('scroll', onReflow, true);
+  attachPromptsDropdownBehavior(promptsBtn, promptsDropdown, promptCtx, taskNextDeps);
   promptsContainer.appendChild(promptsBtn);
   // Portal the dropdown to <body> so it escapes the panel's overflow:hidden.
   document.body.appendChild(promptsDropdown);
