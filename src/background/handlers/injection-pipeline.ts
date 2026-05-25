@@ -256,6 +256,7 @@ export async function injectSingleScript(
     resolvedConfigJson: string | null,
     resolvedThemeJson: string | null,
     resolvedCodeSource?: string,
+    launchSource: InjectionLaunchSource = "manual",
 ): Promise<InjectionResult> {
     const startTime = Date.now();
     const configJson = resolvedConfigJson;
@@ -292,7 +293,7 @@ export async function injectSingleScript(
         configJson !== null, resolvedThemeJson !== null, script.code.length);
 
     try {
-        const wrappedCode = wrapWithIsolation(script, configJson, resolvedThemeJson);
+        const wrappedCode = wrapWithIsolation(script, configJson, resolvedThemeJson, launchSource);
         console.log("[injection] 3/4 WRAP     — wrapped code length: %d chars", wrappedCode.length);
 
         const execStart = performance.now();
