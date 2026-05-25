@@ -230,7 +230,9 @@ function pasteIntoContentEditable(target: HTMLElement, text: string): boolean {
   return false;
 }
 
-export function pasteIntoEditor(rawText: string, promptsCfg: PromptsCfg, getByXPath: (xpath: string) => Element | null): boolean {
+export type PasteOutcome = 'injected' | 'clipboard' | 'failed';
+
+export function pasteIntoEditor(rawText: string, promptsCfg: PromptsCfg, getByXPath: (xpath: string) => Element | null): PasteOutcome {
   const text = normalizeNewlines(rawText);
   const target = findPasteTarget(promptsCfg, getByXPath) as HTMLElement | null;
   if (!target) {
@@ -241,7 +243,7 @@ export function pasteIntoEditor(rawText: string, promptsCfg: PromptsCfg, getByXP
     }).catch(function() {
       showPasteToast('❌ Could not paste or copy — editor target not found', true);
     });
-    return false;
+    return 'clipboard';
   }
 
   log('Prompt inject: target found (' + target.tagName + ', contentEditable=' + target.contentEditable + '), text length=' + text.length, 'info');
@@ -254,12 +256,12 @@ export function pasteIntoEditor(rawText: string, promptsCfg: PromptsCfg, getByXP
       pasteIntoTextarea(target, text);
     } else {
       const ok = pasteIntoContentEditable(target, text);
-      if (!ok) return false;
+      if (!ok) return 'failed';
     }
 
     log('Prompt injected: "' + text.substring(0, 80) + '..." (' + text.length + ' total chars)', 'success');
     showPasteToast('✓ Prompt injected (' + text.length + ' chars)', false);
-    return true;
+    return 'injected';
   } catch (e: unknown) {
     const errMsg = toErrorMessage(e);
     logError('Prompt inject failed', '' + errMsg);
@@ -270,6 +272,6 @@ export function pasteIntoEditor(rawText: string, promptsCfg: PromptsCfg, getByXP
       showToast('❌ Prompt copy to clipboard failed', 'error');
       showPasteToast('❌ Inject and clipboard both failed', true);
     });
-    return false;
+    return 'failed';
   }
 }

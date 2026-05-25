@@ -49,9 +49,10 @@ function adapterGetByXPath(xpath: string): Element | null {
 
 function injectPlanPrompt(n: number): void {
   const text = buildPlanTaskPrompt(n);
-  const ok = pasteIntoEditor(text, getPromptsConfig(), adapterGetByXPath);
-  if (ok) showPasteToast('🧠 Plan prompt injected (' + n + ' steps)', false);
-  else showPasteToast('❌ Plan prompt: editor not found', true);
+  const outcome = pasteIntoEditor(text, getPromptsConfig(), adapterGetByXPath);
+  // Success ('injected') and clipboard-fallback ('clipboard') already toast from prompt-utils.
+  // Only show a caller-side toast on hard failure.
+  if (outcome === 'failed') showPasteToast('❌ Plan prompt: injection failed', true);
 }
 
 /** Render the Plan Task inline accordion into the container. */
@@ -98,7 +99,9 @@ function wireShellToggle(row: HTMLElement, arrow: HTMLElement, sub: HTMLElement,
     e.stopPropagation();
     if (sub.style.display === 'none') show(); else hide();
   };
-  item.onmouseleave = function() { setTimeout(function() { if (!item.matches(':hover')) hide(); }, 120); };
+  // RC-3 fix: do NOT auto-collapse on mouseleave. Outside-click handler in prompts-dropdown.ts
+  // already closes the parent dropdown (and therefore this sub) when the user clicks away.
+  // The previous 120ms timeout raced with preset clicks that crossed the panel border.
 }
 
 function keepInView(dropdown: HTMLElement, sub: HTMLElement): void {
@@ -118,8 +121,8 @@ function appendPresetSteps(sub: HTMLElement, dropdown: HTMLElement): void {
     it.onmouseout = function() { (this as HTMLElement).style.background = 'transparent'; };
     it.onclick = function(e: Event) {
       e.stopPropagation();
-      dropdown.style.display = 'none';
       injectPlanPrompt(n);
+      dropdown.style.display = 'none';
     };
     sub.appendChild(it);
   }
@@ -142,10 +145,10 @@ function appendCustomStepRow(sub: HTMLElement, dropdown: HTMLElement): void {
   go.style.cssText = 'cursor:pointer;font-size:11px;color:' + cPrimary + ';';
   go.onclick = function(e: Event) {
     e.stopPropagation();
-    const n = parseInt(inp.value);
+    const n = parseInt(inp.value, 10);
     if (!n || n < 1 || n > 999) { showPasteToast('⚠️ Enter 1–999', true); return; }
-    dropdown.style.display = 'none';
     injectPlanPrompt(n);
+    dropdown.style.display = 'none';
   };
   inp.onkeydown = function(e: KeyboardEvent) { if (e.key === 'Enter') { e.stopPropagation(); go.click(); } };
   row.appendChild(go);
