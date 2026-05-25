@@ -127,7 +127,7 @@ export async function configureUserScriptWorld(): Promise<void> {
         }
 
         try {
-            await chrome.userScripts.configureWorld({
+            await (chrome.userScripts.configureWorld as (p: unknown) => Promise<void>)({
                 worldId: USER_SCRIPT_WORLD_ID,
                 csp: "script-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src 'self';",
                 messaging: false,
