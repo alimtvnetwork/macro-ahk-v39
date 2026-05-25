@@ -43,7 +43,7 @@ Spec: `plan.md` ("Release Page CI/CD Hardening Plan — 8 Steps")
 - [x] Step 3 — Add required release-asset verification before publish. (Implemented in `release.yml` lines 733–788; gates all required assets before `softprops/action-gh-release`.)
 - [x] Step 4 — Make Release page install/download instructions complete. (Implemented in `release.yml` RELEASE_NOTES.md generation: pinned + latest one-liners, manual Chrome install steps, checksums, SLSA attestation.)
 - [x] Step 5 — Add release-audit workflow for existing tags. (Implemented as `.github/workflows/audit-releases.yml`; scheduled weekly + manual dispatch.)
-- [ ] Step 6 — Update release documentation and RCA references.
+- [x] Step 6 — Update release documentation and RCA references. (Linked release-procedure.md from readme.md CI/CD section; created `scripts/release-publish.mjs`; updated Issue 95 RCA done-checklist.)
 - [x] Step 7 — Validate without publishing a real release. (All workflow YAMLs pass YAML syntax validation; `scripts/release-publish.mjs` dry-run + syntax check passed.)
 - [x] Step 8 — Final version bump + changelog/readme updates. (Bumped to v3.14.2 via `bump-version.mjs`; updated root + macro-controller changelogs; updated readme.md pinned version references.)
 
