@@ -78,6 +78,11 @@ export function bootstrap(deps: {
 }): void {
   timingStart('bootstrap', 'Bootstrap');
 
+  if (window.__MARCO_LAUNCH_SOURCE__ === 'passive') {
+    bootstrapPassiveAttach(deps);
+    return;
+  }
+
   // Preload user settings overrides (chrome.storage.local) before any UI render
   // so the first paint of the workspace list reflects edited grace/refill values.
   // Fire-and-forget — non-blocking; resolver falls back to JSON until loaded.
@@ -139,7 +144,22 @@ function _placeScriptMarker(): void {
   marker.id = IDS.SCRIPT_MARKER;
   marker.style.display = 'none';
   marker.setAttribute('data-version', VERSION);
+  marker.setAttribute('data-launch-source', window.__MARCO_LAUNCH_SOURCE__ === 'passive' ? 'passive' : 'manual');
   document.body.appendChild(marker);
+}
+
+function bootstrapPassiveAttach(deps: {
+  runCheck: () => unknown;
+  setLoopInterval: (ms: number) => void;
+  delegateComplete: () => void;
+  updateProjectButtonXPath: (xpath: string) => void;
+  updateProgressXPath: (xpath: string) => void;
+}): void {
+  _placeScriptMarker();
+  _registerGlobals(deps);
+  registerPageWorkspaceResponder();
+  timingEnd('bootstrap', 'ok', 'Passive attach — no visible UI');
+  log('Startup: passive attach complete — visible panel waits for manual Run script', 'info');
 }
 
 /** Registers window globals + namespace dual-write (Issue 79 Phase 9A). */
@@ -252,6 +272,11 @@ function createUiAndObserver(): void {
 }
 
 function tryCreateUiNow(mc: MacroController): boolean {
+  if (window.__MARCO_LAUNCH_SOURCE__ === 'passive') {
+    log('Startup: passive injection registered globals only — panel hidden until manual Run script', 'info');
+    return true;
+  }
+
   if (!mc.hasUI) {
     ensureUiManagerRegistered(mc);
   }

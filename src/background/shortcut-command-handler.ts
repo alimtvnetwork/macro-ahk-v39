@@ -90,6 +90,7 @@ async function runScriptsFromShortcut(forceReload: boolean): Promise<void> {
             type: MessageType.INJECT_SCRIPTS,
             tabId: activeTabId,
             scripts,
+            launchSource: "manual",
             ...(forceReload ? { forceReload: true } : {}),
         });
         const response = normalizeInjectScriptsResponse(rawResponse);

@@ -7,6 +7,7 @@
  */
 
 import type { JsonValue } from "../background/handlers/handler-types";
+import type { InjectionLaunchSource } from "./injection-types";
 
 export enum MessageType {
     // ─── Config & Auth (from Spec 05) ───
@@ -454,7 +455,7 @@ export type MessageRequest =
     | { type: MessageType.SAVE_CONFIG; config: Record<string, JsonValue> }
     | { type: MessageType.DELETE_CONFIG; id: string }
     | { type: MessageType.GET_SCRIPT_CONFIG; scriptId: string; configId?: string }
-    | { type: MessageType.INJECT_SCRIPTS; tabId: number; scripts: Record<string, JsonValue>[]; forceReload?: boolean }
+    | { type: MessageType.INJECT_SCRIPTS; tabId: number; scripts: Record<string, JsonValue>[]; forceReload?: boolean; launchSource?: InjectionLaunchSource }
     | { type: MessageType.GET_TAB_INJECTIONS; tabId: number }
     | { type: MessageType.GET_ACTIVE_ERRORS }
     | { type: MessageType.CLEAR_ERRORS }

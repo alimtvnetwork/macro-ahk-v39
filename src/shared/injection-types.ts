@@ -10,6 +10,9 @@ export interface ScriptAssets {
     templates?: string;
 }
 
+/** How an injection was started. Manual launches may open visible page UI. */
+export type InjectionLaunchSource = "manual" | "passive";
+
 /** A script to inject into a tab. */
 export interface InjectableScript {
     id: string;

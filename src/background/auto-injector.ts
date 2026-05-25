@@ -36,6 +36,7 @@ import {
 } from "./dismissed-origins";
 import { maybeShowFirstAttachToast } from "./first-attach-toast";
 import { STORAGE_KEY_ALL_SCRIPTS } from "../shared/constants";
+import type { InjectionLaunchSource } from "../shared/injection-types";
 import { ensureBuiltinScriptsExist } from "./builtin-script-guard";
 import { persistInjectionError, persistInjectionWarn } from "./injection-diagnostics";
 import { readAllProjects } from "./handlers/project-helpers";
@@ -44,6 +45,7 @@ import type { MatchResult, ScriptBindingResolved } from "../shared/types";
 
 /** Dedup TTL — absorb burst/double-fires from listener overlap (audit U-1). */
 const DEDUP_TTL_MS = 5_000;
+const AUTO_INJECT_LAUNCH_SOURCE: InjectionLaunchSource = "passive";
 
 /* ------------------------------------------------------------------ */
 /*  URL Guards                                                         */
@@ -350,6 +352,7 @@ async function injectSingleResolved(
             resolved.injectable,
             resolved.configJson,
             resolved.themeJson,
+            AUTO_INJECT_LAUNCH_SOURCE,
         );
 
         const result = await injectWithCspFallback(

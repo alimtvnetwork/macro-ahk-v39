@@ -94,6 +94,7 @@ export function usePopupActions() {
         type: "INJECT_SCRIPTS",
         tabId,
         scripts,
+        launchSource: "manual",
         ...(isForce ? { forceReload: true } : {}),
       });
       // Normalize tolerates older backgrounds that omit

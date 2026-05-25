@@ -15,10 +15,17 @@
  * @see .lovable/memory/architecture/marco-sdk-convention.md — SDK convention
  */
 
-import type { InjectableScript } from "../../shared/injection-types";
+import type { InjectableScript, InjectionLaunchSource } from "../../shared/injection-types";
 import { buildMarcoSdkScript } from "../marco-sdk-template";
 import { getActiveProjectId } from "../state-manager";
 import { logBgWarnSampled, BgLogTag } from "../bg-logger";
+
+const DEFAULT_LAUNCH_SOURCE: InjectionLaunchSource = "manual";
+
+function buildLaunchPreamble(launchSource: InjectionLaunchSource): string {
+    const safeLaunchSource = JSON.stringify(launchSource);
+    return `window.__MARCO_LAUNCH_SOURCE__ = ${safeLaunchSource};`;
+}
 
 /* ------------------------------------------------------------------ */
 /*  JSON Preamble Injection                                             */
@@ -70,8 +77,10 @@ export function wrapWithIsolation(
     script: InjectableScript,
     configJson: string | null,
     themeJson?: string | null,
+    launchSource: InjectionLaunchSource = DEFAULT_LAUNCH_SOURCE,
 ): string {
     const sdkLine = buildSdkPreamble(script);
+    const launchLine = buildLaunchPreamble(launchSource);
 
     const configLine = configJson !== null
         ? buildConfigPreamble(configJson)
@@ -81,7 +90,7 @@ export function wrapWithIsolation(
         ? buildThemePreamble(themeJson)
         : "";
 
-    return buildWrappedCode(script.id, sdkLine, configLine, themeLine, script.code);
+    return buildWrappedCode(script.id, sdkLine, launchLine, configLine, themeLine, script.code);
 }
 
 /** Builds the full wrapped code string. Uses postMessage for error reporting (MAIN world). */
@@ -89,6 +98,7 @@ export function wrapWithIsolation(
 function buildWrappedCode(
     scriptId: string,
     sdkLine: string,
+    launchLine: string,
     configLine: string,
     themeLine: string,
     userCode: string,
@@ -102,7 +112,7 @@ function buildWrappedCode(
     // Cache-busting nonce in sourceURL prevents DevTools from serving stale script
     const wrapperNonce = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
-    return `;${sdkLine};(function() {
+    return `;${sdkLine};${launchLine};(function() {
     // Per-page dedup via <body data-marco-injected="id1,id2,..."> marker.
     // See mem://features/auto-attach-policy.md §2. Logged, never silent.
     try {
@@ -110,12 +120,19 @@ function buildWrappedCode(
         if (__mBody) {
             var __mAttr = __mBody.getAttribute("data-marco-injected") || "";
             var __mList = __mAttr ? __mAttr.split(",") : [];
-            if (__mList.indexOf(${safeScriptId}) !== -1) {
+            var __mAlreadyInjected = __mList.indexOf(${safeScriptId}) !== -1;
+            var __mLaunchSource = window.__MARCO_LAUNCH_SOURCE__ || "manual";
+            var __mPassiveMarker = document.querySelector('[data-launch-source="passive"]');
+            var __mVisiblePanel = document.getElementById("ahk-loop-container");
+            var __mManualAfterPassive = __mAlreadyInjected && __mLaunchSource === "manual" && __mPassiveMarker && !__mVisiblePanel;
+            if (__mAlreadyInjected && !__mManualAfterPassive) {
                 console.info("[Marco] INJECT_SKIPPED_ALREADY_MARKED script=" + ${safeScriptId});
                 return;
             }
-            __mList.push(${safeScriptId});
-            __mBody.setAttribute("data-marco-injected", __mList.join(","));
+            if (!__mAlreadyInjected) {
+                __mList.push(${safeScriptId});
+                __mBody.setAttribute("data-marco-injected", __mList.join(","));
+            }
         }
     } catch (__mDedupErr) {
         console.warn("[Marco] body-marker dedup failed for " + ${safeScriptId} + ":", __mDedupErr);

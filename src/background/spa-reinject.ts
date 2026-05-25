@@ -253,6 +253,7 @@ async function injectSingle(
         resolved.injectable,
         resolved.configJson,
         resolved.themeJson,
+        "passive",
     );
 
     await injectWithCspFallback(tabId, wrappedCode, resolved.world);

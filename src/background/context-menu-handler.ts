@@ -259,6 +259,7 @@ async function handleRunScripts(tabId: number, forceReload = false): Promise<voi
         type: MessageType.INJECT_SCRIPTS,
         tabId,
         scripts: enabledScripts,
+        launchSource: "manual",
         ...(forceReload ? { forceReload: true } : {}),
     });
 }

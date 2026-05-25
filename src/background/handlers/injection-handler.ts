@@ -17,7 +17,7 @@
 
 import type { MessageRequest } from "../../shared/messages";
 import { logBgWarnError, BgLogTag } from "../bg-logger";
-import type { InjectableScript, InjectionResult, InjectScriptsResponse } from "../../shared/injection-types";
+import type { InjectableScript, InjectionLaunchSource, InjectionResult, InjectScriptsResponse } from "../../shared/injection-types";
 import type { StoredProject, ScriptEntry } from "../../shared/project-types";
 import {
     requestHasInlineSyntaxError,
@@ -85,9 +85,11 @@ export async function handleInjectScripts(
         tabId: number;
         scripts: ScriptEntry[];
         forceReload?: boolean;
+        launchSource?: InjectionLaunchSource;
     };
 
     const isForceRun = msg.forceReload === true;
+    const launchSource: InjectionLaunchSource = msg.launchSource === "passive" ? "passive" : "manual";
 
     // ── Early guard: skip injection on restricted URLs (chrome://, edge://, about:, etc.) ──
     try {
@@ -114,7 +116,7 @@ export async function handleInjectScripts(
         return { results: [], inlineSyntaxErrorDetected: false };
     }
 
-    console.log("[injection] ── PIPELINE START ── tabId=%d, raw scripts=%d, forceReload=%s", msg.tabId, msg.scripts.length, isForceRun);
+    console.log("[injection] ── PIPELINE START ── tabId=%d, raw scripts=%d, forceReload=%s, launchSource=%s", msg.tabId, msg.scripts.length, isForceRun, launchSource);
 
     // Show loading spinner toast at start of injection
     const toastEnabledEarly = await isInjectionToastEnabled();
@@ -159,9 +161,11 @@ export async function handleInjectScripts(
         const cachedPayload = await time("cache_gate", () =>
             cacheGet<PipelineCachePayload>(PIPELINE_CACHE_CATEGORY, PIPELINE_CACHE_KEY));
         const cachedFingerprint = cachedPayload?.requestFingerprint ?? "";
+        const cacheLaunchSource = cachedPayload?.launchSource;
         const cacheMatchesRequest = cachedPayload !== null
             && cachedFingerprint.length > 0
-            && requestedFingerprint === cachedFingerprint;
+            && requestedFingerprint === cachedFingerprint
+            && cacheLaunchSource === launchSource;
         if (cachedPayload && cacheMatchesRequest) {
             console.log("[injection] CACHE HIT — skipping Stages 0–3, using cached payload (%d chars, %d scripts) in %.1fms",
                 cachedPayload.code.length, cachedPayload.scriptMeta.length, timings["cache_gate"]);
@@ -170,8 +174,8 @@ export async function handleInjectScripts(
         }
         if (cachedPayload && !cacheMatchesRequest) {
             await cacheDelete(PIPELINE_CACHE_CATEGORY, PIPELINE_CACHE_KEY);
-            console.log("[injection] CACHE MISS — cached request fingerprint [%s] does not match requested [%s], rebuilding",
-                cachedFingerprint || "missing", requestedFingerprint || "empty");
+            console.log("[injection] CACHE MISS — cached request fingerprint/source [%s/%s] does not match requested [%s/%s], rebuilding",
+                cachedFingerprint || "missing", cacheLaunchSource, requestedFingerprint || "empty", launchSource);
         } else {
             console.log("[injection] CACHE MISS — proceeding through full pipeline (%.1fms)", timings["cache_gate"]);
         }
@@ -255,7 +259,7 @@ export async function handleInjectScripts(
     const scriptInjectStart = performance.now();
     const nsInjectStart = performance.now();
     const [execResults] = await time("stage3_4_5_parallel", () => Promise.all([
-        injectAllScripts(msg.tabId, filteredPreparedScripts).then(r => {
+        injectAllScripts(msg.tabId, filteredPreparedScripts, launchSource).then(r => {
             timings["stage3_4_scripts"] = Math.round((performance.now() - scriptInjectStart) * 10) / 10;
             return r;
         }),
