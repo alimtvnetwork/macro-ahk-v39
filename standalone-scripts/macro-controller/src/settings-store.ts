@@ -43,6 +43,8 @@ export interface SettingsOverrides {
   enableWorkspaceStatusLabels?: boolean;
   /** Show the rich hover-card with credit details on workspace rows. */
   enableWorkspaceHoverDetails?: boolean;
+  /** Delay before the workspace hover card disappears after mouseleave (ms). Default 220. */
+  hoverCardHideGracePeriodMs?: number;
   /**
    * Per-workspace lifecycle overrides keyed by workspace id (string UUID).
    * Values here override the global `expiryGracePeriodDays` /
