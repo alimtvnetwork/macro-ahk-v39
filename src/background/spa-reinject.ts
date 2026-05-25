@@ -19,6 +19,7 @@ import {
 import { readAllProjects } from "./handlers/project-helpers";
 import { logCaughtError, logBgWarnError, BgLogTag } from "./bg-logger";
 import { urlFingerprint } from "./url-fingerprint";
+import { handleNavigationCompleted } from "./auto-injector";
 import type { ResolvedScript } from "./script-resolver";
 
 /* ------------------------------------------------------------------ */
@@ -97,6 +98,19 @@ async function handleHistoryStateUpdated(
     const hasRecord = record !== undefined;
 
     if (!hasRecord) {
+        // First-time SPA navigation onto an injectable page (e.g. user clicked
+        // from lovable.dev home → /projects/xxx). `webNavigation.onCompleted`
+        // does NOT fire on pushState, so the auto-injector never sees it and
+        // the extension stays dormant until a hard refresh. Delegate to the
+        // standard auto-injection pipeline so it can evaluate URL rules and
+        // inject. The auto-injector applies its own URL guards + 5s dedup.
+        await handleNavigationCompleted({
+            tabId,
+            url: details.url,
+            frameId: 0,
+            processId: -1,
+            timeStamp: Date.now(),
+        } as chrome.webNavigation.WebNavigationFramedCallbackDetails);
         return;
     }
 
@@ -106,6 +120,7 @@ async function handleHistoryStateUpdated(
     if (!hasBindings) {
         return;
     }
+
 
     const injectionAge = Date.now() - new Date(record.timestamp).getTime();
     const isTooRecent = injectionAge < MIN_INJECTION_AGE_MS;
