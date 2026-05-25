@@ -23,6 +23,12 @@ export type GitsyncFetchOutcome =
   | { status: 'error'; message: string; httpStatus?: number };
 
 interface GitsyncApiResponse {
+  synced?: boolean;
+  config?: {
+    repo_url?: string | null;
+    repo_name?: string | null;
+    owner_name?: string | null;
+  } | null;
   github_repo?: string | null;
   github_owner?: string | null;
   github_repo_url?: string | null;
@@ -30,6 +36,10 @@ interface GitsyncApiResponse {
 }
 
 function pickRepoUrl(body: GitsyncApiResponse): string | null {
+  if (body.config?.repo_url) return body.config.repo_url;
+  if (body.config?.owner_name && body.config?.repo_name) {
+    return 'https://github.com/' + body.config.owner_name + '/' + body.config.repo_name;
+  }
   if (body.github_repo_url) return body.github_repo_url;
   if (body.github_owner && body.github_repo) {
     return 'https://github.com/' + body.github_owner + '/' + body.github_repo;
@@ -88,7 +98,7 @@ export async function fetchGitsyncConfig(
       return { status: 'error', message: 'http_' + resp.status, httpStatus: resp.status };
     }
     const body = await resp.json() as GitsyncApiResponse;
-    if (body.enabled === false) {
+    if (body.enabled === false || body.synced === false) {
       return { status: 'not_linked' };
     }
     const repo = pickRepoUrl(body);
