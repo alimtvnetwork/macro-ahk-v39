@@ -1,5 +1,12 @@
 # Macro Controller — Changelog
 
+## v3.15.3 (2026-05-25)
+
+### Fixed
+- `gitsync-api.ts`: HTTP 401/403 responses now map to `{ status: 'not_linked' }` (same as 404), so right-clicking a workspace whose project the user can't access shows the friendly "No GitHub repo linked" toast and caches the result, instead of the scary `❌ Failed to fetch GitHub repo: http_403` error toast.
+
+---
+
 ## v3.15.2 (2026-05-25)
 
 ### Fixed
