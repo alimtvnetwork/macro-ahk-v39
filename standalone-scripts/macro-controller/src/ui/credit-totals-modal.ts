@@ -262,7 +262,7 @@ export function buildBreakdownTable(workspaces: ReadonlyArray<WorkspaceCredit>):
 
   const header = document.createElement('div');
   header.setAttribute('data-credit-totals-header', '1');
-  header.style.cssText = 'display:grid;grid-template-columns:1.6fr 0.7fr 0.7fr 0.7fr 0.7fr;gap:6px;padding:5px 8px;font-size:9px;color:' + cPrimaryLighter + ';text-transform:uppercase;letter-spacing:0.5px;font-weight:700;background:rgba(124,58,237,0.10);border-bottom:1px solid rgba(124,58,237,0.20);';
+  header.style.cssText = 'display:grid;grid-template-columns:1.6fr 0.7fr 0.5fr 0.7fr 0.7fr 0.7fr;gap:6px;padding:5px 8px;font-size:9px;color:' + cPrimaryLighter + ';text-transform:uppercase;letter-spacing:0.5px;font-weight:700;background:rgba(124,58,237,0.10);border-bottom:1px solid rgba(124,58,237,0.20);';
 
   const body = document.createElement('div');
   body.style.cssText = 'max-height:260px;overflow-y:auto;';
