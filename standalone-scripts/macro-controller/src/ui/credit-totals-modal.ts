@@ -497,7 +497,7 @@ export function showCreditTotalsModal(): void {
   const workspaces = loopCreditState.perWorkspace || [];
   const totals = aggregateCreditTotals(workspaces);
   panel.appendChild(buildBody(totals, workspaces));
-  panel.appendChild(buildFooter(totals));
+  panel.appendChild(buildFooter(totals, workspaces));
 
   document.body.appendChild(panel);
   installA11yHandlers(panel);
