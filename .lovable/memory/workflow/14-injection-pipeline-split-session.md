@@ -20,8 +20,8 @@ type: feature
 | 6 | PERF-R6 — `xpath-capture-coalescer.ts` + batch message type | ✅ Done |
 | 7 | Recorder capture batch handler + registry wiring | ✅ Done |
 | 8 | Integration tests `recorder-xpath-batch.test.ts` (14 cases) | ✅ Done |
-| 9 | E2E `e2e-21-injection-pipeline-split.spec.ts` | ⏳ Pending |
-| 10 | E2E `e2e-22-recorder-xpath-batch.spec.ts` | ⏳ Pending |
+| 9 | E2E `tests/e2e/e2e-21-injection-pipeline-split.spec.ts` (skeleton, test.skip) | ✅ Done |
+| 10 | E2E `tests/e2e/e2e-22-recorder-xpath-batch.spec.ts` (skeleton, test.skip) | ✅ Done |
 
 ## Key files
 - `src/background/handlers/injection-handler.ts` — thin delegator
