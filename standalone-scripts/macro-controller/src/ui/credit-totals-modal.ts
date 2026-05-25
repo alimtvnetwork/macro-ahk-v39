@@ -39,25 +39,42 @@ export function formatMytReset(iso: string): string {
   return weekday + ' ' + hh + ':' + mm + ' MYT';
 }
 
+/** Tone palette for credit numbers — colourful, dark-theme safe (Step 7). */
+export type CreditTone = 'ok' | 'warn' | 'used' | 'total' | 'muted' | 'accent';
+const TONE_COLOR: Record<CreditTone, string> = {
+  ok: '#86efac',      // green — remaining / healthy
+  warn: '#fbbf24',    // amber — alerts
+  used: '#fb923c',    // orange — consumption
+  total: '#a78bfa',   // purple — totals / grants
+  accent: '#67e8f9',  // cyan — plan / meta
+  muted: cPanelFgDim,
+};
+function toneColor(tone: CreditTone | undefined): string {
+  if (tone && TONE_COLOR[tone]) return TONE_COLOR[tone];
+  return '#e0e0e0';
+}
+
 /** Build a single summary card (heading + 3 stat rows). */
-export function buildCard(heading: string, rows: ReadonlyArray<{ label: string; value: string; tone?: 'ok' | 'warn' | 'muted' }>): HTMLElement {
+export function buildCard(heading: string, rows: ReadonlyArray<{ label: string; value: string; tone?: CreditTone }>): HTMLElement {
   const card = document.createElement('div');
-  card.style.cssText = 'background:rgba(0,0,0,0.30);border:1px solid rgba(124,58,237,0.30);border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;min-width:160px;flex:1;';
+  card.style.cssText = 'background:rgba(0,0,0,0.30);border:1px solid rgba(124,58,237,0.30);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:170px;flex:1;';
 
   const h = document.createElement('div');
-  h.style.cssText = 'font-size:9px;color:' + cPrimaryLighter + ';text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:2px;';
+  h.style.cssText = 'font-size:10px;color:' + cPrimaryLighter + ';text-transform:uppercase;letter-spacing:0.6px;font-weight:700;margin-bottom:2px;';
   h.textContent = heading;
   card.appendChild(h);
 
   for (const r of rows) {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11px;';
+    row.style.cssText = 'display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;';
     const label = document.createElement('span');
-    label.style.cssText = 'color:' + cPanelFgDim + ';';
+    label.style.cssText = 'color:' + cPanelFgDim + ';font-size:11px;';
     label.textContent = r.label;
     const value = document.createElement('span');
-    const tone = r.tone === 'warn' ? '#fbbf24' : r.tone === 'muted' ? cPanelFgDim : '#e0e0e0';
-    value.style.cssText = 'color:' + tone + ';font-weight:600;font-variant-numeric:tabular-nums;';
+    const color = toneColor(r.tone);
+    const isNumeric = /^[\d,.\s\/—–-]+$/.test(r.value);
+    const size = isNumeric ? '16px' : '12px';
+    value.style.cssText = 'color:' + color + ';font-weight:700;font-variant-numeric:tabular-nums;font-size:' + size + ';letter-spacing:0.2px;';
     value.textContent = r.value;
     row.appendChild(label);
     row.appendChild(value);
@@ -109,19 +126,22 @@ function buildRow(ws: WorkspaceCredit): HTMLElement {
   name.textContent = ws.fullName || ws.name || ws.id;
 
   const plan = document.createElement('span');
-  plan.style.cssText = 'color:' + cPanelFgDim + ';';
+  plan.style.cssText = 'color:#67e8f9;font-weight:600;font-size:10px;';
   plan.textContent = ws.plan || '—';
 
+  const usedN = Number(ws.totalCreditsUsed);
   const used = document.createElement('span');
-  used.style.cssText = 'text-align:right;';
-  used.textContent = formatCount(Number(ws.totalCreditsUsed));
+  used.style.cssText = 'text-align:right;color:#fb923c;font-weight:700;font-size:11px;';
+  used.textContent = formatCount(usedN);
 
+  const remN = Number(ws.available);
   const rem = document.createElement('span');
-  rem.style.cssText = 'text-align:right;color:' + (Number(ws.available) > 0 ? '#86efac' : cPanelFgDim) + ';';
-  rem.textContent = formatCount(Number(ws.available));
+  const remColor = remN <= 0 ? cPanelFgDim : remN < 100 ? '#fbbf24' : '#86efac';
+  rem.style.cssText = 'text-align:right;color:' + remColor + ';font-weight:700;font-size:11px;';
+  rem.textContent = formatCount(remN);
 
   const total = document.createElement('span');
-  total.style.cssText = 'text-align:right;';
+  total.style.cssText = 'text-align:right;color:#a78bfa;font-weight:700;font-size:11px;';
   total.textContent = formatCount(Number(ws.totalCredits));
 
   row.appendChild(name);
@@ -141,14 +161,14 @@ export function buildBody(totals: CreditTotals, workspaces: ReadonlyArray<Worksp
   const cardsRow = document.createElement('div');
   cardsRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
   cardsRow.appendChild(buildCard('This Billing Cycle', [
-    { label: 'Used', value: formatCount(totals.used) },
+    { label: 'Used', value: formatCount(totals.used), tone: 'used' },
     { label: 'Remaining', value: formatCount(totals.remaining), tone: 'ok' },
-    { label: 'Total grant', value: formatCount(totals.granted), tone: 'muted' },
+    { label: 'Total grant', value: formatCount(totals.granted), tone: 'total' },
   ]));
   cardsRow.appendChild(buildCard('Free Daily Credits', [
     { label: 'Today remaining', value: totals.freeDailyRemaining + ' / ' + totals.freeDailyCap, tone: totals.freeDailyRemaining > 0 ? 'ok' : 'muted' },
-    { label: 'Resets at', value: formatMytReset(totals.resetAtMyt), tone: 'muted' },
-    { label: 'Workspaces', value: formatCount(totals.totalCount), tone: 'muted' },
+    { label: 'Resets at', value: formatMytReset(totals.resetAtMyt), tone: 'accent' },
+    { label: 'Workspaces', value: formatCount(totals.totalCount), tone: 'total' },
   ]));
   body.appendChild(cardsRow);
 
