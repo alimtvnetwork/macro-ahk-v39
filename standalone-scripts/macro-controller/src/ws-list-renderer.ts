@@ -555,7 +555,12 @@ function filterAndSortWorkspaces(
     survivors.sort(function (a, b) {
       return _expiredRecoveryScore(b.ws) - _expiredRecoveryScore(a.ws);
     });
-  } else if (viewState().getRefillPriority()) {
+  } else if (viewState().getRefillPriority() || fs.refillSoon) {
+    // v3.16.1 bug fix — When the "Refill-soon" filter is active, ALL surviving rows
+    // are refill-soon (often with identical `daysToRefill`, e.g. all "1d"), so the
+    // natural API order leaves zero-credit workspaces at the top. Apply the refill
+    // priority sort unconditionally in that case so the highest-credit workspaces
+    // float up. `sortByRefillPriority` already breaks score ties by `available` desc.
     const sorted = sortByRefillPriority(survivors, REFILL_PRIORITY_WINDOW_DAYS);
     survivors.length = 0;
     for (const r of sorted) survivors.push(r);
