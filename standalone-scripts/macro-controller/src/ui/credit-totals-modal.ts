@@ -39,6 +39,36 @@ export function formatMytReset(iso: string): string {
   return weekday + ' ' + hh + ':' + mm + ' MYT';
 }
 
+/** Generate a RFC-4180-ish CSV string from workspace credits. */
+export function generateCsv(workspaces: ReadonlyArray<WorkspaceCredit>): string {
+  const rows: string[] = [];
+  rows.push('Workspace,Plan,Projects,Used,Remaining,Total');
+  for (const ws of workspaces) {
+    const name = (ws.fullName || ws.name || ws.id).replace(/"/g, '""');
+    const plan = (ws.plan || '').replace(/"/g, '""');
+    const projects = String(Number(ws.numProjects) || 0);
+    const used = String(Number(ws.totalCreditsUsed) || 0);
+    const rem = String(Number(ws.available) || 0);
+    const total = String(Number(ws.totalCredits) || 0);
+    rows.push('"' + name + '","' + plan + '",' + projects + ',' + used + ',' + rem + ',' + total);
+  }
+  return rows.join('\r\n');
+}
+
+/** Trigger a browser download of the given CSV text. */
+export function downloadCsv(filename: string, csvText: string): void {
+  const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 /** Tone palette for credit numbers — colourful, dark-theme safe (Step 7). */
 export type CreditTone = 'ok' | 'warn' | 'used' | 'total' | 'muted' | 'accent';
 const TONE_COLOR: Record<CreditTone, string> = {
@@ -467,7 +497,7 @@ export function showCreditTotalsModal(): void {
   const workspaces = loopCreditState.perWorkspace || [];
   const totals = aggregateCreditTotals(workspaces);
   panel.appendChild(buildBody(totals, workspaces));
-  panel.appendChild(buildFooter(totals));
+  panel.appendChild(buildFooter(totals, workspaces));
 
   document.body.appendChild(panel);
   installA11yHandlers(panel);
@@ -535,13 +565,23 @@ function buildTitleBar(): HTMLElement {
   return bar;
 }
 
-function buildFooter(totals: CreditTotals): HTMLElement {
+function buildFooter(totals: CreditTotals, workspaces: ReadonlyArray<WorkspaceCredit>): HTMLElement {
   const footer = document.createElement('div');
   footer.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:rgba(0,0,0,0.20);border-top:1px solid rgba(124,58,237,0.20);font-size:10px;color:' + cPanelFgDim + ';';
   const left = document.createElement('span');
   left.textContent = 'Snapshot age: ' + formatSnapshotAge(loopCreditState.lastCheckedAt) + '  ·  ' + totals.totalCount + ' workspace' + (totals.totalCount === 1 ? '' : 's');
   const right = document.createElement('span');
   right.style.cssText = 'display:flex;gap:6px;';
+  const csvBtn = document.createElement('button');
+  csvBtn.textContent = '⬇ CSV';
+  csvBtn.setAttribute(ATTR_ARIA_LABEL, 'Export CSV');
+  csvBtn.setAttribute('data-credit-totals-csv', '1');
+  csvBtn.style.cssText = 'background:transparent;border:1px solid ' + cPrimary + ';color:' + cPrimaryLighter + ';padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;';
+  csvBtn.onclick = function (): void {
+    const csv = generateCsv(workspaces);
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    downloadCsv('credit-totals-' + timestamp + '.csv', csv);
+  };
   const refresh = document.createElement('button');
   refresh.textContent = '↻ Refresh';
   refresh.setAttribute(ATTR_ARIA_LABEL, 'Refresh credit snapshot');
@@ -552,6 +592,7 @@ function buildFooter(totals: CreditTotals): HTMLElement {
   close.setAttribute(ATTR_ARIA_LABEL, 'Close dialog');
   close.style.cssText = 'background:rgba(124,58,237,0.20);border:1px solid ' + cPrimary + ';color:' + cPrimaryLighter + ';padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;';
   close.onclick = function (): void { removeCreditTotalsModal(); };
+  right.appendChild(csvBtn);
   right.appendChild(refresh);
   right.appendChild(close);
   footer.appendChild(left);
