@@ -4,13 +4,14 @@
  *   - tab row with injected project (green label)
  *   - tab row with probed workspace (amber label + source tag)
  *   - tab row with probe error (gray italic + truncated reason)
- *   - copy-to-clipboard button presence
  *   - refresh button triggers re-fetch
  *
  * Closes spec/22-app-issues/111 acceptance:
  *   "Open the panel with >= 2 Lovable tabs — each row shows the correct workspace name."
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+let _mockSend: ReturnType<typeof vi.fn> | undefined;
 
 vi.mock('../shared-state', () => ({
   cPanelFgDim: '#94a3b8',
@@ -26,15 +27,15 @@ vi.mock('../logging', () => ({
   logSub: vi.fn(),
 }));
 
-vi.mock('./prompt-loader', () => ({
-  sendToExtension: vi.fn(),
+vi.mock('../ui/prompt-loader', () => ({
+  sendToExtension: (...args: unknown[]) => _mockSend!(...args),
 }));
 
-import { sendToExtension } from '../ui/prompt-loader';
 import { createOpenTabsSection } from '../ui/section-open-tabs';
 
 describe('open-tabs-section', () => {
   beforeEach(() => {
+    _mockSend = vi.fn();
     vi.clearAllMocks();
     document.body.innerHTML = '';
   });
@@ -108,7 +109,7 @@ describe('open-tabs-section', () => {
   }
 
   it('renders empty state when no tabs are open', async () => {
-    (sendToExtension as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ tabs: [], capturedAt: '2026-05-25T08:00:00Z' });
+    _mockSend!.mockResolvedValueOnce({ tabs: [], capturedAt: '2026-05-25T08:00:00Z' });
 
     const result = createOpenTabsSection();
     document.body.appendChild(result.section);
@@ -126,7 +127,7 @@ describe('open-tabs-section', () => {
 
   it('renders a list with injected, probed, and error rows', async () => {
     const tabs = makeMockTabs();
-    (sendToExtension as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ tabs, capturedAt: '2026-05-25T08:00:00Z' });
+    _mockSend!.mockResolvedValueOnce({ tabs, capturedAt: '2026-05-25T08:00:00Z' });
 
     const result = createOpenTabsSection();
     document.body.appendChild(result.section);
@@ -168,7 +169,7 @@ describe('open-tabs-section', () => {
   });
 
   it('renders error state when extension call fails', async () => {
-    (sendToExtension as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Extension context invalidated'));
+    _mockSend!.mockRejectedValueOnce(new Error('Extension context invalidated'));
 
     const result = createOpenTabsSection();
     document.body.appendChild(result.section);
@@ -182,7 +183,7 @@ describe('open-tabs-section', () => {
   });
 
   it('renders error state when extension returns isOk=false', async () => {
-    (sendToExtension as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ isOk: false, errorMessage: 'Background busy' });
+    _mockSend!.mockResolvedValueOnce({ isOk: false, errorMessage: 'Background busy' });
 
     const result = createOpenTabsSection();
     document.body.appendChild(result.section);
@@ -196,7 +197,7 @@ describe('open-tabs-section', () => {
   });
 
   it('refresh button re-fetches data', async () => {
-    (sendToExtension as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ tabs: [], capturedAt: '2026-05-25T08:00:00Z' });
+    _mockSend!.mockResolvedValueOnce({ tabs: [], capturedAt: '2026-05-25T08:00:00Z' });
 
     const result = createOpenTabsSection();
     document.body.appendChild(result.section);
@@ -210,6 +211,6 @@ describe('open-tabs-section', () => {
 
     await new Promise((r) => setTimeout(r, 10));
 
-    expect(sendToExtension).toHaveBeenCalledTimes(1);
+    expect(_mockSend).toHaveBeenCalledTimes(1);
   });
 });
