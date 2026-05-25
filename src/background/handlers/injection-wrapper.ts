@@ -121,12 +121,19 @@ function buildWrappedCode(
         if (__mBody) {
             var __mAttr = __mBody.getAttribute("data-marco-injected") || "";
             var __mList = __mAttr ? __mAttr.split(",") : [];
-            if (__mList.indexOf(${safeScriptId}) !== -1) {
+            var __mAlreadyInjected = __mList.indexOf(${safeScriptId}) !== -1;
+            var __mLaunchSource = window.__MARCO_LAUNCH_SOURCE__ || "manual";
+            var __mPassiveMarker = document.querySelector('[data-launch-source="passive"]');
+            var __mVisiblePanel = document.getElementById("ahk-loop-container");
+            var __mManualAfterPassive = __mAlreadyInjected && __mLaunchSource === "manual" && __mPassiveMarker && !__mVisiblePanel;
+            if (__mAlreadyInjected && !__mManualAfterPassive) {
                 console.info("[Marco] INJECT_SKIPPED_ALREADY_MARKED script=" + ${safeScriptId});
                 return;
             }
-            __mList.push(${safeScriptId});
-            __mBody.setAttribute("data-marco-injected", __mList.join(","));
+            if (!__mAlreadyInjected) {
+                __mList.push(${safeScriptId});
+                __mBody.setAttribute("data-marco-injected", __mList.join(","));
+            }
         }
     } catch (__mDedupErr) {
         console.warn("[Marco] body-marker dedup failed for " + ${safeScriptId} + ":", __mDedupErr);
