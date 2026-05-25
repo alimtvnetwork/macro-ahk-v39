@@ -151,6 +151,16 @@ const COLUMNS: ReadonlyArray<{ key: SortKey; label: string; align: 'left' | 'rig
   { key: 'total', label: 'Total', align: 'right' },
 ];
 
+/** Pure: move element at `from` to `to`, returning a new array. (Step 10) */
+export function reorderArray<T>(arr: ReadonlyArray<T>, from: number, to: number): ReadonlyArray<T> {
+  if (from === to) return arr.slice();
+  if (from < 0 || from >= arr.length || to < 0 || to >= arr.length) return arr.slice();
+  const next = arr.slice();
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved);
+  return next;
+}
+
 /** Build the per-workspace breakdown table. */
 export function buildBreakdownTable(workspaces: ReadonlyArray<WorkspaceCredit>): HTMLElement {
   ensureRowStyles();
@@ -159,6 +169,9 @@ export function buildBreakdownTable(workspaces: ReadonlyArray<WorkspaceCredit>):
   wrap.style.cssText = 'background:rgba(0,0,0,0.30);border:1px solid rgba(124,58,237,0.30);border-radius:6px;overflow:hidden;';
 
   let sortState: SortState = { key: 'rem', dir: 'none' };
+  // Mutable manual order (Step 10). Drag-drop edits this; sort uses it as input.
+  let order: ReadonlyArray<WorkspaceCredit> = workspaces.slice();
+  let dragFromIndex = -1;
 
   const header = document.createElement('div');
   header.setAttribute('data-credit-totals-header', '1');
@@ -189,18 +202,64 @@ export function buildBreakdownTable(workspaces: ReadonlyArray<WorkspaceCredit>):
     }
   }
 
+  function attachDrag(row: HTMLElement, dispIdx: number): void {
+    const isManualOrder = sortState.dir === 'none';
+    row.draggable = isManualOrder;
+    row.style.cursor = isManualOrder ? 'grab' : 'default';
+    row.setAttribute('data-row-index', String(dispIdx));
+    if (!isManualOrder) return;
+
+    row.addEventListener('dragstart', (e: DragEvent) => {
+      dragFromIndex = dispIdx;
+      row.style.opacity = '0.4';
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(dispIdx));
+      }
+    });
+    row.addEventListener('dragend', () => {
+      row.style.opacity = '';
+      dragFromIndex = -1;
+      body.querySelectorAll<HTMLElement>('[data-drop-target="1"]').forEach((el) => {
+        el.removeAttribute('data-drop-target');
+        el.style.borderTop = '';
+      });
+    });
+    row.addEventListener('dragover', (e: DragEvent) => {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      row.setAttribute('data-drop-target', '1');
+      row.style.borderTop = '2px solid ' + cPrimaryLighter;
+    });
+    row.addEventListener('dragleave', () => {
+      row.removeAttribute('data-drop-target');
+      row.style.borderTop = '';
+    });
+    row.addEventListener('drop', (e: DragEvent) => {
+      e.preventDefault();
+      const fromStr = e.dataTransfer?.getData('text/plain') || '';
+      const from = Number(fromStr);
+      const to = dispIdx;
+      if (!Number.isFinite(from) || from === to) return;
+      order = reorderArray(order, from, to);
+      renderBody();
+    });
+  }
+
   function renderBody(): void {
     while (body.firstChild) body.removeChild(body.firstChild);
-    if (workspaces.length === 0) {
+    if (order.length === 0) {
       const empty = document.createElement('div');
       empty.style.cssText = 'padding:14px 10px;text-align:center;color:' + cPanelFgDim + ';font-size:11px;font-style:italic;';
       empty.textContent = 'No workspaces cached. Open the workspace panel to sync.';
       body.appendChild(empty);
       return;
     }
-    const sorted = sortWorkspaces(workspaces, sortState);
+    const sorted = sortWorkspaces(order, sortState);
     sorted.forEach((ws, idx) => {
-      body.appendChild(buildRow(ws, idx));
+      const row = buildRow(ws, idx);
+      attachDrag(row, idx);
+      body.appendChild(row);
     });
   }
 
