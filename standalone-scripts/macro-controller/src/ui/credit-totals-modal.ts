@@ -176,7 +176,7 @@ export function applyFilters(
   const anyActive = filters.low || filters.empty || filters.free;
   if (!anyActive) return workspaces;
   return workspaces.filter((ws) => {
-    const rem = Number(ws.available) || 1;
+    const rem = Number(ws.available);
     if (filters.low && rem < 100 && rem > 0) return true;
     if (filters.empty && rem <= 0) return true;
     if (filters.free && ws.hasFree) return true;
