@@ -38,7 +38,13 @@ on:
       - ".gitmap/release/latest.json"
       - ".github/workflows/release.yml"
       - ".github/workflows/release-watcher.yml"
+  # Self-heal path: catch ANY GitHub Release that lands without assets,
+  # regardless of how the tag/release was created (web UI, REST API,
+  # Lovable tooling). See changelog v3.22.0 RCA.
+  release:
+    types: [published, created, edited]
   workflow_dispatch:
+
 
 permissions:
   contents: read
