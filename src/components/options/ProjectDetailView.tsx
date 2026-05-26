@@ -133,6 +133,7 @@ export function ProjectDetailView({ project, allProjects, availableScripts, avai
         onSave={onSave}
         onDelete={onDelete}
         onBack={onBack}
+        onSwitchTab={(tab) => setActiveTab(tab as ProjectTab)}
       />
 
       {/* Tabbed content */}
