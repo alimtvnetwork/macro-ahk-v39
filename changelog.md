@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.1
 
 ---
 
+## [v3.20.0] — 2026-05-26
+
+### Fixed
+- **Ctrl+Shift+Down shortcut sometimes did nothing (RCA)**: the popup Run button was already fixed in v3.18.0 to always send `forceReload: true`, but the keyboard shortcut (`run-scripts` command in `src/background/shortcut-command-handler.ts`) and the right-click context menu (`handleRunScripts` in `src/background/context-menu-handler.ts`) were still using the conditional `...(forceReload ? { forceReload: true } : {})` pattern. With `forceReload=false` the message omitted the flag, the background pipeline cache deduped, and even when it didn't, the per-page `data-marco-injected` body-marker in `src/background/handlers/injection-wrapper.ts` skipped the script with `INJECT_SKIPPED_ALREADY_MARKED`. Both `Ctrl+Shift+Down` and context-menu **Run scripts now** now always send `forceReload: true`, matching the popup. Symptom matches the user's report — first press worked, every subsequent press on the same page silently did nothing.
+- **Double-injection on Run is now actually a re-injection**: plumbed `forceReload` through `injection-handler.ts → injectAllScripts → injectSingleScript → wrapWithIsolation → buildWrappedCode`. The generated wrapper now, on a forced manual launch, splices its own script id out of `<body data-marco-injected="…">` BEFORE the dedup check, so the script always re-mounts. Passive/auto-inject double-fires are still absorbed by the same body marker — only deliberate manual force bypasses it. Logs the new path as `INJECT_FORCE_RELOAD script=<id> — marker cleared`.
+
+### Bumped
+- Version bump: 3.19.0 → 3.20.0 across manifest.json, src/shared/constants.ts, standalone-scripts/macro-controller/src/shared-state.ts, and every standalone-scripts/*/src/instruction.ts.
+
+---
+
 ## [v3.19.0] — 2026-05-26
 
 ### Fixed
