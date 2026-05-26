@@ -2,8 +2,8 @@
 /**
  * check-prompt-info-casing.mjs
  *
- * Validates that every standalone-scripts/prompts/*/info.json uses
- * strictly PascalCase keys (no camelCase / snake_case leftovers).
+ * Validates that every standalone-scripts/prompts/{slug}/info.json uses
+ * strictly PascalCase keys (no camelCase or snake_case leftovers).
  *
  * Exit 0 = all clean.
  * Exit 1 = at least one file has non-PascalCase keys.
