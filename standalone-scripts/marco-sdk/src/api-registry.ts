@@ -161,6 +161,13 @@ export const apiRegistry: ApiRegistry = Object.freeze({
         // Project metadata (`github_repo`, `github_branch`,
         // `last_message_at`) is already returned by `list` above.
         // See `.lovable/question-and-ambiguity/52-projects-get-405.md`.
+        gitsync: Object.freeze({
+            url: "/workspaces/{wsId}/projects/{projectId}/gitsync",
+            method: "GET" as const,
+            auth: true,
+            description: "Fetch gitsync (GitHub repo link) config for a project",
+            timeoutMs: 10_000,
+        }),
     }),
 
     remix: Object.freeze({
