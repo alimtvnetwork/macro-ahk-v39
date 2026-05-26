@@ -145,7 +145,7 @@ Downloads the latest build straight into the directory you're standing in — no
 
 ```powershell
 # PowerShell (Windows) — installs to .\marco-extension under the current folder
-& { $InstallDir = (Join-Path $PWD 'marco-extension'); irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/scripts/install.ps1 | iex }
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/scripts/install.ps1))) -InstallDir (Join-Path $PWD 'marco-extension')
 ```
 
 ```bash
