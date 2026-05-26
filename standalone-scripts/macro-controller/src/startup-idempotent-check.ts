@@ -19,6 +19,10 @@ import { Label } from './types';
 
 type IdempotentResult = 'proceed' | 'abort';
 
+const CONSOLE_PREFIX = '%c[MacroLoop v';
+const STYLE_GREEN = 'color: #10b981; font-weight: bold;';
+const STYLE_BLUE = 'color: #38bdf8; font-weight: bold;';
+
 interface RecoverableController {
   ui?: { create?: () => void; update?: () => void } | null;
   registerUI?: (ui: unknown) => void;
