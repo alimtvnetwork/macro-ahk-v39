@@ -73,6 +73,7 @@ async function globalSetup() {
     { label: 'lovable-common',   script: 'build:lovable-common',   timeout: 180_000 },
     { label: 'lovable-owner-switch', script: 'build:lovable-owner-switch', timeout: 180_000 },
     { label: 'lovable-user-add',  script: 'build:lovable-user-add', timeout: 180_000 },
+    { label: 'lovable-dashboard', script: 'build:lovable-dashboard', timeout: 180_000 },
     { label: 'macro-controller', script: 'build:macro-controller', timeout: 240_000 },
     { label: 'extension',        script: 'build:extension',        timeout: 240_000 },
   ];
