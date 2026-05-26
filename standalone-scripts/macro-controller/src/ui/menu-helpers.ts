@@ -8,6 +8,7 @@ import { resolveFlyoutPlacement } from './flyout-placement';
  * Pure DOM builder functions for dropdown menu items and submenus.
  */
 
+const ATTR_ARIA_EXPANDED = 'aria-expanded';
 
 /** Context holding closure-scoped menu references */
 export interface MenuCtx {
@@ -105,24 +106,24 @@ export function createSubmenu(ctx: MenuCtx, icon: string, label: string): { el: 
   trigger.style.cssText = ctx.menuBtnStyle + 'justify-content:space-between;';
   trigger.innerHTML = '<span style="display:flex;align-items:center;gap:4px;"><span style="font-size:12px;width:18px;text-align:center;">' + icon + '</span><span>' + label + '</span></span><span style="font-size:10px;opacity:0.6;">▸</span>';
   trigger.setAttribute('aria-haspopup', 'menu');
-  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute(ATTR_ARIA_EXPANDED, 'false');
 
   const subCtx: SubmenuCtx = { hideTimer: null, trigger: trigger, subPanel: subPanel, reflowHandler: null };
 
   trigger.onmouseover = function() {
     trigger.style.background = 'rgba(139,92,246,0.2)';
     showSub(subCtx);
-    trigger.setAttribute('aria-expanded', 'true');
+    trigger.setAttribute(ATTR_ARIA_EXPANDED, 'true');
   };
   trigger.onmouseout = function() { trigger.style.background = 'transparent'; };
   trigger.onclick = function(e) {
     e.stopPropagation();
     const open = subPanel.style.display === 'none' || subPanel.style.display === '';
     if (open) { showSub(subCtx); } else { hideSub(subCtx); }
-    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    trigger.setAttribute(ATTR_ARIA_EXPANDED, open ? 'true' : 'false');
   };
   trigger.onkeydown = function(e) {
-    if (e.key === 'Escape') { hideSub(subCtx); trigger.setAttribute('aria-expanded', 'false'); trigger.focus(); }
+    if (e.key === 'Escape') { hideSub(subCtx); trigger.setAttribute(ATTR_ARIA_EXPANDED, 'false'); trigger.focus(); }
   };
 
   subPanel.setAttribute('data-marco-submenu', label);
@@ -130,7 +131,7 @@ export function createSubmenu(ctx: MenuCtx, icon: string, label: string): { el: 
   subPanel.setAttribute('aria-label', label);
   subPanel.style.cssText = 'display:none;position:fixed;min-width:170px;background:' + cPanelBg + ';border:1px solid ' + cPrimary + ';border-radius:' + lDropdownRadius + ';z-index:100004;box-shadow:' + lDropdownShadow + ';padding:4px 0;';
   subPanel.onkeydown = function(e) {
-    if (e.key === 'Escape') { hideSub(subCtx); trigger.setAttribute('aria-expanded', 'false'); trigger.focus(); }
+    if (e.key === 'Escape') { hideSub(subCtx); trigger.setAttribute(ATTR_ARIA_EXPANDED, 'false'); trigger.focus(); }
   };
 
   subPanel.onmouseover = function() { showSub(subCtx); };
