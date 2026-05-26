@@ -435,8 +435,8 @@ function buildRefillBadgeHtml(ws: WorkspaceCredit): string {
     + days + 'd</span>';
 }
 
-/** Build the inner HTML for a workspace row. */
-function buildTierBadgeHtml(ws: WorkspaceCredit): string {
+/** Build the inner HTML for a workspace row. Exported for tests. */
+export function buildTierBadgeHtml(ws: WorkspaceCredit): string {
   const wsTier = ws.tier || 'FREE';
   const tierMeta = WS_TIER_LABELS[wsTier] || WS_TIER_LABELS['FREE'];
 
