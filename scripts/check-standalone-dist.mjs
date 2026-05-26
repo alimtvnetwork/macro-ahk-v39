@@ -25,6 +25,7 @@ const REQUIRED_ARTIFACTS = {
   "lovable-common": ["lovable-common.js", "instruction.json"],
   "lovable-owner-switch": ["lovable-owner-switch.js", "instruction.json"],
   "lovable-user-add": ["lovable-user-add.js", "instruction.json"],
+  "lovable-dashboard": ["lovable-dashboard.js", "instruction.json"],
 };
 
 let failed = false;
