@@ -75,8 +75,8 @@ If the URL leaves the allowed set after activation, call `unmountHomeScreenFeatu
 ## Acceptance
 
 1. On `https://lovable.dev/dashboard` → activates.
-2. On `https://lovable.dev/` → activates.
-3. On `https://lovable.dev` → activates.
+2. On `https://lovable.dev/` → does NOT activate.
+3. On `https://lovable.dev` → does NOT activate.
 4. On `https://lovable.dev/projects/abc` → does NOT activate.
 5. On `https://lovable.dev/dashboard?x=1` → does NOT activate (exact match).
-6. SPA navigation away from an allowed URL unmounts the UI.
+6. SPA navigation away from `/dashboard` unmounts the UI.
