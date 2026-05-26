@@ -1,0 +1,266 @@
+# ──────────────────────────────────────────────────────────────
+# Direct recovery: latest release assets
+#
+# Purpose:
+#   Repairs a published Release page that contains only GitHub source archives.
+#   This path builds from current fixed main, uploads every required asset to
+#   the target release with gh release upload --clobber, edits the release body,
+#   then verifies the live GitHub asset list.
+#
+# NOTE: No email or notification integrations — by design.
+# ──────────────────────────────────────────────────────────────
+
+name: Recover Latest Release Assets
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/recover-latest-release-assets.yml"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-watcher.yml"
+      - ".gitmap/release/latest.json"
+      - ".gitmap/release/v*.json"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to repair. Leave blank to use .gitmap/release/latest.json.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recover-latest-release-assets
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    name: Build and upload release assets
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout fixed source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release tag
+        id: version
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${INPUT_TAG}" ]]; then
+            VER="${INPUT_TAG}"
+          else
+            VER=$(node -e "const fs=require('node:fs'); const j=JSON.parse(fs.readFileSync('.gitmap/release/latest.json','utf8')); const v=String(j.tag || j.version || '').replace(/^v?/,'v'); process.stdout.write(v)")
+          fi
+          if [[ ! "${VER}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "::error::.gitmap/release/latest.json produced invalid release tag '${VER}'"
+            exit 1
+          fi
+          git fetch origin "refs/tags/${VER}:refs/tags/${VER}" 2>/dev/null || true
+          if ! git rev-parse --verify "refs/tags/${VER}" >/dev/null 2>&1; then
+            echo "::error::release tag ${VER} not found on origin"
+            exit 1
+          fi
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          echo "VER=${VER}" >> "$GITHUB_ENV"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build recoverable release outputs
+        run: |
+          set -euo pipefail
+          pnpm run build:sdk
+          pnpm run build:xpath
+          pnpm run build:macro-controller
+          pnpm run build:payment-banner-hider
+          pnpm run build:lovable-common
+          pnpm run build:lovable-owner-switch
+          pnpm run build:lovable-user-add
+          pnpm run build:lovable-dashboard
+          pnpm run build:prompts
+          pnpm run build:extension
+
+      - name: Package release assets
+        run: |
+          set -euo pipefail
+          rm -rf release-assets
+          mkdir -p release-assets
+
+          if [ ! -f chrome-extension/manifest.json ]; then
+            echo "::error file=chrome-extension/manifest.json::Extension build output missing; expected chrome-extension/manifest.json after pnpm run build:extension"
+            ls -la chrome-extension/ || true
+            exit 1
+          fi
+
+          cp readme.md chrome-extension/readme.md
+          echo "${VER}" > chrome-extension/VERSION
+          find chrome-extension -name '*.map' -delete
+
+          (cd chrome-extension && zip -r "../release-assets/marco-extension-${VER}.zip" .)
+          PLUGINS=(
+            "macro-controller"
+            "marco-sdk"
+            "xpath"
+            "payment-banner-hider"
+            "lovable-common"
+            "lovable-owner-switch"
+            "lovable-user-add"
+            "lovable-dashboard"
+          )
+          for plugin in "${PLUGINS[@]}"; do
+            if [ ! -d "standalone-scripts/${plugin}" ]; then
+              echo "::error file=standalone-scripts/${plugin}::Required plugin folder missing; release page must include every plugin ZIP"
+              exit 1
+            fi
+            (cd "standalone-scripts/${plugin}" && zip -r "../../release-assets/${plugin}-${VER}.zip" .)
+          done
+          if [ -d standalone-scripts/prompts ]; then
+            (cd standalone-scripts/prompts && zip -r "../../release-assets/prompts-${VER}.zip" .)
+          fi
+
+          cp scripts/install.sh release-assets/install.sh
+          cp scripts/install.ps1 release-assets/install.ps1
+          chmod +x release-assets/install.sh
+          echo "${VER}" > release-assets/VERSION.txt
+          cp changelog.md release-assets/changelog.md
+
+          (cd release-assets && sha256sum -- * > checksums.txt)
+
+      - name: Generate release notes
+        run: |
+          set -euo pipefail
+          REPO="${GITHUB_REPOSITORY}"
+          {
+            echo "## Marco Extension ${VER}"
+            echo ""
+            echo "### Assets"
+            echo ""
+            echo "| Asset | Description |"
+            echo "|-------|-------------|"
+            echo "| \`marco-extension-${VER}.zip\` | Chrome extension — load unpacked in \`chrome://extensions\` |"
+            echo "| \`macro-controller-${VER}.zip\` | Standalone macro controller |"
+            echo "| \`marco-sdk-${VER}.zip\` | SDK library |"
+            echo "| \`xpath-${VER}.zip\` | XPath utility |"
+            echo "| \`payment-banner-hider-${VER}.zip\` | Payment banner hider plugin |"
+            echo "| \`lovable-common-${VER}.zip\` | Lovable common plugin |"
+            echo "| \`lovable-owner-switch-${VER}.zip\` | Lovable owner switch plugin |"
+            echo "| \`lovable-user-add-${VER}.zip\` | Lovable user add plugin |"
+            echo "| \`lovable-dashboard-${VER}.zip\` | Lovable dashboard plugin |"
+            echo "| \`prompts-${VER}.zip\` | Prompt templates |"
+            echo "| \`install.ps1\` | Unified PowerShell installer |"
+            echo "| \`install.sh\` | Unified Bash installer |"
+            echo "| \`VERSION.txt\` | Version identifier |"
+            echo "| \`changelog.md\` | Full project changelog |"
+            echo "| \`checksums.txt\` | SHA256 checksums |"
+            echo ""
+            echo "### Quick Install"
+            echo ""
+            echo "**Windows (PowerShell):**"
+            echo "\`\`\`powershell"
+            echo "irm https://github.com/${REPO}/releases/download/${VER}/install.ps1 | iex"
+            echo "\`\`\`"
+            echo ""
+            echo "**Linux / macOS:**"
+            echo "\`\`\`bash"
+            echo "curl -fsSL https://github.com/${REPO}/releases/download/${VER}/install.sh | bash"
+            echo "\`\`\`"
+            echo ""
+            echo "### Checksums (SHA256)"
+            echo ""
+            echo "\`\`\`"
+            cat release-assets/checksums.txt
+            echo "\`\`\`"
+          } > release-assets/RELEASE_NOTES.md
+
+      - name: Verify local recovery assets
+        run: |
+          set -euo pipefail
+          REQUIRED=(
+            "release-assets/marco-extension-${VER}.zip"
+            "release-assets/macro-controller-${VER}.zip"
+            "release-assets/marco-sdk-${VER}.zip"
+            "release-assets/xpath-${VER}.zip"
+            "release-assets/payment-banner-hider-${VER}.zip"
+            "release-assets/lovable-common-${VER}.zip"
+            "release-assets/lovable-owner-switch-${VER}.zip"
+            "release-assets/lovable-user-add-${VER}.zip"
+            "release-assets/lovable-dashboard-${VER}.zip"
+            "release-assets/install.ps1"
+            "release-assets/install.sh"
+            "release-assets/VERSION.txt"
+            "release-assets/changelog.md"
+            "release-assets/checksums.txt"
+            "release-assets/RELEASE_NOTES.md"
+          )
+          if [ -d standalone-scripts/prompts ]; then
+            REQUIRED+=("release-assets/prompts-${VER}.zip")
+          fi
+          for f in "${REQUIRED[@]}"; do
+            if [ ! -s "$f" ]; then
+              echo "::error file=$f::Required recovery asset missing or empty"
+              exit 1
+            fi
+          done
+          ls -lh release-assets/
+
+      - name: Upload assets to existing GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload "${VER}" --repo "${GITHUB_REPOSITORY}" --clobber -- release-assets/*
+          gh release edit "${VER}" --repo "${GITHUB_REPOSITORY}" --title "Release ${VER}" --notes-file release-assets/RELEASE_NOTES.md --latest
+
+      - name: Verify live GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REQUIRED=(
+            "marco-extension-${VER}.zip"
+            "macro-controller-${VER}.zip"
+            "marco-sdk-${VER}.zip"
+            "xpath-${VER}.zip"
+            "payment-banner-hider-${VER}.zip"
+            "lovable-common-${VER}.zip"
+            "lovable-owner-switch-${VER}.zip"
+            "lovable-user-add-${VER}.zip"
+            "lovable-dashboard-${VER}.zip"
+            "install.ps1"
+            "install.sh"
+            "VERSION.txt"
+            "changelog.md"
+            "checksums.txt"
+            "RELEASE_NOTES.md"
+          )
+          if [ -d standalone-scripts/prompts ]; then
+            REQUIRED+=("prompts-${VER}.zip")
+          fi
+          ASSETS=$(gh release view "${VER}" --repo "${GITHUB_REPOSITORY}" --json assets --jq '.assets[].name')
+          for asset in "${REQUIRED[@]}"; do
+            if ! printf '%s\n' "${ASSETS}" | grep -qx "${asset}"; then
+              echo "::error::Live GitHub Release ${VER} is missing asset: ${asset}"
+              printf '%s\n' "${ASSETS}"
+              exit 1
+            fi
+          done
+          echo "✅ Live GitHub Release ${VER} contains all required uploaded assets"
