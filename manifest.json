@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Marco Macro Extension",
-    "version": "3.19.0",
+    "version": "3.20.0",
     "description": "Riseup Asia Marco — macro automation, XPath recording, and prompt management.",
     "content_security_policy": {
         "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"

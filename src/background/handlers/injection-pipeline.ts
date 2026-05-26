@@ -115,6 +115,7 @@ export async function injectAllScripts(
     tabId: number,
     scripts: PreparedScript[],
     launchSource: InjectionLaunchSource = "manual",
+    forceReload = false,
 ): Promise<InjectionResult[]> {
     if (scripts.length === 0) return [];
 
@@ -137,7 +138,7 @@ export async function injectAllScripts(
     if (hasCssScript) {
         console.log("[injection] 3/4 ORDER    — CSS-bearing chain detected, forcing sequential ordered injection (%d scripts)", orderedScripts.length);
         for (const script of orderedScripts) {
-            const result = await injectSingleScript(tabId, script.injectable, script.configJson, script.themeJson, script.codeSource, launchSource);
+            const result = await injectSingleScript(tabId, script.injectable, script.configJson, script.themeJson, script.codeSource, launchSource, forceReload);
             results.push(result);
         }
         return results;
@@ -159,7 +160,7 @@ export async function injectAllScripts(
             const scriptMeta: PipelineCacheMeta[] = [];
 
             for (const script of goodScripts) {
-                const wrapped = wrapWithIsolation(script.injectable, script.configJson, script.themeJson, launchSource);
+                const wrapped = wrapWithIsolation(script.injectable, script.configJson, script.themeJson, launchSource, forceReload);
                 wrappedParts.push(wrapped);
                 scriptMeta.push({
                     id: script.injectable.id,
@@ -206,7 +207,7 @@ export async function injectAllScripts(
         } catch (batchError) {
             logCaughtError(BgLogTag.INJECTION, "Batch injection failed, falling back to sequential", batchError);
             for (const script of goodScripts) {
-                const result = await injectSingleScript(tabId, script.injectable, script.configJson, script.themeJson, script.codeSource, launchSource);
+                const result = await injectSingleScript(tabId, script.injectable, script.configJson, script.themeJson, script.codeSource, launchSource, forceReload);
                 results.push(result);
             }
         }
@@ -256,6 +257,7 @@ export async function injectSingleScript(
     resolvedThemeJson: string | null,
     resolvedCodeSource?: string,
     launchSource: InjectionLaunchSource = "manual",
+    forceReload = false,
 ): Promise<InjectionResult> {
     const startTime = Date.now();
     const configJson = resolvedConfigJson;
@@ -292,7 +294,7 @@ export async function injectSingleScript(
         configJson !== null, resolvedThemeJson !== null, script.code.length);
 
     try {
-        const wrappedCode = wrapWithIsolation(script, configJson, resolvedThemeJson, launchSource);
+        const wrappedCode = wrapWithIsolation(script, configJson, resolvedThemeJson, launchSource, forceReload);
         console.log("[injection] 3/4 WRAP     — wrapped code length: %d chars", wrappedCode.length);
 
         const execStart = performance.now();

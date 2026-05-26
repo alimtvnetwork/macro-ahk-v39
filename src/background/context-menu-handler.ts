@@ -260,7 +260,10 @@ async function handleRunScripts(tabId: number, forceReload = false): Promise<voi
         tabId,
         scripts: enabledScripts,
         launchSource: "manual",
-        ...(forceReload ? { forceReload: true } : {}),
+        // v3.20.0: always force on manual context-menu runs (parity with popup
+        // Run and shortcut). The `forceReload` parameter is now historical —
+        // both "Run" and "Force Run" context-menu entries behave identically.
+        forceReload: true,
     });
 }
 

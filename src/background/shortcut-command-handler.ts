@@ -91,7 +91,10 @@ async function runScriptsFromShortcut(forceReload: boolean): Promise<void> {
             tabId: activeTabId,
             scripts,
             launchSource: "manual",
-            ...(forceReload ? { forceReload: true } : {}),
+            // v3.20.0: all manual shortcut launches force a reload so the per-page
+            // body-marker dedup never silently absorbs a deliberate re-run.
+            // Mirrors the popup Run button's behavior (`use-popup-actions.ts`).
+            forceReload: true,
         });
         const response = normalizeInjectScriptsResponse(rawResponse);
 

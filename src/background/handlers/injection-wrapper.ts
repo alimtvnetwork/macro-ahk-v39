@@ -78,6 +78,7 @@ export function wrapWithIsolation(
     configJson: string | null,
     themeJson?: string | null,
     launchSource: InjectionLaunchSource = DEFAULT_LAUNCH_SOURCE,
+    forceReload = false,
 ): string {
     const sdkLine = buildSdkPreamble(script);
     const launchLine = buildLaunchPreamble(launchSource);
@@ -90,7 +91,7 @@ export function wrapWithIsolation(
         ? buildThemePreamble(themeJson)
         : "";
 
-    return buildWrappedCode(script.id, sdkLine, launchLine, configLine, themeLine, script.code);
+    return buildWrappedCode(script.id, sdkLine, launchLine, configLine, themeLine, script.code, forceReload);
 }
 
 /** Builds the full wrapped code string. Uses postMessage for error reporting (MAIN world). */
@@ -102,9 +103,11 @@ function buildWrappedCode(
     configLine: string,
     themeLine: string,
     userCode: string,
+    forceReload: boolean,
 ): string {
     const codeSnippet = JSON.stringify(userCode.slice(0, 500));
     const safeScriptId = JSON.stringify(scriptId);
+    const safeForceReload = forceReload ? "true" : "false";
 
     // Blob URL scripts run in their own parse context — no need for
     // 'use strict' (which would break top-level let/const in some engines).
@@ -115,13 +118,28 @@ function buildWrappedCode(
     return `;${sdkLine};${launchLine};(function() {
     // Per-page dedup via <body data-marco-injected="id1,id2,..."> marker.
     // See mem://features/auto-attach-policy.md §2. Logged, never silent.
+    //
+    // v3.20.0 fix: when the caller forced a manual reload (popup Run, shortcut
+    // Ctrl+Shift+Down, context-menu Run), splice this script's id out of the
+    // marker list BEFORE the dedup check so the script always re-mounts. The
+    // dedup gate continues to absorb passive/auto-inject double-fires.
     try {
         var __mBody = document.body;
         if (__mBody) {
+            var __mForceReload = ${safeForceReload};
+            var __mLaunchSource = window.__MARCO_LAUNCH_SOURCE__ || "manual";
             var __mAttr = __mBody.getAttribute("data-marco-injected") || "";
             var __mList = __mAttr ? __mAttr.split(",") : [];
+            if (__mForceReload && __mLaunchSource === "manual") {
+                var __mFiltered = [];
+                for (var __mI = 0; __mI < __mList.length; __mI++) {
+                    if (__mList[__mI] !== ${safeScriptId}) __mFiltered.push(__mList[__mI]);
+                }
+                __mList = __mFiltered;
+                __mBody.setAttribute("data-marco-injected", __mList.join(","));
+                console.info("[Marco] INJECT_FORCE_RELOAD script=" + ${safeScriptId} + " — marker cleared");
+            }
             var __mAlreadyInjected = __mList.indexOf(${safeScriptId}) !== -1;
-            var __mLaunchSource = window.__MARCO_LAUNCH_SOURCE__ || "manual";
             var __mPassiveMarker = document.querySelector('[data-launch-source="passive"]');
             var __mVisiblePanel = document.getElementById("ahk-loop-container");
             var __mManualAfterPassive = __mAlreadyInjected && __mLaunchSource === "manual" && __mPassiveMarker && !__mVisiblePanel;

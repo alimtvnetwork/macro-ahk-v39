@@ -259,7 +259,7 @@ export async function handleInjectScripts(
     const scriptInjectStart = performance.now();
     const nsInjectStart = performance.now();
     const [execResults] = await time("stage3_4_5_parallel", () => Promise.all([
-        injectAllScripts(msg.tabId, filteredPreparedScripts, launchSource).then(r => {
+        injectAllScripts(msg.tabId, filteredPreparedScripts, launchSource, isForceRun).then(r => {
             timings["stage3_4_scripts"] = Math.round((performance.now() - scriptInjectStart) * 10) / 10;
             return r;
         }),

@@ -31,19 +31,19 @@ irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/scripts/i
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/scripts/install.sh | bash
 ```
 
-### 📌 Pinned version (`v3.19.0`)
+### 📌 Pinned version (`v3.20.0`)
 
 ```powershell
 # Windows · PowerShell
-irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.19.0/install.ps1 | iex
+irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.20.0/install.ps1 | iex
 ```
 
 ```bash
 # macOS · Linux · Bash
-curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.19.0/install.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.20.0/install.sh | bash
 ```
 
-**Pinned version:** `v3.19.0` &nbsp;•&nbsp; **Macro Controller:** `v3.19.0`
+**Pinned version:** `v3.20.0` &nbsp;•&nbsp; **Macro Controller:** `v3.20.0`
 
 ### 📦 Download-only (unpack into current folder)
 
@@ -56,13 +56,13 @@ irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/scripts/d
 
 ```powershell
 # Pin a version + custom folder name (env-var form, works with `irm | iex`)
-$env:MARCO_DL_VERSION='v3.19.0'; $env:MARCO_DL_FOLDER='marco'; `
+$env:MARCO_DL_VERSION='v3.20.0'; $env:MARCO_DL_FOLDER='marco'; `
   irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/scripts/download-extension.ps1 | iex
 ```
 
 ```powershell
 # Or run a local clone with explicit flags
-.\scripts\download-extension.ps1 -Version v3.19.0 -FolderName marco-extension
+.\scripts\download-extension.ps1 -Version v3.20.0 -FolderName marco-extension
 ```
 
 After it finishes, load the resulting folder via `chrome://extensions → Load unpacked`.
@@ -90,10 +90,10 @@ Pick your platform — each section is a self-contained install path with the re
 **Recommended path.** Open **PowerShell** (Win + X → "Windows PowerShell" or "Terminal") and run:
 
 ```powershell
-irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.19.0/install.ps1 | iex
+irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.20.0/install.ps1 | iex
 ```
 
-- 🔒 Pinned to `v3.19.0` — see [Pinned to a specific release](#-pinned-to-a-specific-release) to change versions
+- 🔒 Pinned to `v3.20.0` — see [Pinned to a specific release](#-pinned-to-a-specific-release) to change versions
 - 🌊 Want auto-update? Use the [latest channel](#-latest-channel-auto-update) one-liner
 - 📁 Custom install folder? See [Custom Directory Install](#custom-directory-install)
 - 🚩 Full flag list, exit codes, checksum behavior → [Installer Options](#installer-options)
@@ -103,10 +103,10 @@ irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.19.0/ins
 Open your terminal and run:
 
 ```bash
-curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.19.0/install.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.20.0/install.sh | bash
 ```
 
-- 🔒 Pinned to `v3.19.0` — see [Pinned to a specific release](#-pinned-to-a-specific-release) for other tags
+- 🔒 Pinned to `v3.20.0` — see [Pinned to a specific release](#-pinned-to-a-specific-release) for other tags
 - 🌊 Auto-update channel → [latest channel](#-latest-channel-auto-update)
 - 📁 Custom install folder? See [Custom Directory Install](#custom-directory-install)
 - 🚩 Full flag list, exit codes, checksum behavior → [Installer Options](#installer-options)
@@ -120,13 +120,13 @@ The unified installer auto-derives the pinned version from its download URL. Use
 #### 🔒 Pinned to a specific release
 
 ```powershell
-# PowerShell (Windows) — replace v3.19.0 with any released tag
-irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.19.0/install.ps1 | iex
+# PowerShell (Windows) — replace v3.20.0 with any released tag
+irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.20.0/install.ps1 | iex
 ```
 
 ```bash
 # Bash (Linux / macOS)
-curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.19.0/install.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.20.0/install.sh | bash
 ```
 
 #### 🌊 Latest channel (auto-update)
@@ -203,7 +203,7 @@ The installers (`install.ps1`, `install.sh`) conform to the [Generic Installer B
 
 | Flag | Description | Example |
 |------|-------------|---------|
-| `-Version` | Pin a specific release (`vX.Y.Z[-pre]`) or `latest` | `-Version v3.19.0` |
+| `-Version` | Pin a specific release (`vX.Y.Z[-pre]`) or `latest` | `-Version v3.20.0` |
 | `-InstallDir` | Custom install directory | `-InstallDir D:\marco-extension\v3.6.1` |
 | `-Repo` | Override GitHub `owner/repo` | `-Repo alimtvnetwork/macro-ahk-v39` |
 | `-Help` | Print usage and exit 0 | `-Help` |
@@ -212,10 +212,10 @@ The installers (`install.ps1`, `install.sh`) conform to the [Generic Installer B
 
 | Flag | Short | Description | Example |
 |------|-------|-------------|---------|
-| `--version <ver>` | `-v` | Force a specific version (`vX.Y.Z[-pre]`) or `latest`. Anything else exits 3. | `--version v3.19.0` |
-| `--dir <path>` | `-d` | Target directory (default: `~/marco-extension`) | `--dir ~/marco-extension/v3.19.0` |
+| `--version <ver>` | `-v` | Force a specific version (`vX.Y.Z[-pre]`) or `latest`. Anything else exits 3. | `--version v3.20.0` |
+| `--dir <path>` | `-d` | Target directory (default: `~/marco-extension`) | `--dir ~/marco-extension/v3.20.0` |
 | `--repo <o/r>` | `-r` | Override GitHub `owner/repo` | `--repo alimtvnetwork/macro-ahk-v39` |
-| `--dry-run` | — | Resolve the install plan, print it, exit 0 — **nothing is downloaded or extracted**. Useful for CI smoke tests and debugging. | `--dry-run --version v3.19.0` |
+| `--dry-run` | — | Resolve the install plan, print it, exit 0 — **nothing is downloaded or extracted**. Useful for CI smoke tests and debugging. | `--dry-run --version v3.20.0` |
 | `--no-sibling-discovery` | — | Disable §4 sibling-repo probing for this run (overrides `install.config.sh`). Strict mode would skip it anyway. | `--no-sibling-discovery` |
 | `--enable-sibling-discovery` | — | Force-enable sibling probing for this run. **Still blocked by strict mode** (spec §4 rule 6). | `--enable-sibling-discovery` |
 | `--help` | `-h` | Print full usage with the spec link, then exit 0 | `--help` |
@@ -283,7 +283,7 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/sc
   | bash -s -- --dry-run
 
 # Pin a specific version into a custom directory:
-./install.sh --version v3.19.0 --dir ~/marco-extension/v3.19.0
+./install.sh --version v3.20.0 --dir ~/marco-extension/v3.20.0
 
 # Force-enable sibling-repo discovery for this one run:
 ./install.sh --enable-sibling-discovery
@@ -295,7 +295,7 @@ curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/sc
 ### Manual Install
 
 1. Download `marco-extension-v{VERSION}.zip` from [Releases](https://github.com/alimtvnetwork/macro-ahk-v39/releases)
-2. Extract to a folder (e.g., `D:\marco-extension\v3.19.0`)
+2. Extract to a folder (e.g., `D:\marco-extension\v3.20.0`)
 3. Open `chrome://extensions` (or `edge://extensions`)
 4. Enable **Developer mode** (toggle in top-right)
 5. Click **Load unpacked** and select the extracted folder
@@ -673,7 +673,7 @@ await RiseupAsiaMacroExt.require("Project.Script");
 
  ## CI/CD Release Pipeline
 
-Creating or pushing a `release/*` branch (e.g., `release/v3.19.0`) or creating a
+Creating or pushing a `release/*` branch (e.g., `release/v3.20.0`) or creating a
 `v*` tag automatically enters release mode and:
 
 1. Installs dependencies with pnpm; if `pnpm-lock.yaml` is absent it falls back to `pnpm install --no-frozen-lockfile --lockfile=false`
