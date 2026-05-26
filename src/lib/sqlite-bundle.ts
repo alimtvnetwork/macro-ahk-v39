@@ -904,10 +904,11 @@ function readPromptCategoriesTable(db: Database): Map<string, string[]> {
   return out;
 }
 
-function readPrompts(db: Database): PromptEntry[] {
+function readPrompts(db: Database, strict = false): PromptEntry[] {
   try {
     let rows;
     try { rows = db.exec("SELECT * FROM Prompts"); } catch {
+      if (strict) return [];
       try { rows = db.exec("SELECT * FROM prompts"); } catch { return []; }
     }
     const hasRows = rows.length > 0 && rows[0].values.length > 0;
@@ -919,11 +920,11 @@ function readPrompts(db: Database): PromptEntry[] {
     const cols = rows[0].columns;
     return rows[0].values.map((row: SqlValue[]) => {
       const obj = Object.fromEntries(cols.map((c: SqlValue, i: number) => [c, row[i]]));
-      const uid = resolveUid(obj);
+      const uid = resolveUid(obj, strict);
       const junctionCats = catsByPromptUid.get(uid);
       // v6 preferred: rebuild comma-separated list from junction.
       // Fallback: pre-v6 Prompts.Category single value.
-      const singularCategory = (col(obj, "Category", "category") as string) ?? undefined;
+      const singularCategory = (col(obj, "Category", "category", strict) as string) ?? undefined;
       const category = junctionCats && junctionCats.length > 0
         ? junctionCats.join(", ")
         : singularCategory;
@@ -932,14 +933,14 @@ function readPrompts(db: Database): PromptEntry[] {
         // v5 — Slug column is now actually written. v4 bundles return
         // undefined here, which the Task Next resolver treats as "no slug".
         slug: (obj["Slug"] as string) ?? undefined,
-        name: (col(obj, "Name", "name") as string),
-        text: (col(obj, "Text", "text") as string),
-        order: (col(obj, "RunOrder", "run_order") as number) ?? 0,
-        isDefault: col(obj, "IsDefault", "is_default") === 1,
-        isFavorite: col(obj, "IsFavorite", "is_favorite") === 1,
+        name: (col(obj, "Name", "name", strict) as string),
+        text: (col(obj, "Text", "text", strict) as string),
+        order: (col(obj, "RunOrder", "run_order", strict) as number) ?? 0,
+        isDefault: col(obj, "IsDefault", "is_default", strict) === 1,
+        isFavorite: col(obj, "IsFavorite", "is_favorite", strict) === 1,
         category,
-        createdAt: (col(obj, "CreatedAt", "created_at") as string),
-        updatedAt: (col(obj, "UpdatedAt", "updated_at") as string),
+        createdAt: (col(obj, "CreatedAt", "created_at", strict) as string),
+        updatedAt: (col(obj, "UpdatedAt", "updated_at", strict) as string),
       } as PromptEntry;
     });
   } catch {
