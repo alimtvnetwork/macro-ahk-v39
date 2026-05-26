@@ -129,6 +129,51 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# ── Top-level fail-safe (ERR trap) ──────────────────────────────────
+# `set -euo pipefail` is great for fail-fast but a bare exit leaves
+# the user (especially when running `curl ... | bash`) with no idea
+# WHICH line crashed or WHY. This trap dumps everything copy/pastable
+# to stderr AND to a log file in $TMPDIR so the user can share it.
+MARCO_CRASH_LOG="${TMPDIR:-/tmp}/marco-install-$(date -u +%Y%m%d-%H%M%S)-$$.log"
+on_err() {
+    local exit_code=$?
+    local line_no=${1:-?}
+    local cmd=${2:-?}
+    {
+        echo "=== Marco Installer Crash ==="
+        echo "Timestamp:  $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo "Script:     install.sh"
+        echo "Repo:       ${REPO:-?}"
+        echo "Version:    ${VERSION_OVERRIDE:-${VERSION:-?}}"
+        echo "InstallDir: ${INSTALL_DIR:-?}"
+        echo "DryRun:     ${DRY_RUN:-0}"
+        echo "Bash:       ${BASH_VERSION:-?}"
+        echo "Uname:      $(uname -a 2>/dev/null || echo '?')"
+        echo "PWD:        $(pwd)"
+        echo "ExitCode:   ${exit_code}"
+        echo ""
+        echo "--- Failing command ---"
+        echo "Line ${line_no}: ${cmd}"
+        echo ""
+        echo "--- Call stack (most recent call first) ---"
+        local i=0
+        while caller "$i" >/dev/null 2>&1; do
+            caller "$i"
+            i=$((i + 1))
+        done
+        echo ""
+        echo "--- FUNCNAME chain ---"
+        printf '  %s\n' "${FUNCNAME[@]:-(top-level)}"
+    } | tee "${MARCO_CRASH_LOG}" >&2 || true
+    printf '\n\033[31m============================================================\033[0m\n' >&2
+    printf '\033[31m Marco installer crashed — log saved to:\033[0m\n  %s\n' "${MARCO_CRASH_LOG}" >&2
+    printf '\033[31m============================================================\033[0m\n\n' >&2
+    exit "${exit_code}"
+}
+trap 'on_err "${LINENO}" "${BASH_COMMAND}"' ERR
+
+
+
 # ── Logging ─────────────────────────────────────────────────────────
 
 step() { printf ' \033[36m%s\033[0m\n' "$*" >&2; }
