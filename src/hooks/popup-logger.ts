@@ -1,5 +1,5 @@
 /**
- * Popup logger shim — mirrors `src/content-scripts/home-screen/logger.ts`.
+ * Popup logger shim — mirrors `standalone-scripts/lovable-dashboard/src/logger.ts`.
  *
  * The popup runs in the extension's own UI context and does NOT receive the
  * `RiseupAsiaMacroExt` MAIN-world SDK, so the namespace logger is never
