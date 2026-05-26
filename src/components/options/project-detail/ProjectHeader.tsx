@@ -135,8 +135,7 @@ export function ProjectHeader({ project, onSave, onDelete, onBack, onSwitchTab }
   };
 
   const handleUpdate = () => {
-    toast.info("Checking for updates…");
-    // TODO: wire to updater handler CHECK_FOR_UPDATE
+    onSwitchTab?.("updater");
   };
 
   const handleDelete = async () => {
