@@ -17,6 +17,7 @@
 #   - lovable-common-{VER}.zip     — standalone-scripts/lovable-common/**
 #   - lovable-owner-switch-{VER}.zip — standalone-scripts/lovable-owner-switch/**
 #   - lovable-user-add-{VER}.zip   — standalone-scripts/lovable-user-add/**
+#   - lovable-dashboard-{VER}.zip  — standalone-scripts/lovable-dashboard/**
 #   - install.sh                   — Unified Bash installer (URL-pinned or latest)
 #   - install.ps1                  — Unified PowerShell installer (URL-pinned or latest)
 #   - VERSION.txt                  — Plain-text version identifier
