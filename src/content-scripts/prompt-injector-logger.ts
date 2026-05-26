@@ -1,7 +1,7 @@
 /**
  * Marco Extension — Prompt Injector logger shim
  *
- * Mirrors `src/content-scripts/home-screen/logger.ts`: a thin wrapper around
+ * Mirrors `standalone-scripts/lovable-dashboard/src/logger.ts`: a thin wrapper around
  * `RiseupAsiaMacroExt.Logger` (memory `error-logging-via-namespace-logger`)
  * that falls back to `console.error` when the namespace SDK isn't injected
  * (e.g. when the prompt-injector content script runs on a page that hasn't

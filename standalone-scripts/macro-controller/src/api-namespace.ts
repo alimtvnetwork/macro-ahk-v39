@@ -43,7 +43,7 @@ export interface CreditsApi {
   /**
    * Read the latest hydrated credit state. Returns null only when
    * the namespace has been built but no fetch has yet completed.
-   * Consumers (e.g. home-screen content script) MUST call `fetch()`
+   * Consumers (e.g. the standalone `lovable-dashboard` script) MUST call `fetch()`
    * once before relying on the returned `perWorkspace` array.
    */
   getState: () => LoopCreditState | null;

@@ -59,7 +59,7 @@ const FILE_WHITELIST = new Map([
     // Documentation / generated files.
     ["src/lib/generate-llm-guide.ts", "Documentation generation helper, not runtime"],
     ["src/content-scripts/network-reporter.ts", "Content-script network intercept, not agent-driven"],
-    ["src/content-scripts/home-screen/credit-source.ts", "Content-script credit proxy, not agent-driven"],
+    ["standalone-scripts/lovable-dashboard/src/credit-source.ts", "Standalone dashboard credit proxy, not agent-driven"],
     ["src/platform/preview-adapter.ts", "Preview iframe injection strings, not agent-driven"],
     ["src/components/options/monaco-js-intellisense.ts", "Monaco type fetch for UI editor, not agent-driven"],
 

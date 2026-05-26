@@ -406,17 +406,10 @@ function initMessageRelay(): void {
 initMessageRelay();
 
 /* ------------------------------------------------------------------ */
-/*  Home-Screen Feature Bootstrap                                      */
-/*  Spec: spec/21-app/01-chrome-extension/home-screen-modification/    */
-/*  The URL guard inside bootHomeScreen() ensures it only activates    */
-/*  on AllowedHomeUrl exact-match values; safe to call from <all_urls>.*/
+/*  Home-Screen / Lovable-Dashboard Bootstrap                          */
+/*  Moved out of message-relay into the standalone `lovable-dashboard` */
+/*  project (standalone-scripts/lovable-dashboard). That script is     */
+/*  auto-injected by the background standalone-seeder pipeline; do not */
+/*  boot it here to avoid double-injection.                            */
 /* ------------------------------------------------------------------ */
 
-import { bootHomeScreen } from "./home-screen";
-import { logError as logHomeScreenError } from "./home-screen/logger";
-
-try {
-    bootHomeScreen();
-} catch (caught) {
-    logHomeScreenError("boot", "HomeScreen boot failed — bootHomeScreen() threw before URL guard or after; feature disabled for this navigation", caught);
-}
