@@ -257,6 +257,7 @@ export async function injectSingleScript(
     resolvedThemeJson: string | null,
     resolvedCodeSource?: string,
     launchSource: InjectionLaunchSource = "manual",
+    forceReload = false,
 ): Promise<InjectionResult> {
     const startTime = Date.now();
     const configJson = resolvedConfigJson;
