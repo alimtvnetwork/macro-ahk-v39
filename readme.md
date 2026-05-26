@@ -31,19 +31,19 @@ irm https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/scripts/i
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/macro-ahk-v39/main/scripts/install.sh | bash
 ```
 
-### 📌 Pinned version (`v3.20.0`)
+### 📌 Pinned version (`v3.21.0`)
 
 ```powershell
 # Windows · PowerShell
-irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.20.0/install.ps1 | iex
+irm https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.21.0/install.ps1 | iex
 ```
 
 ```bash
 # macOS · Linux · Bash
-curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.20.0/install.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/macro-ahk-v39/releases/download/v3.21.0/install.sh | bash
 ```
 
-**Pinned version:** `v3.20.0` &nbsp;•&nbsp; **Macro Controller:** `v3.20.0`
+**Pinned version:** `v3.21.0` &nbsp;•&nbsp; **Macro Controller:** `v3.21.0`
 
 ### 📦 Download-only (unpack into current folder)
 
