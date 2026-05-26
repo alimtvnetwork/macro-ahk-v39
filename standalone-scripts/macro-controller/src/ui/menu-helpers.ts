@@ -41,16 +41,10 @@ interface SubmenuCtx {
   hideTimer: ReturnType<typeof setTimeout> | null;
   trigger: HTMLElement;
   subPanel: HTMLElement;
+  reflowHandler: (() => void) | null;
 }
 
-// CQ16: Extracted from createSubmenu closure
-// Step A4: auto-flip placement — opens right by default, flips left near the
-// right edge; opens down by default, flips up near the bottom edge.
-function showSub(ctx: SubmenuCtx): void {
-  if (ctx.hideTimer) { clearTimeout(ctx.hideTimer); ctx.hideTimer = null; }
-  // Make panel measurable without flashing in the wrong spot.
-  ctx.subPanel.style.visibility = 'hidden';
-  ctx.subPanel.style.display = 'block';
+function positionSub(ctx: SubmenuCtx): void {
   const tRect = ctx.trigger.getBoundingClientRect();
   const sRect = ctx.subPanel.getBoundingClientRect();
   const placement = resolveFlyoutPlacement(
@@ -62,13 +56,44 @@ function showSub(ctx: SubmenuCtx): void {
   ctx.subPanel.style.left = placement.left + 'px';
   ctx.subPanel.setAttribute('data-marco-placement-h', placement.horizontal);
   ctx.subPanel.setAttribute('data-marco-placement-v', placement.vertical);
-  ctx.subPanel.style.visibility = 'visible';
 }
 
-// CQ16: Extracted from createSubmenu closure
+// Step A4: auto-flip placement — opens right by default, flips left near the
+// right edge; opens down by default, flips up near the bottom edge.
+// Step A5: recompute on scroll/resize while open; tear down on close.
+function showSub(ctx: SubmenuCtx): void {
+  if (ctx.hideTimer) { clearTimeout(ctx.hideTimer); ctx.hideTimer = null; }
+  ctx.subPanel.style.visibility = 'hidden';
+  ctx.subPanel.style.display = 'block';
+  positionSub(ctx);
+  ctx.subPanel.style.visibility = 'visible';
+  if (!ctx.reflowHandler) {
+    let raf = 0;
+    const handler = (): void => {
+      if (raf) { return; }
+      raf = window.requestAnimationFrame(function() {
+        raf = 0;
+        if (ctx.subPanel.style.display !== 'none') { positionSub(ctx); }
+      });
+    };
+    ctx.reflowHandler = handler;
+    window.addEventListener('scroll', handler, true);
+    window.addEventListener('resize', handler);
+  }
+}
+
+function hideSub(ctx: SubmenuCtx): void {
+  ctx.subPanel.style.display = 'none';
+  if (ctx.reflowHandler) {
+    window.removeEventListener('scroll', ctx.reflowHandler, true);
+    window.removeEventListener('resize', ctx.reflowHandler);
+    ctx.reflowHandler = null;
+  }
+}
+
 function scheduleSub(ctx: SubmenuCtx): void {
   if (ctx.hideTimer) { clearTimeout(ctx.hideTimer); ctx.hideTimer = null; }
-  ctx.hideTimer = setTimeout(function() { ctx.subPanel.style.display = 'none'; }, 150);
+  ctx.hideTimer = setTimeout(function() { hideSub(ctx); }, 150);
 }
 
 export function createSubmenu(ctx: MenuCtx, icon: string, label: string): { el: HTMLElement; panel: HTMLElement } {
@@ -79,20 +104,35 @@ export function createSubmenu(ctx: MenuCtx, icon: string, label: string): { el: 
   const trigger = document.createElement('button');
   trigger.style.cssText = ctx.menuBtnStyle + 'justify-content:space-between;';
   trigger.innerHTML = '<span style="display:flex;align-items:center;gap:4px;"><span style="font-size:12px;width:18px;text-align:center;">' + icon + '</span><span>' + label + '</span></span><span style="font-size:10px;opacity:0.6;">▸</span>';
+  trigger.setAttribute('aria-haspopup', 'menu');
+  trigger.setAttribute('aria-expanded', 'false');
 
-  const subCtx: SubmenuCtx = { hideTimer: null, trigger: trigger, subPanel: subPanel };
+  const subCtx: SubmenuCtx = { hideTimer: null, trigger: trigger, subPanel: subPanel, reflowHandler: null };
 
   trigger.onmouseover = function() {
     trigger.style.background = 'rgba(139,92,246,0.2)';
     showSub(subCtx);
+    trigger.setAttribute('aria-expanded', 'true');
   };
   trigger.onmouseout = function() { trigger.style.background = 'transparent'; };
-  trigger.onclick = function(e) { e.stopPropagation(); subPanel.style.display = subPanel.style.display === 'none' ? 'block' : 'none'; };
+  trigger.onclick = function(e) {
+    e.stopPropagation();
+    const open = subPanel.style.display === 'none' || subPanel.style.display === '';
+    if (open) { showSub(subCtx); } else { hideSub(subCtx); }
+    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  trigger.onkeydown = function(e) {
+    if (e.key === 'Escape') { hideSub(subCtx); trigger.setAttribute('aria-expanded', 'false'); trigger.focus(); }
+  };
 
   subPanel.setAttribute('data-marco-submenu', label);
+  subPanel.setAttribute('role', 'menu');
+  subPanel.setAttribute('aria-label', label);
   subPanel.style.cssText = 'display:none;position:fixed;min-width:170px;background:' + cPanelBg + ';border:1px solid ' + cPrimary + ';border-radius:' + lDropdownRadius + ';z-index:100004;box-shadow:' + lDropdownShadow + ';padding:4px 0;';
+  subPanel.onkeydown = function(e) {
+    if (e.key === 'Escape') { hideSub(subCtx); trigger.setAttribute('aria-expanded', 'false'); trigger.focus(); }
+  };
 
-  // Keep subPanel open while mouse is over it
   subPanel.onmouseover = function() { showSub(subCtx); };
   subPanel.onmouseout = function() { scheduleSub(subCtx); };
 

@@ -1,0 +1,15 @@
+{
+  "id": "default-lovable-dashboard",
+  "title": "Lovable Dashboard",
+  "slug": "lovable-dashboard",
+  "version": "3.21.0",
+  "author": "Riseup Asia LLC",
+  "categories": [
+    "lovable",
+    "dashboard"
+  ],
+  "isDefault": true,
+  "order": 40,
+  "createdAt": "2026-05-26T00:00:00Z",
+  "updatedAt": "2026-05-26T00:00:00Z"
+}
