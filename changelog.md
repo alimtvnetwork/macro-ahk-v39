@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.1
 
 ---
 
+## [v3.19.0] — 2026-05-26
+
+### Fixed
+- **Open GitHub repo / gitsync fetch now works**: rewrote `standalone-scripts/macro-controller/src/gitsync-api.ts` to route `/workspaces/{wsId}/projects/{pid}/gitsync` through the centralized `window.marco.api.call("projects.gitsync", …)` SDK path instead of a raw `fetch()` from the MAIN world. Routing through the SDK applies the same axios auth interceptor used by every other API call (workspaces, credit-balance, memberships, projects.list, remix.init), so the `Authorization: Bearer <token>` header is now always attached — matching the working request the user pasted. Registered the new endpoint in `standalone-scripts/marco-sdk/src/api-registry.ts` under `projects.gitsync`. Negative caching unchanged (24h for `not_linked`, 5min for `error`); right-click → **🔄 Refresh gitsync** still forces a re-fetch.
+
+### Bumped
+- Version bump: 3.18.0 → 3.19.0 across manifest.json, src/shared/constants.ts, standalone-scripts/macro-controller/src/shared-state.ts, and every standalone-scripts/*/src/instruction.ts.
+
+---
+
 ## [v3.18.0] — 2026-05-25
 
 ### Fixed
