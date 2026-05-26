@@ -1848,6 +1848,30 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ════════════════════════════════════════════════════════════
+  # Job 2f1: Prompt info.json PascalCase compliance
+  # ════════════════════════════════════════════════════════════
+  casing-prompt-info:
+    name: "Casing · prompt info.json"
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Zero-dep — no install needed.
+      - name: Validate prompt info.json PascalCase compliance
+        run: node scripts/check-prompt-info-casing.mjs
+
+  # ════════════════════════════════════════════════════════════
   # Job 3g: Import/Export E2E
   #
   # Runs the dedicated import-export round-trip test suite against
